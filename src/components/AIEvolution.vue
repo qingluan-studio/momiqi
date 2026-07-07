@@ -239,6 +239,107 @@ const originalIdeas = [
     icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
   },
 ]
+
+const finetuning = [
+  { title: 'LoRA / QLoRA', subtitle: '低秩适配', desc: '冻结原始权重，仅训练低秩矩阵(rank 8-64)。QLoRA进一步将原始权重4-bit量化。一块24GB显卡可微调70B模型，使个人微调大模型成为可能。HuggingFace PEFT库一站式支持。', tags: ['低秩矩阵', '4-bit量化', '单卡70B'] },
+  { title: '指令微调 SFT', subtitle: 'Supervised Fine-Tuning', desc: '用高质量(指令,回答)对训练模型。ChatGPT的成功证明：少量精心策划的指令数据(数万条)就能让模型从"补全"模式切换到"助手"模式。LIMA论文表明1000条精选数据即可。', tags: ['指令数据', '行为转换'] },
+  { title: '模型合并 MergeKit', subtitle: '融合多个模型优势', desc: 'MergeKit 支持 Linear/SLERP/TIES/DARE 等合并算法。将数学专家模型+代码专家模型合并为一个全能模型，1+1>2。DARE方法先随机丢弃90%参数差，再合并剩余部分，意外地保持甚至提升性能。', tags: ['权重合并', 'DARE', 'TIES'] },
+  { title: 'RL微调 GRPO/PPO', subtitle: '强化学习微调', desc: 'DeepSeek-R1 使用GRPO在RL阶段让模型自主发现推理能力。通过在数学题上给"答案正确"的奖励信号，模型自发演化出反思、验证、回溯等复杂推理行为。人力只需定义奖励函数。', tags: ['强化学习', '奖励建模', '能力涌现'] },
+  { title: '参数高效微调全集', subtitle: 'PEFT全家桶', desc: '除了LoRA还有：Adapter(插入小模块)、Prefix Tuning(可学习前缀)、Prompt Tuning(软提示)、IA3(仅缩放激活值)。每种方法的可训练参数不到总参数的1%，但效果接近全量微调。', tags: ['Adapter', 'Prefix', 'IA3'] },
+]
+
+const inferenceStack = [
+  { title: 'llama.cpp / GGUF', subtitle: 'CPU推理王者', desc: '用纯C++实现，支持CPU+GPU混合推理。GGUF格式将模型压缩为4/5/6/8-bit，普通笔记本也能跑70B模型。生态丰富：Ollama(一键部署)、LM Studio(GUI)、Open WebUI(类ChatGPT界面)。', tags: ['GGUF', 'CPU推理', 'Ollama'], color: '#f59e0b' },
+  { title: 'vLLM', subtitle: '高吞吐推理引擎', desc: '基于PagedAttention的KV缓存管理，推理吞吐量是HuggingFace的24倍。支持连续批处理(Continuous Batching)，动态合并请求。已成为OpenAI兼容API部署的事实标准。', tags: ['PagedAttention', '24x吞吐', '连续批处理'], color: '#6366f1' },
+  { title: '量化三剑客', subtitle: 'GPTQ / AWQ / GGUF', desc: 'GPTQ：逐层量化+逆序更新，4-bit几乎无损。AWQ：发现1%显著权重保护，其余量化。GGUF：K-Quant算法对重要层精细量化。三者覆盖GPU部署、高端推理、CPU消费三大场景。', tags: ['4-bit', '权重量化', '无损压缩'], color: '#22c55e' },
+  { title: '推测解码', subtitle: '投机采样加速', desc: '用小模型快速生成候选token，大模型并行验证。在不损失质量的前提下实现2-3倍推理加速。Medusa方法用多个预测头同时猜多个token，进一步推至3.5倍。', tags: ['Draft+Verify', '2-3x加速', 'Medusa'], color: '#8b5cf6' },
+  { title: 'TensorRT-LLM', subtitle: 'NVIDIA官方加速', desc: 'NVIDIA为自家GPU深度优化的推理引擎。支持FP8/INT4量化、In-flight Batching、Multi-GPU张量并行。在H100上可达最高吞吐，是企业级部署的性能天花板。', tags: ['FP8', '多GPU并行', 'H100优化'], color: '#10b981' },
+  { title: 'SGLang / LMDeploy', subtitle: '新一代推理框架', desc: 'SGLang用RadixAttention共享前缀缓存，结构化生成控制。LMDeploy由上海AI Lab开发，TurboMind引擎在国产GPU上优秀。推理框架正在从vLLM一家独大到百花齐放。', tags: ['前缀缓存', '结构化输出', '国产GPU'], color: '#06b6d4' },
+]
+
+const freeArsenal = [
+  { title: 'Ollama', subtitle: '替代 ChatGPT 付费版', desc: '一键本地运行 Llama/DeepSeek/Qwen。`ollama run deepseek-r1:7b` 即可拥有本地推理模型。支持OpenAI兼容API。搭配Open WebUI获得ChatGPT体验。完全免费，隐私100%本地。', free: true, icon: 'M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5' },
+  { title: 'HuggingFace Spaces', subtitle: '替代 Vercel/云部署', desc: '免费GPU部署AI应用。T4 16GB免费可用，支持Gradio/Streamlit/Docker。一键复制Space即可白嫖GPU推理。社区海量现成应用可直接使用。', free: true, icon: 'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z' },
+  { title: 'Cloudflare Workers AI', subtitle: '替代 OpenAI API', desc: '全球边缘节点运行 Llama/Qwen/DeepSeek 等模型。每天免费10万次推理。`@cf/meta/llama-3-8b-instruct` 一行代码调用。延迟极低(边缘计算)，免费额度慷慨。', free: true, icon: 'M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z' },
+  { title: 'Google Colab', subtitle: '替代 GPU 云服务器', desc: '免费T4 GPU(有时V100/A100)。`!pip install transformers && python run.py` 即可跑大模型。搭配ngrok可暴露为公网API。12小时连续运行，巧用多账号轮换。', free: true, icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6' },
+  { title: 'Groq LPU', subtitle: '替代付费推理API', desc: '全球最快推理(500 tok/s)。免费API每天数万次调用，支持Llama/Mixtral/DeepSeek。专有LPU芯片实现亚毫秒首字延迟。`pip install groq && export GROQ_API_KEY=xxx`。', free: true, icon: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z' },
+  { title: 'GitHub Models', subtitle: '替代 Azure AI', desc: 'GitHub Marketplace 内免费试用 GPT-4o/Claude 3.5/Llama/Mistral。可在Codespace内直接调用。学生/开源开发者白嫖商业级模型的绝佳途径。', free: true, icon: 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5 5 0 001.39 6.56' },
+]
+
+const nuclearToolchain = [
+  {
+    number: '01',
+    title: '核聚变模型融合引擎',
+    subtitle: 'Nuclear Fusion Model Engine',
+    desc: '将10+开源模型通过多层融合管道——先在参数空间用DARE/TIES合并权重，再在输出空间用贝叶斯模型平均。最终产物：一个融合了数学(Llama-Math)、代码(CodeLlama)、推理(R1)、写作(Qwen-Writer)、翻译(NLLB)的全能超级模型，参数量反而比原始模型都小(通过共享底座+剪枝)。',
+    tags: ['多模型融合', '贝叶斯平均', '能力聚合'],
+    color: '#ef4444',
+    icon: 'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83',
+  },
+  {
+    number: '02',
+    title: '量子级极限压缩',
+    subtitle: 'Quantum-Grade Compression (QGC)',
+    desc: '三层压缩管线：第一层4-bit量化(GGUF Q4_K_M)，第二层结构化剪枝(移除30%冗余注意力头)，第三层知识蒸馏(用压缩模型自身的高温soft label再训练)。最终将70B模型压缩至2GB以下，在手机上以20tok/s运行。核心突破：压缩到极致后，使用LoRA热修补压缩损失。',
+    tags: ['4-bit→2GB', '剪枝+蒸馏', 'LoRA修补'],
+    color: '#a855f7',
+    icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z M13 10H7 M10 14H7',
+  },
+  {
+    number: '03',
+    title: 'P2P分布式算力网格',
+    subtitle: 'TorrentCompute Protocol',
+    desc: '类似BitTorrent的分布式AI推理协议。全球闲置GPU构成算力池，贡献算力赚取积分。当你需要推理时，任务自动拆分到N个节点并行执行。采用安全多方计算(SMPC)保证数据隐私——每个节点只看到加密片段，无法窥探完整输入。零成本获取相当于A100集群的推理能力。',
+    tags: ['P2P算力', 'SMPC隐私', '零成本集群'],
+    color: '#f59e0b',
+    icon: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75 M9 11a4 4 0 100-8 4 4 0 000 8z',
+  },
+  {
+    number: '04',
+    title: '自克隆AI工厂',
+    subtitle: 'Self-Cloning AI Factory',
+    desc: '一个母体AI Agent能自动克隆自身到任意云平台：读取目标平台API→生成对应Dockerfile/Terraform→部署镜像→健康检查→注册到负载均衡。从一个母体出发，30分钟内克隆出覆盖AWS/Azure/GCP/阿里云/Cloudflare/Ollama本地节点的全球推理网络。零手动配置，全自动扩缩容。',
+    tags: ['自动克隆', '多云部署', '全球网络'],
+    color: '#22c55e',
+    icon: 'M12 2a7 7 0 017 7c0 2.4-1.2 4.5-3 5.7V17a3 3 0 01-3 3 3 3 0 01-3-3v-2.3c-1.8-1.2-3-3.3-3-5.7a7 7 0 017-7z M10 17h4 M10 21h4',
+  },
+  {
+    number: '05',
+    title: '永生部署引擎',
+    subtitle: 'Perpetual Deployment Engine (PDE)',
+    desc: 'AI服务永不宕机的自愈系统。三副本冗余+自动故障转移+滚动更新。当检测到节点异常→自动在另一个云平台创建替换节点→流量无缝切换→旧节点销毁。当模型版本升级→先部署新版本影子服务→并行对比1小时→确认质量不降级后平滑切换。整个流程无人值守，平均恢复时间<3秒。',
+    tags: ['自愈系统', '三副本', '<3秒恢复'],
+    color: '#3b82f6',
+    icon: 'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4',
+  },
+  {
+    number: '06',
+    title: '万能工具链协议 v2',
+    subtitle: 'Universal Toolchain Protocol v2 (UTP2)',
+    desc: '一个协议统治所有AI工具和API。类似USB之于外设——任何LLM通过UTP2即可调用任何工具，无需为每个工具写适配代码。协议内置工具发现(自动扫描可用工具)、能力协商(模型声明需求，工具声明能力，自动匹配)、安全沙箱(每次调用在隔离环境执行)。开放标准，任何人都可注册新工具。',
+    tags: ['协议统一', '自动发现', '安全沙箱'],
+    color: '#ec4899',
+    icon: 'M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71 M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71',
+  },
+  {
+    number: '07',
+    title: '极限边缘运行时',
+    subtitle: 'Extreme Edge Runtime (EER)',
+    desc: '为ESP32/树莓派/手机等极端受限设备设计的AI运行时。采用Int2量化(每个权重2-bit)、稀疏注意力(仅计算top-5%注意力)、增量推理(缓存中间激活复用)。让1GB RAM设备运行1B参数模型，在智能手表上实现离线语音助手。功耗<100mW，纽扣电池可持续运行数小时。',
+    tags: ['Int2量化', '1B@1GB', '<100mW'],
+    color: '#f97316',
+    icon: 'M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+  },
+  {
+    number: '08',
+    title: '一键安装AI超级套件',
+    subtitle: 'AI Super Suite One-Click',
+    desc: '`curl -fsSL ai.install | bash` 一条命令在本机安装：Ollama(Llama3/Qwen/DeepSeek全系)、Open WebUI(聊天界面)、ComfyUI(图像/视频生成)、LangFlow(Agent可视化编排)、n8n(自动化工作流)、Qdrant(向量数据库)、PostgreSQL+pgvector。30分钟从零到完整AI开发环境，全部免费开源。',
+    tags: ['一行安装', '全套工具', '全开源'],
+    color: '#06b6d4',
+    icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8',
+  },
+]
 </script>
 
 <template>
@@ -498,6 +599,73 @@ const originalIdeas = [
               <div class="orig-tags">
                 <span v-for="t in o.tags" :key="t" class="orig-tag">{{ t }}</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 17. 模型微调与定制化 -->
+      <section data-section="finetune" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">17</span> 模型微调与定制化</h2>
+        <p class="section-desc">让大模型适应你的数据、你的领域、你的风格。一个人一台电脑即可微调70B模型。</p>
+        <div class="ft-grid">
+          <div v-for="(f, i) in finetuning" :key="f.title" class="ft-card" :class="{ visible: visibleSections['finetune'] }" :style="{ '--delay': `${i*0.08}s` }">
+            <span class="ft-title">{{ f.title }}</span>
+            <span class="ft-subtitle">{{ f.subtitle }}</span>
+            <p class="ft-desc">{{ f.desc }}</p>
+            <div class="ft-tags"><span v-for="t in f.tags" :key="t" class="ft-tag">{{ t }}</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 18. 推理加速与部署引擎 -->
+      <section data-section="infra" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">18</span> 推理加速与部署引擎</h2>
+        <p class="section-desc">从CPU消费级推理到GPU企业级部署，极致榨干每一瓦算力。</p>
+        <div class="infra-grid">
+          <div v-for="(inf, i) in inferenceStack" :key="inf.title" class="infra-card" :class="{ visible: visibleSections['infra'] }" :style="{ '--color': inf.color, '--delay': `${i*0.08}s`, borderLeftColor: inf.color }">
+            <span class="infra-title" :style="{ color: inf.color }">{{ inf.title }}</span>
+            <span class="infra-subtitle">{{ inf.subtitle }}</span>
+            <p class="infra-desc">{{ inf.desc }}</p>
+            <div class="infra-tags"><span v-for="t in inf.tags" :key="t" class="infra-tag" :style="{ background: inf.color+'18', color: inf.color }">{{ t }}</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 19. 免费替代方案全攻略 -->
+      <section data-section="free" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">19</span> 免费替代方案全攻略</h2>
+        <p class="section-desc">每一个付费AI服务都有免费开源替代。白嫖的正确姿势，不花一分钱搭出企业级AI栈。</p>
+        <div class="free-grid">
+          <div v-for="(fr, i) in freeArsenal" :key="fr.title" class="free-card" :class="{ visible: visibleSections['free'] }" :style="{ '--delay': `${i*0.08}s` }">
+            <div class="free-badge">FREE</div>
+            <div class="free-body">
+              <span class="free-title">{{ fr.title }}</span>
+              <span class="free-subtitle">{{ fr.subtitle }}</span>
+              <p class="free-desc">{{ fr.desc }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 20. 核弹级工具链 -->
+      <section data-section="nuclear" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">20</span> 核弹级工具链与极致架构</h2>
+        <p class="section-desc">以下是关于云部署、极致处理、一键安装、分布式算力的原创架构设想。全部开放，自由实现。</p>
+        <div class="nuke-grid">
+          <div v-for="(nk, i) in nuclearToolchain" :key="nk.title" class="nuke-card" :class="{ visible: visibleSections['nuclear'] }" :style="{ '--color': nk.color, '--delay': `${i*0.06}s`, borderColor: nk.color+'40' }">
+            <div class="nuke-head">
+              <div class="nuke-icon" :style="{ background: nk.color }">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path :d="nk.icon" /></svg>
+              </div>
+              <div>
+                <span class="nuke-title" :style="{ color: nk.color }">{{ nk.title }}</span>
+                <span class="nuke-subtitle">{{ nk.subtitle }}</span>
+              </div>
+            </div>
+            <p class="nuke-desc">{{ nk.desc }}</p>
+            <div class="nuke-tags">
+              <span v-for="t in nk.tags" :key="t" class="nuke-tag" :style="{ background: nk.color+'15', color: nk.color }">{{ t }}</span>
             </div>
           </div>
         </div>
@@ -820,6 +988,69 @@ const originalIdeas = [
 .future-card.visible { opacity: 1; transform: translateY(0); }
 .future-title { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
 .future-content { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+
+/* Finetuning */
+.ft-grid { display: flex; flex-direction: column; gap: 8px; }
+.ft-card {
+  padding: 10px 14px; border-radius: 10px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); opacity: 0; transform: translateY(8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.ft-card.visible { opacity: 1; transform: translateY(0); }
+.ft-title { font-size: 12px; font-weight: 700; color: var(--accent); }
+.ft-subtitle { font-size: 10px; color: var(--text-tertiary); margin-left: 6px; }
+.ft-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.5; margin: 3px 0 6px; }
+.ft-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.ft-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: rgba(99,102,241,0.08); color: var(--accent); }
+
+/* Inference */
+.infra-grid { display: flex; flex-direction: column; gap: 9px; }
+.infra-card {
+  padding: 12px 14px; border-radius: 12px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); border-left: 3px solid transparent;
+  opacity: 0; transform: translateX(-8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.infra-card.visible { opacity: 1; transform: translateX(0); }
+.infra-title { display: block; font-size: 13px; font-weight: 700; }
+.infra-subtitle { display: block; font-size: 10px; color: var(--text-tertiary); margin-bottom: 2px; }
+.infra-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 6px; }
+.infra-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.infra-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; }
+
+/* Free Arsenal */
+.free-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.free-card {
+  padding: 10px 10px; border-radius: 10px; background: rgba(34,197,94,0.04);
+  border: 1px solid rgba(34,197,94,0.15); opacity: 0; transform: translateY(8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+  position: relative; overflow: hidden;
+}
+.free-card.visible { opacity: 1; transform: translateY(0); }
+.free-badge {
+  position: absolute; top: 6px; right: 8px; font-size: 8px; font-weight: 800;
+  padding: 1px 5px; border-radius: 3px; background: #22c55e; color: #fff; letter-spacing: 0.5px;
+}
+.free-body { padding-right: 32px; }
+.free-title { display: block; font-size: 12px; font-weight: 700; color: #22c55e; }
+.free-subtitle { display: block; font-size: 9px; color: var(--text-tertiary); margin-bottom: 4px; }
+.free-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.45; }
+
+/* Nuclear */
+.nuke-grid { display: flex; flex-direction: column; gap: 10px; }
+.nuke-card {
+  padding: 14px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid; opacity: 0; transform: translateY(8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.nuke-card.visible { opacity: 1; transform: translateY(0); }
+.nuke-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.nuke-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nuke-title { display: block; font-size: 13px; font-weight: 700; }
+.nuke-subtitle { display: block; font-size: 10px; color: var(--text-tertiary); font-style: italic; }
+.nuke-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px; }
+.nuke-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.nuke-tag { font-size: 9px; padding: 3px 8px; border-radius: 4px; border: 1px solid currentColor; font-weight: 500; }
 
 /* Original ideas */
 .original-grid { display: flex; flex-direction: column; gap: 10px; }
