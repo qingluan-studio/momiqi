@@ -741,6 +741,39 @@ const breakPaywall = [
     steps: ['硬件: 二手RTX 3060 12GB ≈ ¥2000(一次性投入)', '软件: ollama pull qwen2.5:14b + ollama pull deepseek-r1:14b', '生图: ComfyUI + SD3-Medium + Flux-Schnell → Midjourney级效果', '兜底: 复杂任务用DeepSeek免费API(每月500万token免费)'],
   },
 ]
+
+const aiReading = [
+  { title: '阅读理解：深度语义', desc: '不是"扫描关键词"，而是像博士生读论文一样逐层理解：字面层→结构层→逻辑层→意图层→批判层。AI在NarrativeQA(小说问答)上超越人类基准，在HotpotQA(多跳推理)上达到90%+。RULER基准测试：在128K上下文的海量文本中精准定位一句话——大海捞针，百发百中。', items: [
+    { name: '多跳推理 (Multi-hop QA)', detail: '问题需要跨越多个段落收集线索。问"第一个登月的人在哪一年出生？"→先从段落A找到阿姆斯特朗→再从段落B核对其出生年份1930→综合两段信息作答。HotpotQA/2WikiMultihopQA是标准测试集。' },
+    { name: '跨文档推理', detail: '问题需要对照多个独立文档才能回答。问"A公司和B公司2024年哪家营收更高？"→分别阅读两份财报→提取营收数字→比较→输出答案。GPT-4在FinanceBench上准确率65%+。' },
+    { name: '批判性阅读', detail: '不盲信文本，而是检验：这个数据来源可靠吗？这个论证有逻辑漏洞吗？有没有遗漏的变量？AI被训练去识别文本中的认知偏差、统计陷阱、循环论证。' },
+    { name: '深度语义理解', detail: '理解字面意思之外的隐含信息。"她打开窗户"在不同上下文中意义完全不同：可能是通风、可能是呼救、可能是为猫留出入口。AI需要激活世界知识来正确解读。' },
+  ]},
+  { title: '阅读长度：上下文窗口', desc: '上下文窗口是AI的"工作记忆"。从GPT-2的1K到Gemini 2.5 Pro的2M token，3年膨胀2000倍。一只"蓝鲸"(2M token)vs一只"蚂蚁"(1K token)的差距。', items: [
+    { name: '2M Token能装下什么', detail: 'Gemini 2.5 Pro的2M token ≈ 150万英文单词 ≈ 3000页文档 ≈ 整个《冰与火之歌》前五卷。一次性喂入整个代码库(200个文件,5万行代码)+所有API文档，然后问"这个函数有没有被废弃的API调用？"→AI瞬间扫描整库并定位。' },
+    { name: 'Lost in the Middle', detail: '长上下文的阿克琉斯之踵。实验证明：AI对文档开头和结尾的内容记忆最准，对中间部分(15%-70%位置)的记忆力急剧下降——如同人类阅读长文时中间的段落最容易忽略。解决方案：关键信息放在开头或结尾；分段检索+重组。' },
+    { name: 'RULER / LongBench', detail: '长上下文能力的标准测试。RULER包含13项任务(检索/多跳/聚合/问答)，覆盖4K到128K长度。GPT-4 128K的RULER得分85.9，Claude 3.5 Sonnet 200K得分91.2。不是窗口开了就算——要真的"看懂"才行。' },
+    { name: '虚拟无限上下文', detail: 'MemGPT/Letta框架实现"分页式记忆"：AI把超长文档拆成页→按需换入换出→模拟虚拟内存。实际效果：在100万token的文档上做推理，准确率接近原生窗口，且显存消耗恒定。' },
+  ]},
+  { title: '阅读速度：飞阅千页', desc: 'AI阅读速度的衡量不只是token/秒，更是"理解密度/秒"。人类阅读约250词/分钟(约300 token/分钟)，而AI的阅读速度是人类的上万倍。', items: [
+    { name: 'Prefill 速度', detail: 'AI的"阅读阶段"(把输入文本编码为KV缓存)。GPT-4o约5000 tok/s读入，Groq LPU跑Llama 70B达8000 tok/s读入。读完整本《三体》(约60万中文字≈15万token)仅需30秒。人类读同一本书需要一周。' },
+    { name: '批量并行阅读', detail: '同时阅读100份合同不串行，而是全部并行编码。SGLang的RadixAttention能高效复用重复前缀。批量阅读吞吐可超100万tok/s——读完备考一年的全部教材(50本书)约10秒。' },
+    { name: '流式阅读 (Streaming)', detail: '不是等全文读完才开始理解，而是边读边更新理解。对于新闻直播/实时聊天/监控日志等流式场景，增量更新KV缓存+持续输出同步理解。如同人类边听边点头"嗯嗯我懂了"。' },
+    { name: '阅读速度瓶颈', detail: '不是计算速度，是显存带宽。H100的显存带宽3.35TB/s，但GPT-4规模模型推理需要读取权重+KV缓存，双重IO。Flash Attention 3通过计算/IO重叠实现了75%的理论带宽利用率——这是当前的天花板。' },
+  ]},
+  { title: '阅读意图：弦外之音', desc: '真正的阅读不止读懂文字，还读懂文字背后的人——他的目的、情绪、潜台词、认知框架。这是AI从"文字处理器"进化为"认知伙伴"的关键。', items: [
+    { name: '意图分类与路由', detail: '用户输入"我的代码跑不起来了"→AI不只是识别关键词"代码"，而是理解三层意图：显性(需要debug帮助)、隐性(可能感到挫败需要情绪支持)、任务性(需要定位具体错误)。然后智能路由：技术问题→代码分析链路，情绪问题→共情回复。' },
+    { name: '反讽与潜台词识别', detail: '"哦太好了，又蓝屏了"——字面是喜悦，实际是极度烦躁。AI通过语调、上下文、常识判断。当前最好模型(Sarcasm Detection任务)准确率约85%。讽刺是人类语言中最难的形式——它要求同时理解字面义和语境义的冲突。' },
+    { name: '认知框架识别', detail: '从用户的表达方式中推断他的认知水平。问"帮我解释一下transformer"vs"transformer里QKV的数学推导帮我验证一下"——AI自动切换回答的复杂度。前者给科普级、后者给论文级。这是自适应教学的基础。' },
+    { name: '元意图推理', detail: '用户问"你有情绪吗？"——真实意图可能不是哲学探讨，而是：a)测试AI是否诚实 b)寻找情感连接 c)担心自己被AI取代 d)单纯好奇。AI需要从对话历史、询问时机、用户画像中推理元意图，而非只回答字面问题。' },
+  ]},
+  { title: '阅读自补全：自动弥合', desc: 'AI在阅读时不仅被动接收，还主动预测和补全缺失的信息。这不是"续写"，而是在理解过程中填补文本的逻辑空白——像人类读书时自动脑补未写明的细节。', items: [
+    { name: 'FIM (Fill-in-the-Middle)', detail: '传统模型只能从左到右生成。FIM训练让模型学会填中间的空隙：给定前缀(上文)和后缀(下文)，补全中间缺失的片段。CodeLlama/DeepSeek-Coder用FIM训练后，代码补全准确率提升20%+。这是所有AI编程助手的核心技术。' },
+    { name: '上下文自动补全', detail: '读到"2024年诺贝尔物理学奖授予了..."→AI在理解过程中自动激活"John Hopfield和Geoffrey Hinton"的知识。不是生成，而是在阅读时隐性激活关联知识。类似人类的"我知道你要说什么"。' },
+    { name: '逻辑缺漏检测', detail: '阅读技术文档时，AI自动检测信息缺口："这段只说了怎么做，没说为什么要这样做"、"这里引用了图3但文档中没有图3"→自动标注文档的完整度并提示缺失部分。GitHub Copilot Workspace已开始实现此类功能。' },
+    { name: '预测式阅读', detail: '最高级的阅读：AI预测下一段会讲什么→与实际内容对照→如果不一致则更新自己的认知模型。在阅读理解测试中，允许模型"先预测后验证"比直接阅读的准确率高10%-15%。因为预测迫使模型激活已有的知识框架。' },
+  ]},
+]
 </script>
 
 <template>
@@ -1482,6 +1515,31 @@ const breakPaywall = [
         </div>
       </section>
 
+      <!-- 42. AI深度阅读 -->
+      <section data-section="reading" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">42</span> AI深度阅读 · 理解·长度·速度·意图·自补全</h2>
+        <p class="section-desc">从"扫描关键词"到"理解弦外之音"——AI正在获得真正的阅读能力。</p>
+        <div v-for="(rd, ri) in aiReading" :key="rd.title" class="rd-block" :class="{ visible: visibleSections['reading'] }" :style="{ '--delay': `${ri*0.1}s` }">
+          <div class="rd-header">
+              <span class="rd-icon">
+                <svg v-if="rd.title.includes('理解')" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+                <svg v-else-if="rd.title.includes('长度')" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3"/></svg>
+                <svg v-else-if="rd.title.includes('速度')" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <svg v-else-if="rd.title.includes('意图')" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h12"/><path d="M18 20l2-2-2-2"/></svg>
+              </span>
+            <span class="rd-title">{{ rd.title }}</span>
+          </div>
+          <p class="rd-desc">{{ rd.desc }}</p>
+          <div class="rd-items">
+            <div v-for="(it, ii) in rd.items" :key="it.name" class="rd-item">
+              <div class="rd-item-name">{{ ii + 1 }}. {{ it.name }}</div>
+              <p class="rd-item-detail">{{ it.detail }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- 结尾总结 -->
       <section data-section="summary" class="evo-section summary-section">
         <div class="summary-card" :class="{ visible: visibleSections['summary'] }">
@@ -2096,6 +2154,23 @@ const breakPaywall = [
 .train-card-name { font-size: 12px; font-weight: 700; color: var(--text-primary); }
 .train-card-tech { font-size: 9px; padding: 1px 6px; border-radius: 3px; background: rgba(139,92,246,0.1); color: #8b5cf6; font-weight: 600; white-space: nowrap; }
 .train-card-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+
+/* AI Reading */
+.rd-block {
+  padding: 16px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 14px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.rd-block.visible { opacity: 1; transform: translateY(0); }
+.rd-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.rd-icon { display: flex; flex-shrink: 0; }
+.rd-title { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+.rd-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+.rd-items { display: flex; flex-direction: column; gap: 8px; }
+.rd-item { padding-left: 8px; border-left: 2px solid var(--accent); }
+.rd-item-name { font-size: 11px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+.rd-item-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.55; }
 
 /* Summary */
 .summary-section { margin-top: 6px; margin-bottom: 6px; }
