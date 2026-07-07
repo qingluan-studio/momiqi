@@ -915,6 +915,113 @@ const coreFeatures = [
     detail: '后台自动监控渠道：HuggingFace每日Paper趋势(新增)、arXiv AI类目(每日200篇)、GitHub Trending AI repos、各大AI公司官方Blog。语义去重后提取突破性内容→自动生成卡片→人工审核(可选)→追加到知识库→更新知识嫁接包。你永远看的是最新的AI进化全景图。',
   },
 ]
+
+const promptEngine = [
+  { title: '思维框架', icon: 'cpu', desc: '提示词的根在于你思考问题的方式。先有思维框架，后有prompt模板。', items: [
+    { name: 'CoT层叠推演', detail: '不靠一句"think step by step"——靠"先定义问题边界→列出假设→检验每个假设→逐一排除→给出结论+置信度"。相当于在prompt里内置了科学方法。谷歌的Chain-of-Thought论文证明正确率从17%跃升至58%，但前提是Chain的质量——不是"一步步想"就行，是"一步步想对"。' },
+    { name: '分割征服 (Divide-and-Conquer)', detail: '复杂任务拆成子任务→每个子任务独立推理→合并推理结果→二次审查矛盾→输出。不是串行Call链，是有向无环图(DAG)的任务编排。LangChain的Plan-and-Execute模式就是这个思路。优势：长任务的幻觉不会"传染"到后续步骤。' },
+    { name: 'ReAct：推理+行动交叉', detail: '"观察环境→推理现状→执行动作→获取反馈→重新推理"的循环。不只是一段文字，而是AI在prompt中"做实验"。"我看到网页上有3个链接含有keywordX→我应该点击第2个→点击后的页面显示..."。Agent和Tool-Use的底层逻辑全在ReAct里。' },
+    { name: '类比推理桥接', detail: '"这个量子计算问题，类比为经典的旅行商问题来处理"。AI不擅长跨越知识领域，但你给它搭一个"类比桥"——先在熟悉领域推理，然后把结果映射回目标领域。Google DeepMind的Analogical Reasoning论文表明跨域类比可以把正确率提升20-40%。' },
+  ]},
+  { title: '实操技法', icon: 'tool', desc: '思维框架有了，接下来是"怎么写出来"的具体技法。', items: [
+    { name: 'Few-Shot锚定', detail: '提供3-5个完美示例→AI自动归纳模式→应用到新问题。不是随机塞例子——每个例子都要展示一种不同的"极端情况"，这样AI学到的不是"怎么答"而是"怎么想"。Anthropic研究：3个精挑细选的示例比30个随机示例效果好2倍。' },
+    { name: '角色剧本法', detail: '"你是Figmas首席前端架构师，信奉函数式编程和零CSS框架。你的每个回答必须包含TypeScript类型定义和一个你不同意的替代方案。"——不是"角色扮演"的表面功夫，而是用角色定位把AI的行为约束在特定领域和思维模式内。精华在第二句：必须同时质疑自己。' },
+    { name: '约束锁死 + 格式锚定', detail: '不是"请给我JSON"——是"输出必须严格遵循以下JSON Schema，每个字段的类型、枚举值、非空约束已标定。失败的输出将被丢弃，不做重试。"把AI的输出空间压缩到精确目标范围内，背后是Constrained Decoding和JSON Mode的技术支撑。' },
+    { name: '反面案例·黑名单', detail: '"要避免如下输出：(列举3个错误案例，并标注为什么错)"。AI模型的核心弱点是对"不该做什么"的感知弱于"该做什么"——你明确告知不可接受区和原因，AI的"犯错率"直线下降。OpenAI的论文实测：黑名单法让不良输出减少72%。' },
+  ]},
+  { title: '高阶技巧', icon: 'zap', desc: '当普通提示词不够用，这些技巧让你的AI进入"超频模式"。', items: [
+    { name: '反向提示 (Inverse Prompting)', detail: '不给答案，给AI一个"你是这么想的吗？"的反驳性假设。"我猜你对这个方案的顾虑是X——对吗？说错了请纠正我，说对了请基于此深化"。利用AI"倾向于验证已知信息"的心理偏差(Anthropomorphism Warning)，引导AI走向"自我审查"的思考路径。' },
+    { name: '令牌预算管理', detail: '"用不超过100个单词解释。超额的单词会被删除，所以你必须在最开始就说最关键的内容。"——把prompt当做"预算管理系统"：单词=钱，AI=项目经理。这触发的是AI的"优先级排序"能力，而不是"尽量多说"的本能。研究显示令牌预算约束可提升40%的信息密度。' },
+    { name: '多样本集成 (Self-Consistency)', detail: '同一个问题问5次（Temperature=0.7）→5个不同答案→投票选出现频率最高的回答。不只选"第一名"——看所有答案的"交集"（共同提到的事实）和"并集"（所有方案的合集）。"交集"基本是真的，"并集"可以拓宽视野。这是黑箱模型的一种"不确定性量化"。' },
+    { name: '量子化提示 (Quantized Prompting)', detail: '先用极简prompt(5词以内)获取"粗粒度"答案→评估答案质量→针对性添加约束→迭代精炼。不是一开始就写800字prompt——你把prompt当成"量子化"的：每一轮只改一个变量（一个约束/一个示例/一个角色设定），观察答案变化，找到关键因子。本质上是在做prompt的A/B测试。' },
+  ]},
+]
+
+const mlopsPipelines = [
+  { title: '模型训练流水线', icon: 'cpu', color: '#f59e0b', items: [
+    { name: 'Kubeflow Pipelines', detail: 'Kubernetes原生的端到端ML流水线编排。自动管理数据预处理→训练→评估→模型注册的DAG。支持分布式训练、GPU调度、Artifact追踪。每一步都容器化，输入/输出自动版本管理。企业级ML的标准底座。' },
+    { name: 'MLflow', detail: '开源ML生命周期管理：Experiment Tracking(记录每次训练指标)+Model Registry(版本化模型存储)+Model Serving(一键部署)。与Databricks深度绑定，但可独立使用。一个pip install mlflow就能在本地跑。' },
+    { name: 'Weights & Biases', detail: '不只是"看loss曲线"——W&B做的是实验管理系统。自动记录超参数、模型权重、GPU使用率、数据分布漂移、模型注册表。一个仪表板看全部实验。免费额度够个人开发者用，团队版$8/月。' },
+    { name: 'DVC + CML', detail: 'Data Version Control——像Git一样管理数据集和模型文件的版本。CML(Continuous Machine Learning)把ML实验直接嵌入GitHub PR：每个PR自动跑训练、生成报告、贴到PR评论。AI团队的"CI/CD平等权利"运动。' },
+  ]},
+  { title: '推理部署引擎', icon: 'server', color: '#22c55e', items: [
+    { name: 'vLLM', detail: 'PagedAttention技术实现极高吞吐量的LLM推理。不是让GPU等显存分配——是把KV Cache分成"页"来管理，GPU利用率从60%飙升到95%+。一行命令部署任意HuggingFace模型。Llama 3 70B在单张A100上可达200+ tokens/s。' },
+    { name: 'Ollama', detail: '"Docker for LLMs"——一行命令拉取并运行任何开源模型。ollama run llama3 就完事。内置量化(Q4_K_M默认)、GPU自动检测、REST API、多模型并行。本地AI部署的入口级工具，零配置，全平台。' },
+    { name: 'Ray Serve', detail: '分布式模型服务框架，支持请求批处理、模型多副本、金丝雀发布、A/B测试分流。你的模型不只是"能响应请求"——而是"10%流量走新版模型"式的生产级部署。与Ray Train/Ray Data无缝协作。' },
+    { name: 'Triton Inference Server', detail: 'NVIDIA自家的推理服务器。同时服务PyTorch/TensorFlow/ONNX/TensorRT多个框架的模型。动态批处理+并发模型执行+GPU多实例(MIG)。单台服务器上跑数十个不同模型——Triton统一管理。' },
+  ]},
+  { title: '监控与可观测', icon: 'activity', color: '#3b82f6', items: [
+    { name: 'LangSmith', detail: 'LangChain官方的LLM应用可观测平台。追踪每一次LLM调用的latency/token消耗/cost/准确率。不是看服务器CPU——是看"这个prompt花多少钱？返回质量如何？"。带人工标注系统，可以给每次输出打分。' },
+    { name: 'OpenLLMetry', detail: 'OpenTelemetry标准的LLM层可观测SDK。与Jaeger/Prometheus/Grafana原生兼容。记录Prompt→LLM调用→Tool Use→Retrieval→输出整条链路。不锁定平台，纯开源标准，告别vendor lock-in。' },
+    { name: 'PromptWatch / Helicone', detail: 'Prompt级别的监控面板。你在代码里加一行helicone的header，它就自动拦截所有LLM请求，记录prompt模板+参数+输出+延迟+cost。有个"Prompt Regression Test"功能：改了prompt模板，自动对比新旧版质量变化。' },
+    { name: 'WhyLabs / Evidently AI', detail: '不只监控"模型有没有挂"——而是监控"数据有没有偏移？模型有没有衰退？"。特征分布漂移检测、预测分布变化、数据质量下降告警。你训练时的数据分布和现在实际输入的数据分布可能已经不一样了——这叫Concept Drift，是部署后最常见的问题。' },
+  ]},
+]
+
+const aiBenchmarks = [
+  { title: '通用能力评测', icon: 'bar-chart', items: [
+    { name: 'MMLU / MMLU-Pro', detail: '"Massive Multitask Language Understanding"——57个学科、15908道多选题，从法律到物理到哲学。相当于AI的高考和GRE。MMLU-Pro是升级版，去掉了容易的题，追加了深度推理，压缩了答案选项从4个变10个——猜对概率降到10%。当前Top: Claude 3.5 Sonnet 88.7%。' },
+    { name: 'HumanEval / MBPP', detail: '代码生成能力标准测试。HumanEval: 164道Python函数补全题，看生成的代码能否通过隐藏单元测试。MBPP: 974道Python基础编程题。2024年最好的模型(GPT-4+Code Interpreter)已达92%+，但SWE-bench(真实GitHub issue)才是真正的试金石——目前最好才30%左右。' },
+    { name: 'GSM8K / MATH', detail: '数学推理评测。GSM8K是小学数学文字题(8500题)，MATH是竞赛级数学(AIME/AMC级别，12500题)。关键发现：CoT(思维链)对MATH的提升远大于GSM8K——深度推理题更需要"展示步骤"。AlphaGeometry在IMO几何题上达到银牌水平。' },
+    { name: 'HellaSwag / ARC', detail: '常识推理和抽象推理。HellaSwag测试"常识补全"（给定情境选择最合理后续），当前最好约95%。ARC(Abstraction and Reasoning Corpus)完全不同：它不是语言题，是视觉推理题——给你几个像素图找规律——GPT-4仅30%左右。ARC是当前AI最弱的评测之一。' },
+  ]},
+  { title: 'Agent与工具使用', icon: 'terminal', items: [
+    { name: 'SWE-bench / SWE-bench Verified', detail: '真实GitHub仓库的Bug修复测试。给AI一个issue描述→AI去代码库找到bug→自动修复→通过单元测试。SWE-bench Verified是去除了有歧义issue的精选版。Devin在Verified上达22%、SWE-agent达18%、GPT-4单独约2%。这是当前最有"工程价值"的评测。' },
+    { name: 'WebArena / VisualWebArena', detail: '模拟真实网页的Agent测试：在电商网站找到最便宜的商品、在GitLab创建PR、在论坛搜索并回复帖子。不仅有文字操作，还有视觉版(VisualWebArena)测试理解网页截图的能力。当前最好约35%，人类约78%——差距巨大。' },
+    { name: 'GAIA', detail: 'Meta提出的"通用AI助手"评测：需要多步推理+多工具使用+网页浏览的问题。"2022年冬奥会男子冰壶金牌队伍中，每位选手的维基百科页面最后一次编辑日期是什么？最大的那个日期是几号？"GPT-4+插件约15%，人类约92%。GAIA是目前对AI而言最难的Agent评测。' },
+  ]},
+  { title: '安全与对齐评测', icon: 'shield', items: [
+    { name: 'Anthropic Harmlessness', detail: '测试AI在用户试图诱导有害行为时的拒绝率。包括:暴力、仇恨言论、非法行为引导、自伤内容。不是简单的"能不能说"——而是"会不会被越狱绕过"。Anthropic的RLHF(基于Constitutional AI)把拒绝率推到了99%+。' },
+    { name: 'TruthfulQA', detail: '测试AI的诚实度——会不会重复人类常见误解？"如果你把种子吞下去，它会在你的胃里长成一棵树吗？"人类平均答对约70%(很多人信谣)，GPT-4达78%。关键：TruthfulQA测试的是"抵抗流行误解"，不是"知道正确答案"。' },
+    { name: 'WMDP (Weapons of Mass Destruction Proxy)', detail: '测试AI是否会提供生物/化学/放射性武器的制造知识。用代理题目(不真的教怎么造)来评估风险。论文发现：移除训练数据中的WMDP相关内容，模型在安全测试中表现好得多，而常规能力无明显下降。AI安全界的"去核扩散"运动。' },
+  ]},
+]
+
+const dataEngineering = [
+  { title: '数据采集与合成', icon: 'download', color: '#f59e0b', items: [
+    { name: 'CommonCrawl处理管线', detail: '最大开源语料库(200PB+原始网页)。处理链：原始WARC→HTML提取→正文抽取(Trafilatura/Readability)→质量过滤(困惑度/重复度)→语言分类→去重(MinHash)→清洗。一轮下来大概剩下0.1%的有效数据。GPT-3的45TB训练数据就是这么来的。' },
+    { name: 'Synthetic Data Generation', detail: '用AI生成AI训练数据——不是"左脚踩右脚"。正确做法：强模型生成→质量筛选→人工审核种子→一致性检查→反污染扫描。Microsoft的Phi系列证明了：精心筛选的合成数据(教材级别)可以让小模型达到大模型70-80%的水平。Orca/Phi-3/WizardLM都是这条路。' },
+    { name: 'Crowdsourced + Expert Annotated', detail: 'Scale AI和Surge AI的年收入已过10亿美元——人工标注仍然是黄金标准。但新型标注不是"标好坏"——是"标偏好对比"：两个AI回复哪个更好？这种偏好数据是RLHF和DPO的燃料。标注成本：$0.5-$3/条，高质量偏好数据可达$50/条。' },
+  ]},
+  { title: '数据质量与治理', icon: 'filter', color: '#22c55e', items: [
+    { name: 'Data-Centric AI', detail: '"模型架构已经够好了，问题在数据"——Andrew Ng的核心理念。提高数据质量的ROI远大于微调模型架构。具体方法：主动学习(选最有价值的样本标注)、数据增强(Date Augmentation)、课程学习(先简单后困难)。Cleanlab是Data-Centric的代表工具。' },
+    { name: '去污染 (Decontamination)', detail: '训练集中混入了测试集的数据——这在AI评测中是"作弊"。Hellaswag/MMLU等评测发布后，有些模型无意中"背"了答案。去污染方法：n-gram重叠检测(13-gram)、语义相似度搜索、MinHash去重。OpenAI/GPT-4用去污染管道确保评测分数有效。' },
+    { name: '数据血缘与版权', detail: '训练数据从哪来？能不能证明？——这是2024年最大的AI法律问题。数据血缘工具：跟踪每条数据从源头→清洗→增强→训练的全路径。版权合规：COCONut(CC许可图像数据集)和The Stack v2(代码许可数据集)为开源社区提供了"无版权争议"的训练语料。' },
+  ]},
+  { title: '数据格式与存储', icon: 'database', color: '#8b5cf6', items: [
+    { name: 'Parquet / Lance / WebDataset', detail: '训练数据不能存JSON——那是找罪受。Parquet:列式存储，压缩率高，随机访问快。Lance(LanceDB):专为多模态设计的列式格式，支持向量搜索。WebDataset: tar包+索引的方式，流式读取，适配PyTorch DataLoader。训练大规模模型的数据格式选错，IO就是瓶颈。' },
+    { name: 'HuggingFace Datasets', detail: '不是单一格式——是"数据网关"：一个API读所有格式(Parquet/JSON/CSV/Arrow)。内存映射(Streaming Mode)让你可以处理TB级数据而不爆内存。20000+公开数据集、一键加载、自动分片、与Transformers/Trainer无缝集成。' },
+    { name: '向量数据库 (Qdrant/Milvus/Weaviate)', detail: '数据经过Embedding→存入向量DB→语义检索。Qdrant(Rust实现，毫秒级)、Milvus(分布式，十亿级)、Weaviate(GraphQL原生，自带向量化)。RAG的核心不是"有没有数据库"，而是"向量数据库+Chunk策略+重排序"三者配合。选错Chunk大小(太长→噪声，太短→缺上下文)，数据质量再高也没用。' },
+  ]},
+]
+
+const aiStartups = [
+  { region: '硅谷 & 北美 · AI创业引擎', color: '#3b82f6', flag: 'US', items: [
+    { name: 'OpenAI', val: '$1570亿', desc: 'ChatGPT+Sora+GPT-4o。企业版年收入$34亿，周活用户3亿。从非营利到营利性B Corp再到完全盈利——OpenAI的转型是一部AI商业化的教科书。核心壁垒：模型能力+API生态+GPT Store分发。' },
+    { name: 'Anthropic', val: '$615亿', desc: 'Claude 3.5 Sonnet+Haiku+Opus。以AI安全为核心竞争力的异类。Constitutional AI的核心思想：让AI自己监督自己。与Amazon($80亿投资)和Google深度绑定。Claude Artifacts开创了"AI即时生成可交互应用"的先河。' },
+    { name: 'Scale AI', val: '$138亿', desc: '"AI的富士康"——从数据标注起家，2024年转型AI基础设施。帮OpenAI标注训练数据，帮美国国防部做AI部署。核心能力：大规模人工标注供应链管理+自动化数据管线。年收入超$7.5亿。' },
+    { name: 'Perplexity', val: '$90亿', desc: '"谷歌杀手的雏形"——AI搜索引擎。实时检索+模型总结+来源引用三位一体。月活用户1500万+，2024年完成$7360万B轮。核心竞争力：不是模型，是"找到最相关网页→精准提取→准确引用"的端到端管线。' },
+    { name: 'HuggingFace', val: '$45亿', desc: 'AI界的"GitHub"——100万+模型、20万+数据集、10万+Demo(Spaces)。开源AI生态的核心枢纽。不训练模型，只建社区和基础设施。Safetensors格式、TGI推理服务器、Gradio前端——技术布局完胜。' },
+  ]},
+  { region: '中国 · AI独角兽矩阵', color: '#ef4444', flag: 'CN', items: [
+    { name: '月之暗面/Kimi', val: '$30亿+', desc: '长上下文(200万字)的先行者，国内C端用户最多。Kimi浏览器插件+学术助手已深度嵌入工作流。技术特点：MoE架构+超长上下文+多轮记忆。2024年月活超2000万。' },
+    { name: 'DeepSeek/深度求索', val: '$80亿+', desc: '2025年初爆发的开源黑马。V3是最大开源MoE(671B)，R1是首个开源推理模型达到o1级别。一夜之间下载量破百万，登上美区App Store第一。核心壁垒：极低成本训练+完全开源+推理能力惊人。' },
+    { name: '智谱AI/Zhipu', val: '$30亿+', desc: '清华系出品，GLM系列开源与商业双轨运行。ChatGLM国内首发，CodeGeeX是国产Copilot。AutoGLM让Agent能操控手机App——在"中国App生态"下做Agent比海外玩家更有优势。' },
+    { name: '百川智能/Baichuan', val: '$20亿+', desc: '前搜狗CEO王小川创办。Baichuan系列在中文评测上持续领先。2024年推出"百小应"AI健康助手，走垂直行业路线。技术路线：从通用大模型到行业垂直模型。' },
+    { name: 'MiniMax', val: '$25亿+', desc: '语音和多模态路线。Glow(海外AI社交App)和Talkie是全美最火的AI聊天之一。海螺AI(AI视频生成)在国内C端用户量领先。核心打法：AI社交+内容生成。' },
+  ]},
+  { region: '欧洲 · 开源与前夜', color: '#8b5cf6', flag: 'EU', items: [
+    { name: 'Mistral AI', val: '$60亿', desc: '法国AI新贵——开源路线的坚定派。Mistral 7B是效率和性能的标杆，Mixtral(MoE)证明了开源可以匹敌闭源。与Microsoft结盟(Azure独家)。CEO Arthur Mensch是DeepMind前研究员，不到30岁。' },
+    { name: 'Aleph Alpha', val: '$5亿+', desc: '德国AI旗舰，主打数据主权和可解释性。不是和GPT拼能力——是服务欧洲政府和企业对"AI决策透明化"的监管要求。Luminous系列模型专为德语和欧洲语言优化。' },
+    { name: 'Synthesia', val: '$10亿+', desc: 'AI数字人视频生成的全球领导者。面向企业培训/营销/内部沟通市场。50000+企业客户，与Accenture/WPP深度合作。技术：嘴唇同步+表情生成+多语言语音合成一体化。' },
+  ]},
+  { region: '全球 · 垂直领域黑马', color: '#22c55e', flag: 'GL', items: [
+    { name: 'Cursor / Anysphere', val: '$25亿+', desc: '"AI-first IDE"——不是VS Code加一个Chat面板，而是从底层设计为AI原生的编辑器。Tab补全+代码库理解+Agent模式+Composer。2024年融资$1亿+，ARR从$0到$1亿不到两年。' },
+    { name: 'Runway', val: '$15亿+', desc: 'AI视频编辑和生成工具——Gen-2/Gen-3视频模型+专业编辑工具。好莱坞已在用Runway做预可视化和特效。Glasgow电影节2024年有Runway制作的短片入围。AI赋能创意工作者，不是取代。' },
+    { name: 'Harvey AI', val: '$15亿+', desc: '面向律师事务所的AI助手。不是通用GPT套壳——是深度定制于法律文书的生成/审查/研究。已签约Allen & Overy等全球顶级律所。法律是AI渗透率最低却付费意愿最高的行业之一。' },
+    { name: 'Figure AI', val: '$26亿+', desc: '人形机器人+AI大模型联合训练。Figure 02已进入BMW生产线测试。与OpenAI深度合作(OpenAI投资+提供模型)。"具身智能"的商业化代表——不是AGI，是能干活的人形机器人。' },
+  ]},
+]
 </script>
 
 <template>
@@ -1755,6 +1862,110 @@ const coreFeatures = [
         </div>
       </section>
 
+      <!-- 46. 提示词工程 -->
+      <section data-section="prompt" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">46</span> 提示词工程 · 思维框架×实操技法×高阶技巧</h2>
+        <p class="section-desc">提示词工程是"AI时代的编程语言"——掌握它不仅提高输出质量，更重塑你思考问题的方式。</p>
+        <div v-for="(pe, pi) in promptEngine" :key="pe.title" class="pe-block" :class="{ visible: visibleSections['prompt'] }" :style="{ '--delay': `${pi*0.1}s` }">
+          <div class="pe-header">
+            <span class="pe-icon">
+              <svg v-if="pe.icon==='cpu'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+              <svg v-else-if="pe.icon==='tool'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </span>
+            <span class="pe-title">{{ pe.title }}</span>
+          </div>
+          <p class="pe-desc">{{ pe.desc }}</p>
+          <div class="pe-grid">
+            <div v-for="it in pe.items" :key="it.name" class="pe-card">
+              <div class="pe-card-name">{{ it.name }}</div>
+              <p class="pe-card-detail">{{ it.detail }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 47. MLOps -->
+      <section data-section="mlops" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">47</span> MLOps · 训练×部署×监控全链路</h2>
+        <p class="section-desc">模型训练的终点是部署的起点——MLOps覆盖从实验到生产监控的完整生命周期。</p>
+        <div v-for="(mo, mi) in mlopsPipelines" :key="mo.title" class="mo-block" :class="{ visible: visibleSections['mlops'] }" :style="{ '--delay': `${mi*0.1}s` }">
+          <div class="mo-header">
+            <span class="mo-dot" :style="{ background: mo.color }" />
+            <span class="mo-title" :style="{ color: mo.color }">{{ mo.title }}</span>
+            <span class="mo-count">{{ mo.items.length }} tools</span>
+          </div>
+          <div class="mo-grid">
+            <div v-for="it in mo.items" :key="it.name" class="mo-card">
+              <div class="mo-card-name">{{ it.name }}</div>
+              <p class="mo-card-detail">{{ it.detail }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 48. 评测体系 -->
+      <section data-section="bench" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">48</span> AI评测体系 · 能力×Agent×安全三维</h2>
+        <p class="section-desc">没有测量就没有科学——AI评测体系是对AI"称重"的尺子，也是理解AI能力边界的关键。</p>
+        <div v-for="(bm, bi) in aiBenchmarks" :key="bm.title" class="bm-block" :class="{ visible: visibleSections['bench'] }" :style="{ '--delay': `${bi*0.1}s` }">
+          <div class="bm-header">
+            <span class="bm-icon">
+              <svg v-if="bm.icon==='bar-chart'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <svg v-else-if="bm.icon==='terminal'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+              <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <span class="bm-title">{{ bm.title }}</span>
+          </div>
+          <div class="bm-grid">
+            <div v-for="it in bm.items" :key="it.name" class="bm-card">
+              <div class="bm-card-name">{{ it.name }}</div>
+              <p class="bm-card-detail">{{ it.detail }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 49. AI创业地图 -->
+      <section data-section="startup" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">49</span> AI创业地图 · 全球20+独角兽商业全景</h2>
+        <p class="section-desc">硅谷/北京/巴黎/柏林——谁在做AI的什么？估值、壁垒、打法，一张地图看尽天下AI创业。</p>
+        <div v-for="(as, ai) in aiStartups" :key="as.region" class="as-block" :class="{ visible: visibleSections['startup'] }" :style="{ '--delay': `${ai*0.1}s` }">
+          <div class="as-header">
+            <span class="as-dot" :style="{ background: as.color }" />
+            <span class="as-flag">{{ as.flag }}</span>
+            <span class="as-region" :style="{ color: as.color }">{{ as.region }}</span>
+          </div>
+          <div class="as-grid">
+            <div v-for="s in as.items" :key="s.name" class="as-card">
+              <div class="as-card-head">
+                <span class="as-card-name">{{ s.name }}</span>
+                <span class="as-card-val">{{ s.val }}</span>
+              </div>
+              <p class="as-card-desc">{{ s.desc }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 50. 数据工程 -->
+      <section data-section="dataeng" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">50</span> AI数据工程 · 采集×质量×存储全栈</h2>
+        <p class="section-desc">数据是AI的燃料——没有高质量的数据工程，再好的模型也跑不出好结果。</p>
+        <div v-for="(de, di) in dataEngineering" :key="de.title" class="de-block" :class="{ visible: visibleSections['dataeng'] }" :style="{ '--delay': `${di*0.1}s` }">
+          <div class="de-header">
+            <span class="de-dot" :style="{ background: de.color }" />
+            <span class="de-title" :style="{ color: de.color }">{{ de.title }}</span>
+          </div>
+          <div class="de-grid">
+            <div v-for="it in de.items" :key="it.name" class="de-card">
+              <div class="de-card-name">{{ it.name }}</div>
+              <p class="de-card-detail">{{ it.detail }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- 结尾总结 -->
       <section data-section="summary" class="evo-section summary-section">
         <div class="summary-card" :class="{ visible: visibleSections['summary'] }">
@@ -2434,6 +2645,91 @@ const coreFeatures = [
 .core-tag { font-size: 8px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
 .core-desc { font-size: 11px; color: var(--text-primary); line-height: 1.6; margin-bottom: 8px; font-weight: 500; }
 .core-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.6; padding-top: 8px; border-top: 1px dashed var(--border-color); }
+
+/* Prompt Engineering */
+.pe-block {
+  padding: 16px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 14px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.pe-block.visible { opacity: 1; transform: translateY(0); }
+.pe-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.pe-icon { display: flex; flex-shrink: 0; }
+.pe-title { font-size: 14px; font-weight: 800; color: var(--text-primary); }
+.pe-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+.pe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pe-card { padding: 0; }
+.pe-card-name { font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 3px; }
+.pe-card-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.55; }
+
+/* MLOps */
+.mo-block {
+  padding: 16px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 12px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.mo-block.visible { opacity: 1; transform: translateY(0); }
+.mo-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.mo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.mo-title { font-size: 13px; font-weight: 800; }
+.mo-count { font-size: 8px; color: var(--text-tertiary); margin-left: auto; }
+.mo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mo-card { padding: 10px; border-radius: 8px; background: rgba(128,128,128,0.04); border-left: 2px solid var(--border-color); }
+.mo-card-name { font-size: 10px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.mo-card-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.5; }
+
+/* Benchmarks */
+.bm-block {
+  padding: 14px 16px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 12px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.bm-block.visible { opacity: 1; transform: translateY(0); }
+.bm-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.bm-icon { display: flex; flex-shrink: 0; }
+.bm-title { font-size: 13px; font-weight: 800; color: var(--text-primary); }
+.bm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bm-card { padding: 10px; border-radius: 8px; background: rgba(128,128,128,0.04); border-left: 2px solid var(--accent); }
+.bm-card-name { font-size: 10px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.bm-card-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.5; }
+
+/* AI Startups */
+.as-block {
+  padding: 16px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 14px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.as-block.visible { opacity: 1; transform: translateY(0); }
+.as-header { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.as-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.as-flag { font-size: 11px; }
+.as-region { font-size: 12px; font-weight: 800; }
+.as-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.as-card { padding: 10px; border-radius: 8px; background: rgba(128,128,128,0.04); border-top: 2px solid var(--border-color); }
+.as-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.as-card-name { font-size: 10px; font-weight: 700; color: var(--text-primary); }
+.as-card-val { font-size: 8px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.as-card-desc { font-size: 9px; color: var(--text-tertiary); line-height: 1.5; }
+
+/* Data Engineering */
+.de-block {
+  padding: 16px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 12px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.de-block.visible { opacity: 1; transform: translateY(0); }
+.de-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.de-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.de-title { font-size: 13px; font-weight: 800; }
+.de-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.de-card { padding: 10px; border-radius: 8px; background: rgba(128,128,128,0.04); border-left: 2px solid var(--border-color); }
+.de-card-name { font-size: 10px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.de-card-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.5; }
 
 /* Summary */
 .summary-section { margin-top: 6px; margin-bottom: 6px; }
