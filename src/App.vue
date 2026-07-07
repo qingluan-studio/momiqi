@@ -13,7 +13,7 @@ import TabBar from './components/TabBar.vue'
 import VisionTool from './components/VisionTool.vue'
 import CodeGenTool from './components/CodeGenTool.vue'
 import TranslateTool from './components/TranslateTool.vue'
-import PromptLibrary from './components/PromptLibrary.vue'
+import ToolBox from './components/ToolBox.vue'
 
 const chatStore = useChat()
 const settingsStore = useSettings()
@@ -98,7 +98,7 @@ function switchTab(tab: string) {
           </svg>
         </button>
         <span class="app-title">
-          {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', translate: '翻译助手', prompts: '模板库' }[activeTab] }}
+          {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', translate: '翻译助手', tools: '工具箱' }[activeTab] }}
         </span>
         <button class="icon-btn" @click="showSettings = true" aria-label="设置">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -128,7 +128,7 @@ function switchTab(tab: string) {
         <VisionTool v-if="activeTab === 'vision'" :settings="settingsStore" />
         <CodeGenTool v-if="activeTab === 'code'" :settings="settingsStore" />
         <TranslateTool v-if="activeTab === 'translate'" :settings="settingsStore" />
-        <PromptLibrary v-if="activeTab === 'prompts'" :settings="settingsStore" />
+        <ToolBox v-if="activeTab === 'tools'" :settings="settingsStore" />
       </main>
 
       <TabBar :active="activeTab" @change="switchTab" />
