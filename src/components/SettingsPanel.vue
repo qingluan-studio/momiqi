@@ -40,6 +40,10 @@ function handleToggle(provider: AIProvider, enabled: boolean) {
 function handleApiKey(provider: AIProvider, key: string) {
   props.settings.setProviderApiKey(provider, key)
 }
+
+function handleModel(provider: AIProvider, model: string) {
+  props.settings.setProviderModel(provider, model)
+}
 </script>
 
 <template>
@@ -79,6 +83,17 @@ function handleApiKey(provider: AIProvider, key: string) {
           </div>
 
           <div v-if="settings.settings.providers[p.key].enabled" class="provider-config">
+            <select
+              class="model-select"
+              :value="settings.settings.providers[p.key].models[0]"
+              @change="(e: Event) => handleModel(p.key, (e.target as HTMLSelectElement).value)"
+            >
+              <option
+                v-for="m in settings.settings.providers[p.key].models"
+                :key="m"
+                :value="m"
+              >{{ m }}</option>
+            </select>
             <input
               type="password"
               class="key-input"
@@ -213,6 +228,17 @@ function handleApiKey(provider: AIProvider, key: string) {
   flex-direction: column;
   gap: 8px;
 }
+
+.model-select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 12px;
+  box-sizing: border-box;
+}
+.model-select:focus { outline: none; border-color: var(--accent); }
 
 .key-input {
   width: 100%;

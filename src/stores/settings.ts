@@ -4,10 +4,10 @@ import { getItem, setItem } from '../utils/storage'
 
 const DEFAULT_SETTINGS: AppSettings = {
   providers: {
-    deepseek: { enabled: false, apiKey: '', models: ['deepseek-chat'], priority: 1 },
-    gemini: { enabled: false, apiKey: '', models: ['gemini-2.0-flash'], priority: 2 },
-    groq: { enabled: false, apiKey: '', models: ['llama-3.3-70b-versatile'], priority: 3 },
-    kimi: { enabled: false, apiKey: '', models: ['moonshot-v1-8k'], priority: 4 },
+    deepseek: { enabled: false, apiKey: '', models: ['deepseek-chat', 'deepseek-reasoner'], priority: 1 },
+    gemini: { enabled: false, apiKey: '', models: ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-pro', 'gemini-1.5-flash'], priority: 2 },
+    groq: { enabled: false, apiKey: '', models: ['llama-3.3-70b-versatile', 'mixtral-8x7b-32768', 'gemma2-9b-it', 'llama-3.1-8b-instant'], priority: 3 },
+    kimi: { enabled: false, apiKey: '', models: ['moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'], priority: 4 },
   },
   activeProvider: 'deepseek',
   theme: 'dark',
@@ -20,6 +20,15 @@ export function useSettings() {
 
   function save() {
     setItem('settings', { ...settings })
+  }
+
+  function setProviderModel(provider: AIProvider, model: string) {
+    const models = settings.providers[provider].models
+    const idx = models.indexOf(model)
+    if (idx < 0) return
+    const [item] = models.splice(idx, 1)
+    models.unshift(item)
+    save()
   }
 
   function setProviderEnabled(provider: AIProvider, enabled: boolean) {
@@ -56,6 +65,7 @@ export function useSettings() {
   return {
     settings,
     save,
+    setProviderModel,
     setProviderEnabled,
     setProviderApiKey,
     setProviderPriority,

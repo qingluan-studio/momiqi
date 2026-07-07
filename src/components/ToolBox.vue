@@ -7,6 +7,8 @@ import RegexTool from './RegexTool.vue'
 import SqlTool from './SqlTool.vue'
 import NamingTool from './NamingTool.vue'
 import CommitGenTool from './CommitGenTool.vue'
+import SearchTool from './SearchTool.vue'
+import TranslateTool from './TranslateTool.vue'
 
 defineProps<{
   settings: ReturnType<typeof import('../stores/settings').useSettings>
@@ -22,6 +24,8 @@ const subTabs = [
   { id: 'sql', label: 'SQL' },
   { id: 'naming', label: '命名' },
   { id: 'commit', label: 'Commit' },
+  { id: 'search', label: '搜索' },
+  { id: 'translate', label: '翻译' },
 ]
 </script>
 
@@ -44,6 +48,8 @@ const subTabs = [
       <SqlTool v-if="subTab === 'sql'" :settings="settings" />
       <NamingTool v-if="subTab === 'naming'" :settings="settings" />
       <CommitGenTool v-if="subTab === 'commit'" :settings="settings" />
+      <SearchTool v-if="subTab === 'search'" :settings="settings" />
+      <TranslateTool v-if="subTab === 'translate'" :settings="settings" />
     </div>
   </div>
 </template>
