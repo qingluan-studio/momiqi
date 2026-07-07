@@ -3,14 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="#6366f1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AI Kit" />
+    <link rel="manifest" href="/momiqi/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/momiqi/icon.svg" />
     <title>AI 工具箱</title>
-    <script type="module" crossorigin src="/momiqi/assets/index-CLdoUN3U.js"></script>
-    <link rel="stylesheet" crossorigin href="/momiqi/assets/index-D4QYiEM0.css">
+    <script type="module" crossorigin src="/momiqi/assets/index-XxquT2N_.js"></script>
+    <link rel="stylesheet" crossorigin href="/momiqi/assets/index-B8eqG7LJ.css">
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/momiqi/sw.js')
+      }
+    </script>
   </body>
 </html>
