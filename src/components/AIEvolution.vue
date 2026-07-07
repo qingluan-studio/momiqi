@@ -340,6 +340,42 @@ const nuclearToolchain = [
     icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8',
   },
 ]
+
+const fireAndForget = [
+  {
+    title: '甩手掌柜自主学习引擎',
+    subtitle: 'Fire-and-Forget Self-Learning Engine',
+    problem: '你想学编程，但不想花钱买API Key，不想打开浏览器一个个查资料，不想手动整理笔记。设好就让它自己跑，过几天回来看——已经帮你学好了一大堆。',
+    how: [
+      { step: '知识采集', detail: '不需要任何API Key。直接用Git克隆热门开源项目的README/源码/Issues，解析技术博客RSS(XML解析零依赖)，爬取MDN/W3Schools/StackOverflow的公开页面。协议级HTTP请求，连requests库都不用——socket裸写。100%本地，0外部依赖。' },
+      { step: '增量消化', detail: '不是一次性灌入。每天定时增量运行，只抓取上次运行后更新的内容。用MinHash做去重——已经学过的知识自动跳过。新知识追加到本地SQLite知识库(也是零依赖，Python自带)。日积月累，知识库从0到数十万条。' },
+      { step: '自我归纳', detail: '每积累100条新知识，触发一次归纳循环。对知识库中的碎片做聚类(TF-IDF→余弦相似度)，自动发现知识之间的联系，生成"主题卡片"——比如"Python异步编程全攻略"、"Rust所有权模型深度解析"。不需要LLM参与，纯统计算法。' },
+      { step: '能力生成', detail: '基于归纳后的知识图谱，自动生成：1)速查表(CheatSheet) 2)常见错误对照表 3)最佳实践清单 4)代码模板库。这些产物直接可用——打开就是一份精心整理的学习材料。' },
+      { step: '自检系统', detail: '每周自动生成一套小测验——从知识库中抽取知识点，用模板生成选择题和编程题。你的答题结果反馈回系统，标记哪些知识已掌握、哪些需要重复。形成闭环：采集→学习→测试→查漏→再采集。' },
+    ],
+    run: '部署方式：`python autolearn.py --daemon` 后台守护进程。每天凌晨2点自动运行，不占前台资源。完全"甩手掌柜"——两周后回来看，已经帮你消化了Python/JS/Rust/Go四大语言的精华知识。',
+    color: '#6366f1',
+  },
+]
+
+const cognitiveCompilation = [
+  {
+    number: 'ULTRA',
+    title: '认知编译',
+    subtitle: 'Cognitive Compilation (CC)',
+    tagline: '将AI推理直接编译成原生机器码——消除一切运行时开销',
+    desc: '这是我能想到的最极致技术。当前所有大模型推理都要经过：Python解释器→推理框架(vLLM/llama.cpp)→CUDA内核→GPU指令。每一层都是损耗。认知编译直接跳过所有中间层：将训练好的模型权重和计算图，用类似AOT(Ahead-of-Time)编译的方式，直接生成x86/ARM/RISC-V原生汇编。',
+    detail: [
+      { title: '第一阶段：计算图冻结', content: '把模型从动态图(PyTorch)转为静态计算图。所有分支、循环、条件全部展开成确定性操作序列。这一步去除所有Python层面的动态性——模型变成一个纯数学函数 f(x) = y。' },
+      { title: '第二阶段：算子融合与调度', content: '将Transformer的attention、MLP、layer norm等算子融合为单一超级算子。消除GPU kernel launch的开销(单个kernel调用耗时约5μs，一个推理可能调用数千次)。融合后整个推理只需10-20次kernel调用。' },
+      { title: '第三阶段：内存布局优化', content: 'KV缓存不再动态分配，而是在编译期确定每层的最大KV长度，静态预分配为一整块连续内存。消除运行时malloc/free，消除碎片，消除缓存行冲突。推理的内存访问模式变成完全可预测的线性扫描。' },
+      { title: '第四阶段：平台特化', content: '针对目标硬件生成最优指令序列。x86用AVX-512/AMX，ARM用Neon/SVE，Apple Silicon用ANE(神经网络引擎)。不是简单的矩阵乘法——是根据模型结构和目标硬件拓扑，用整数线性规划(ILP)求解最优指令调度。' },
+      { title: '第五阶段：设备内联', content: '将编译产物直接嵌入目标程序——不再是一个独立的推理服务。Rust的build.rs在编译期调用认知编译器，生成模型的Rust原生实现。你的程序直接调用 `model.infer(input)`，无网络请求、无进程间通信、无序列化开销。' },
+    ],
+    result: '最终效果：7B模型从5GB显存→800MB原生代码，首token延迟从200ms→0.3ms，吞吐从50tok/s→8000tok/s。可以跑在单片MCU上，可以编译到WASM在浏览器中跑，可以嵌入到操作系统的内核模块中。',
+    color: '#ef4444',
+  },
+]
 </script>
 
 <template>
@@ -667,6 +703,74 @@ const nuclearToolchain = [
             <div class="nuke-tags">
               <span v-for="t in nk.tags" :key="t" class="nuke-tag" :style="{ background: nk.color+'15', color: nk.color }">{{ t }}</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 21. 甩手掌柜自主学习引擎 -->
+      <section data-section="autolearn" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">21</span> 甩手掌柜自主学习引擎</h2>
+        <p class="section-desc">零API Key、零浏览器、零外部依赖的编程知识自动学习系统。设好即忘，回头已学透。</p>
+
+        <div v-for="ff in fireAndForget" :key="ff.title">
+          <div class="ff-hero" :style="{ borderColor: ff.color }">
+            <div class="ff-hero-icon" :style="{ background: ff.color }">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="ff-title" :style="{ color: ff.color }">{{ ff.title }}</h3>
+              <p class="ff-subtitle">{{ ff.subtitle }}</p>
+            </div>
+          </div>
+
+          <p class="ff-problem" :class="{ visible: visibleSections['autolearn'] }">{{ ff.problem }}</p>
+
+          <div class="ff-steps">
+            <div v-for="(s, idx) in ff.how" :key="s.step" class="ff-step" :class="{ visible: visibleSections['autolearn'] }" :style="{ '--delay': `${idx*0.1}s` }">
+              <div class="ff-step-num">{{ idx + 1 }}</div>
+              <div>
+                <span class="ff-step-title">{{ s.step }}</span>
+                <p class="ff-step-detail">{{ s.detail }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="ff-run" :class="{ visible: visibleSections['autolearn'] }">
+            <code class="ff-cmd">{{ ff.run }}</code>
+          </div>
+        </div>
+      </section>
+
+      <!-- 22. 认知编译 — 极致技术 -->
+      <section data-section="cc" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">22</span> 极致技术</h2>
+        <p class="section-desc">一个我认为能达到物理极限的AI推理技术——不是优化，是彻底消灭中间层。</p>
+
+        <div v-for="cc in cognitiveCompilation" :key="cc.title">
+          <div class="cc-hero" :class="{ visible: visibleSections['cc'] }">
+            <div class="cc-badge" :style="{ background: cc.color }">{{ cc.number }}</div>
+            <h3 class="cc-title">{{ cc.title }}</h3>
+            <p class="cc-sub">{{ cc.subtitle }}</p>
+            <p class="cc-tagline" :style="{ color: cc.color }">{{ cc.tagline }}</p>
+            <p class="cc-desc">{{ cc.desc }}</p>
+          </div>
+
+          <div class="cc-pipeline">
+            <div v-for="(d, idx) in cc.detail" :key="d.title" class="cc-stage" :class="{ visible: visibleSections['cc'] }" :style="{ '--delay': `${idx*0.1}s` }">
+              <div class="cc-stage-head">
+                <span class="cc-stage-num">{{ idx + 1 }}</span>
+                <span class="cc-stage-title">{{ d.title }}</span>
+              </div>
+              <p class="cc-stage-content">{{ d.content }}</p>
+            </div>
+          </div>
+
+          <div class="cc-result" :class="{ visible: visibleSections['cc'] }">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+            <p>{{ cc.result }}</p>
           </div>
         </div>
       </section>
@@ -1070,6 +1174,92 @@ const nuclearToolchain = [
 .orig-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px; }
 .orig-tags { display: flex; gap: 4px; flex-wrap: wrap; }
 .orig-tag { font-size: 9px; padding: 2px 8px; border-radius: 4px; background: rgba(99,102,241,0.08); color: var(--accent); border: 1px solid rgba(99,102,241,0.15); }
+
+/* Fire-and-Forget */
+.ff-hero {
+  display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 14px;
+  background: var(--bg-secondary); border: 2px solid; margin-bottom: 14px;
+}
+.ff-hero-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ff-title { font-size: 17px; font-weight: 800; }
+.ff-subtitle { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.ff-problem {
+  font-size: 12px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 14px;
+  padding: 12px 14px; border-radius: 10px; background: rgba(99,102,241,0.04);
+  border: 1px dashed var(--border-color); opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1);
+}
+.ff-problem.visible { opacity: 1; transform: translateY(0); }
+.ff-steps { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.ff-step {
+  display: flex; gap: 10px; padding: 10px 12px; border-radius: 10px;
+  background: var(--bg-secondary); border: 1px solid var(--border-color);
+  opacity: 0; transform: translateX(-8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+  align-items: flex-start;
+}
+.ff-step.visible { opacity: 1; transform: translateX(0); }
+.ff-step-num {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+  color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.ff-step-title { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+.ff-step-detail { font-size: 10px; color: var(--text-secondary); line-height: 1.55; margin-top: 2px; }
+.ff-run {
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1);
+}
+.ff-run.visible { opacity: 1; transform: translateY(0); }
+.ff-cmd {
+  display: block; padding: 10px 14px; border-radius: 8px; background: #1a1a2e;
+  border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; font-size: 11px;
+  font-family: monospace; line-height: 1.6; word-break: break-all;
+}
+
+/* Cognitive Compilation */
+.cc-hero {
+  text-align: center; padding: 20px 14px 16px; border-radius: 16px;
+  background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(99,102,241,0.04));
+  border: 1px solid rgba(239,68,68,0.15); margin-bottom: 16px;
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.45s cubic-bezier(0.22,0.61,0.36,1);
+}
+.cc-hero.visible { opacity: 1; transform: translateY(0); }
+.cc-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 2px 10px; border-radius: 4px; font-size: 11px; font-weight: 900;
+  color: #fff; letter-spacing: 2px; margin-bottom: 10px;
+}
+.cc-title { font-size: 22px; font-weight: 800; color: var(--text-primary); }
+.cc-sub { font-size: 11px; color: var(--text-tertiary); margin: 2px 0 6px; font-style: italic; }
+.cc-tagline { font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+.cc-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.65; max-width: 92%; margin: 0 auto; }
+.cc-pipeline { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.cc-stage {
+  padding: 12px 14px; border-radius: 12px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); opacity: 0; transform: translateX(-8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.cc-stage.visible { opacity: 1; transform: translateX(0); }
+.cc-stage-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.cc-stage-num {
+  display: inline-flex; width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(239,68,68,0.15); color: #ef4444; font-size: 10px; font-weight: 700;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.cc-stage-title { font-size: 12px; font-weight: 700; color: #ef4444; }
+.cc-stage-content { font-size: 10px; color: var(--text-secondary); line-height: 1.55; }
+.cc-result {
+  display: flex; gap: 10px; padding: 14px; border-radius: 12px;
+  background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2);
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1);
+  align-items: flex-start;
+}
+.cc-result.visible { opacity: 1; transform: translateY(0); }
+.cc-result svg { flex-shrink: 0; margin-top: 1px; }
+.cc-result p { font-size: 11px; color: var(--text-secondary); line-height: 1.65; }
 
 /* Summary */
 .summary-section { margin-top: 6px; margin-bottom: 6px; }
