@@ -24,7 +24,13 @@ export default defineConfig({
       '/api/groq': {
         target: 'https://api.groq.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/groq/, '/openai/v1'),
+        rewrite: (path: string) => path.replace(/^\/api\/groq/, '/openai/v1'),
+        secure: true,
+      },
+      '/api/kimi': {
+        target: 'https://api.moonshot.cn',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace(/^\/api\/kimi/, '/v1'),
         secure: true,
       },
     },

@@ -16,6 +16,7 @@ const testStatus = ref<'idle' | 'testing' | 'success' | 'fail'>('idle')
 
 const providers: { key: AIProvider; label: string; desc: string }[] = [
   { key: 'deepseek', label: 'DeepSeek', desc: '高性价比，中文能力优秀，注册即送 500 万 Tokens' },
+  { key: 'kimi', label: 'Kimi', desc: '长上下文(128k)，中文理解强，免费额度每日使用' },
   { key: 'gemini', label: 'Gemini', desc: '多模态、长上下文，免费 Tier 15 RPM' },
   { key: 'groq', label: 'Groq', desc: '极速推理，免费 Tier，支持 Llama/Mixtral' },
 ]

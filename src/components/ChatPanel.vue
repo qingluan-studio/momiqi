@@ -134,7 +134,7 @@ function handleInput() {
         <div class="msg-body">
           <div class="msg-content" v-html="renderMarkdown(msg.content)" />
           <div v-if="msg.provider" class="msg-meta">
-            {{ { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq' }[msg.provider] }}
+            {{ { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq', kimi: 'Kimi' }[msg.provider] }}
           </div>
         </div>
       </div>

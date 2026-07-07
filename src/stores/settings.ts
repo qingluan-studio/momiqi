@@ -7,6 +7,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     deepseek: { enabled: false, apiKey: '', models: ['deepseek-chat'], priority: 1 },
     gemini: { enabled: false, apiKey: '', models: ['gemini-2.0-flash'], priority: 2 },
     groq: { enabled: false, apiKey: '', models: ['llama-3.3-70b-versatile'], priority: 3 },
+    kimi: { enabled: false, apiKey: '', models: ['moonshot-v1-8k'], priority: 4 },
   },
   activeProvider: 'deepseek',
   theme: 'dark',

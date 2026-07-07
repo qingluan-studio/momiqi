@@ -1,4 +1,4 @@
-export type AIProvider = 'deepseek' | 'gemini' | 'groq'
+export type AIProvider = 'deepseek' | 'gemini' | 'groq' | 'kimi'
 
 export interface ChatMessage {
   id: string

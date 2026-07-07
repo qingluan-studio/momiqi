@@ -1,5 +1,5 @@
 import type { AIProvider, ProviderConfig, APIError } from '../types'
-import { deepseekAPI, geminiAPI, groqAPI } from './adapters'
+import { deepseekAPI, geminiAPI, groqAPI, kimiAPI } from './adapters'
 import { getItem } from '../utils/storage'
 
 function getProviders(settings: ProviderConfig): AIProvider[] {
@@ -13,6 +13,7 @@ const apiMap = {
   deepseek: deepseekAPI,
   gemini: geminiAPI,
   groq: groqAPI,
+  kimi: kimiAPI,
 }
 
 async function callProvider(

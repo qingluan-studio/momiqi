@@ -6,6 +6,7 @@ import ContentGenerator from './ContentGenerator.vue'
 import RegexTool from './RegexTool.vue'
 import SqlTool from './SqlTool.vue'
 import NamingTool from './NamingTool.vue'
+import CommitGenTool from './CommitGenTool.vue'
 
 defineProps<{
   settings: ReturnType<typeof import('../stores/settings').useSettings>
@@ -20,6 +21,7 @@ const subTabs = [
   { id: 'regex', label: '正则' },
   { id: 'sql', label: 'SQL' },
   { id: 'naming', label: '命名' },
+  { id: 'commit', label: 'Commit' },
 ]
 </script>
 
@@ -41,6 +43,7 @@ const subTabs = [
       <RegexTool v-if="subTab === 'regex'" :settings="settings" />
       <SqlTool v-if="subTab === 'sql'" :settings="settings" />
       <NamingTool v-if="subTab === 'naming'" :settings="settings" />
+      <CommitGenTool v-if="subTab === 'commit'" :settings="settings" />
     </div>
   </div>
 </template>

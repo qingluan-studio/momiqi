@@ -36,6 +36,7 @@ function startNewChat() {
     deepseek: 'deepseek-chat',
     gemini: 'gemini-2.0-flash',
     groq: 'llama-3.3-70b-versatile',
+    kimi: 'moonshot-v1-8k',
   }
   const model = providerSettings?.models?.[0] || modelMap[activeProvider] || ''
   chatStore.createSession(activeProvider, model)
