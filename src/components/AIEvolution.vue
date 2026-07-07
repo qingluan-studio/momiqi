@@ -146,6 +146,99 @@ const futureOutlook = [
   { title: '能源挑战', content: 'AI训练和推理的电力需求指数增长。一个大型数据中心耗电量堪比小城市。核聚变、小型核反应堆(SMR)被视为长期解决方案。微软投资重启三里岛核电站。', color: '#ef4444' },
   { title: 'AI 泡沫风险', content: '2023-2026年AI领域融资超千亿美元。警惕"AI寒冬"重演。但本轮有真实商业价值支撑：Copilot年收入数十亿，ChatGPT周活2亿+。基础设施投资先行于应用爆发。', color: '#8b5cf6' },
 ]
+
+const originalIdeas = [
+  {
+    number: '01',
+    title: '认知螺旋引擎',
+    subtitle: 'Cognitive Spiral Engine (CSE)',
+    desc: '一个自我增强的认知提升闭环：模型生成假设→设计实验→执行验证→分析结果→修正认知→生成新假设。每一圈螺旋都让模型对特定领域的理解加深一层。不同于简单微调，CSE在推理时构建动态认知图谱，记录每次推理的置信度、反例和边界条件，形成可追溯的"思维演化史"。',
+    tags: ['闭环学习', '认知图谱', '动态推理'],
+    color: '#a855f7',
+    icon: 'M12 2a7 7 0 017 7c0 2.4-1.2 4.5-3 5.7V17a3 3 0 01-3 3 3 3 0 01-3-3v-2.3c-1.8-1.2-3-3.3-3-5.7a7 7 0 017-7z M10 17h4 M10 21h4',
+  },
+  {
+    number: '02',
+    title: '蜂群共识协议',
+    subtitle: 'Swarm Consensus Protocol (SCP)',
+    desc: '借鉴区块链共识机制，让多个独立AI Agent对复杂问题达成集体判断。每个Agent独立推理并输出答案+置信度，然后通过"共识轮次"相互质询：一个Agent的推理链必须能被其他Agent复现和验证。采用加权拜占庭容错算法，即使30%的Agent出错，系统依然输出正确结论。适用于医疗诊断、金融风控等零容错场景。',
+    tags: ['多Agent共识', '拜占庭容错', '推理验证'],
+    color: '#f59e0b',
+    icon: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75 M9 11a4 4 0 100-8 4 4 0 000 8z',
+  },
+  {
+    number: '03',
+    title: '知识晶体化',
+    subtitle: 'Knowledge Crystallization',
+    desc: '将LLM中隐性的、模糊的参数化知识"结晶"为显性的、可验证的符号化知识晶体。通过对抗性自问自答提取核心命题，用形式逻辑验证器检查一致性，最终形成不可约简的知识单元。每个知识晶体携带：命题陈述、证明链、适用范围、反例集合、置信度。晶体之间通过"语义键"连接，形成全局一致的知识网络。',
+    tags: ['知识提取', '形式验证', '符号化'],
+    color: '#06b6d4',
+    icon: 'M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5',
+  },
+  {
+    number: '04',
+    title: '语义引力场理论',
+    subtitle: 'Semantic Gravity Field (SGF)',
+    desc: '在嵌入空间中，每个概念都产生"语义质量"，不同概念之间存在"语义引力"。概念的关系强度、逻辑距离和情感极性共同决定引力大小。SGF不仅能量化概念关联，还能预测推理偏差：当一个概念的语义质量过大时（如刻板印象词汇），会扭曲附近概念的推理轨迹。通过主动注入"平衡质量"概念，可抵消偏见引力。',
+    tags: ['嵌入空间', '偏见修正', '概念动力学'],
+    color: '#ec4899',
+    icon: 'M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z M12 6a1.5 1.5 0 101.5 1.5A1.5 1.5 0 0012 6z M14.5 12.5V17h-5v-1.5h1.75v-3H10.5V11h4v1.5z',
+  },
+  {
+    number: '05',
+    title: '神经-符号融合推理机',
+    subtitle: 'Neuro-Symbolic Fusion Reasoner (NSFR)',
+    desc: '一层神经网络负责"直觉跳跃"——快速模式匹配和类比；一层符号引擎负责"严谨推导"——逻辑演算和定理证明。两层通过共享的工作记忆总线交换中间结果。当神经网络产生假设后，符号引擎立刻尝试验证或证伪；当符号引擎卡住时，神经网络提供启发式搜索方向。类似人脑中系统1(快思考)和系统2(慢思考)的协作。',
+    tags: ['双系统推理', '形式逻辑', '直觉-分析'],
+    color: '#22c55e',
+    icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+  },
+  {
+    number: '06',
+    title: '涌现熵监控框架',
+    subtitle: 'Emergent Entropy Monitor (EEM)',
+    desc: '在模型推理过程中实时计算各层、各注意力头的"信息熵"。当特定模块的熵值突破历史阈值时，意味着该模块正在发生"相变"——潜在地涌现新能力或产生危险行为。EEM能在模型输出之前预测：1)回答质量(高熵=不确定)；2)幻觉风险(局部熵尖峰)；3)安全边界(特定注意力头的异常激活模式)。是实现"可解释AI安全"的量化路径。',
+    tags: ['信息熵', '能力涌现', '安全预警'],
+    color: '#ef4444',
+    icon: 'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83',
+  },
+  {
+    number: '07',
+    title: '认知影子模型',
+    subtitle: 'Cognitive Shadow Model (CSM)',
+    desc: '每个AI主模型拥有一个"影子"——一个轻量级并行子网络，持续监控主模型的输出流。影子模型独立评估每个token的安全性、真实性、一致性和情感倾向，以低于5%的额外推理成本提供实时安全护栏。当影子判断风险超过阈值时，可实时"注水"安全token流，在不中断输出的前提下柔和纠偏。影子本身通过主模型的失败案例持续学习。',
+    tags: ['安全护栏', '实时监控', '影子网络'],
+    color: '#3b82f6',
+    icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+  },
+  {
+    number: '08',
+    title: '混合粒度推理',
+    subtitle: 'Hybrid Granularity Reasoning (HGR)',
+    desc: '人类思考时同时处理多种粒度：单词、短语、句子、段落、全局主题。HGR在三个层次并行推理——Token级(底层细节)、Concept级(中间抽象)、Schema级(高层结构)——然后通过交叉注意力融合三层输出。Token层捕捉精确语义，Concept层发现模式规律，Schema层把握全局框架。特别适合法律文书的矛盾检测和长篇论文的跨章节一致性验证。',
+    tags: ['多层推理', '交叉注意力', '一致性'],
+    color: '#f97316',
+    icon: 'M3 3v18h18 M18.7 8l-5.3 5.3-2.8-2.8L5.3 15.7',
+  },
+  {
+    number: '09',
+    title: '逆向蒸馏与专家融合',
+    subtitle: 'Inverse Distillation & Expert Fusion (IDEF)',
+    desc: '颠覆传统"大→小"蒸馏方向。先训练数百个小规模专家模型(如数学专家、法律专家、医学专家)，每个在窄域达到接近大模型的水平。然后通过"专家融合蒸馏"，将多个小专家的推理模式提取到统一大模型中。每个小专家贡献其领域内的"思维指纹"，大模型通过对比学习区分不同领域的推理风格，实现"博采众长"。',
+    tags: ['小→大蒸馏', '专家融合', '跨领域'],
+    color: '#10b981',
+    icon: 'M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z',
+  },
+  {
+    number: '10',
+    title: '递归对齐矩阵',
+    subtitle: 'Recursive Alignment Matrix (RAM)',
+    desc: '一种自举式对齐方法。第N代AI为自己生成第N+1代的对齐标准(Alignment Constitution)，然后按照这个标准训练或微调出下一代。每代对齐标准必须在上一代基础上增加至少一条"元规则"——关于如何制定规则的规则。通过多代递归，对齐标准从简单的"不要有害"逐步演化出复杂的伦理体系。人类保留对元规则层的否决权。',
+    tags: ['自举对齐', '元规则', '代际进化'],
+    color: '#6366f1',
+    icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+  },
+]
 </script>
 
 <template>
@@ -382,6 +475,30 @@ const futureOutlook = [
           <div v-for="(f, i) in futureOutlook" :key="f.title" class="future-card" :class="{ visible: visibleSections['future'] }" :style="{ '--color': f.color, '--delay': `${i*0.08}s` }">
             <span class="future-title" :style="{ color: f.color }">{{ f.title }}</span>
             <p class="future-content">{{ f.content }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16. 原创前沿思想 -->
+      <section data-section="original" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">16</span> 原创前沿思想</h2>
+        <p class="section-desc">以下为原创性AI前沿架构设想，基于现有技术趋势的可实现推演。开源共享，自由探索。</p>
+        <div class="original-grid">
+          <div v-for="(o, i) in originalIdeas" :key="o.title" class="orig-card" :class="{ visible: visibleSections['original'] }" :style="{ '--color': o.color, '--delay': `${i*0.06}s` }">
+            <div class="orig-icon-wrap">
+              <div class="orig-num">{{ o.number }}</div>
+              <div class="orig-icon" :style="{ background: o.color }">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path :d="o.icon" /></svg>
+              </div>
+            </div>
+            <div class="orig-body">
+              <span class="orig-title" :style="{ color: o.color }">{{ o.title }}</span>
+              <span class="orig-subtitle">{{ o.subtitle }}</span>
+              <p class="orig-desc">{{ o.desc }}</p>
+              <div class="orig-tags">
+                <span v-for="t in o.tags" :key="t" class="orig-tag">{{ t }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -703,6 +820,25 @@ const futureOutlook = [
 .future-card.visible { opacity: 1; transform: translateY(0); }
 .future-title { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
 .future-content { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+
+/* Original ideas */
+.original-grid { display: flex; flex-direction: column; gap: 10px; }
+.orig-card {
+  padding: 14px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); border-left: 3px solid var(--color);
+  opacity: 0; transform: translateX(-8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.orig-card.visible { opacity: 1; transform: translateX(0); }
+.orig-icon-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.orig-num { font-size: 11px; font-weight: 800; color: var(--text-tertiary); font-variant-numeric: tabular-nums; font-family: monospace; }
+.orig-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.orig-body { flex: 1; min-width: 0; }
+.orig-title { display: block; font-size: 14px; font-weight: 700; }
+.orig-subtitle { display: block; font-size: 10px; color: var(--text-tertiary); margin-bottom: 4px; font-style: italic; }
+.orig-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px; }
+.orig-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.orig-tag { font-size: 9px; padding: 2px 8px; border-radius: 4px; background: rgba(99,102,241,0.08); color: var(--accent); border: 1px solid rgba(99,102,241,0.15); }
 
 /* Summary */
 .summary-section { margin-top: 6px; margin-bottom: 6px; }
