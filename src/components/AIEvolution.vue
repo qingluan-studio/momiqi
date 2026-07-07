@@ -774,6 +774,81 @@ const aiReading = [
     { name: '预测式阅读', detail: '最高级的阅读：AI预测下一段会讲什么→与实际内容对照→如果不一致则更新自己的认知模型。在阅读理解测试中，允许模型"先预测后验证"比直接阅读的准确率高10%-15%。因为预测迫使模型激活已有的知识框架。' },
   ]},
 ]
+
+const brainInspired = [
+  {
+    region: '大脑皮层 · 分层感知',
+    brain: 'V1→V2→V4→IT 腹侧通路逐层提取边缘→纹理→部件→物体。',
+    ai: 'CNN的逐层抽象：Conv1边缘→Conv3纹理→Conv5部件→FC物体。ResNet的残差连接灵感来自皮层之间的跳跃连接。Vision Transformer的patch embedding模拟了V1的感受野。',
+    icon: 'eye',
+  },
+  {
+    region: '海马体 · 记忆编码',
+    brain: 'CA1区模式分离(防混淆)+CA3区模式完成(补全)+齿状回新生神经元(减少干扰)。',
+    ai: 'Hopfield网络=海马体CA3的模式完成。Transformer的KV缓存=海马体对近期经验的快速编码。MemGPT/Letta的长期记忆系统直接借鉴海马体的"记忆巩固"(从海马→皮层迁移)。',
+    icon: 'brain',
+  },
+  {
+    region: '前额叶 · 工作记忆与规划',
+    brain: '背外侧PFC维护当前目标，腹内侧PFC评估价值，前扣带回监测冲突。',
+    ai: 'Transformer的Attention=工作记忆的动态读写。MCTS(蒙特卡洛树搜索)=前额叶的"在心里模拟未来"。o1/o3的静默推理链=人在做数学题时的内在独白。GPT的上下文窗口就是AI的工作记忆容量。',
+    icon: 'target',
+  },
+  {
+    region: '杏仁核 · 情感与价值',
+    brain: '快速低路(不经皮层直连→快速恐惧反应)+慢速高路(经皮层分析→理性评估)。',
+    ai: 'RLHF中的Reward Model=杏仁核的"快感/厌恶"信号。情感分析的多粒度=基本情绪(杏仁核)+复杂情感(PFC调控)。AI对齐的核心问题本质上是"给AI装一个健康的杏仁核"——什么该恐惧，什么该追求。',
+    icon: 'heart',
+  },
+  {
+    region: '基底节 · 习惯与强化',
+    brain: '直接通路=Go信号(执行动作)，间接通路=No-Go信号(抑制动作)，多巴胺=奖励预测误差。',
+    ai: 'TD-Learning(Temporal Difference)=多巴胺的奖励预测误差公式的数学实现。DQN的经验回放=基底节对过往行为结果的"离线重演"。AlphaGo的策略网络+价值网络=基底节的选择与评估双通道。GRPO组内对比=多巴胺的相对奖励编码。',
+    icon: 'zap',
+  },
+  {
+    region: '小脑 · 程序性与自动化',
+    brain: '小脑不产生动作，但让动作精确、流畅、自动化。存储"肌肉记忆"。',
+    ai: 'MoE(Mixture of Experts)的路由机制=小脑的模块化。推理优化中的"算子融合+编译缓存"=小脑的自动化——重复任务一次学会后不再消耗前额叶资源。推测解码(小模型生成+大模型验证)=小脑-皮层协作。',
+    icon: 'cpu',
+  },
+  {
+    region: '默认模式网络 · 自省与创造',
+    brain: '大脑不做任务时最活跃的网络——回忆过去、想象未来、做白日梦、自我反思。',
+    ai: '自回归生成(逐token预测下一个)=大脑默认模式的"自由联想"。扩散模型的"从噪声到有序"=创造力的神经机制模拟。反事实推理=DMN的"如果当初..."推演。LLM的幻觉在某些意义上对应了DMN的自发叙事——太会编故事。',
+    icon: 'compass',
+  },
+  {
+    region: '突触可塑性 · 学习机制',
+    brain: 'LTP(长时程增强)="一起放电的神经元会连接在一起"(Hebb定律)。LTD(长时程抑制)=削弱不重要的连接。',
+    ai: '反向传播=SGD本质上是"全局版的LTP/LTD"。LoRA低秩更新=只让一小部分突触可塑(类似青春期后大脑仍有局部可塑性)。Dropout=随机沉默部分神经元=模拟突触的随机失效(增强鲁棒性)。Hebbian学习正在被重新引入ML作为无监督预训练。',
+    icon: 'git-branch',
+  },
+  {
+    region: '神经振荡 · 节律与同步',
+    brain: 'Theta振荡(4-8Hz)协调海马-皮层记忆编码。Gamma振荡(30-80Hz)绑定分散的特征为统一感知。',
+    ai: 'Attention的QKV=Gamma振荡的"通过同步来绑定"原理——不同位置的token通过注意力权重"同步"为统一表征。位置编码(正弦/RoPE)=Theta振荡的时序组织。RWKV/Mamba的状态空间模型=以连续时间动力学替代离散attention——更接近神经振荡的连续性。',
+    icon: 'activity',
+  },
+  {
+    region: '镜像神经元 · 观察与模仿',
+    brain: '看到别人做动作时自己也会激活相同的运动神经元——"感同身受"的神经基础。',
+    ai: '模仿学习(Imitation Learning/Behavioral Cloning)=镜像神经元的AI实现。GPT从海量人类文本中学习=大规模"观察学习"。Fine-tuning通过少量示例快速掌握新任务=镜像神经元的一次观察即可模仿。Instruction Following的本质=理解并镜像人类意图。',
+    icon: 'users',
+  },
+  {
+    region: '全局工作空间 · 意识理论',
+    brain: 'GNW理论：多个无意识处理器竞争，胜出者进入全局工作空间→被"意识到"→广播到全脑。',
+    ai: 'Mixture of Experts的Top-K门控=多个"无意识专家"竞争，选中的K个进入"意识流"。Transformer的cross-attention=全局广播机制。o1的思考过程本质是让推理进入"全局工作空间"——不再是并行自动处理，而是串行的有意识推演。有人已经开始研究AI的"意识时刻"。',
+    icon: 'eye-off',
+  },
+  {
+    region: '蓝斑-去甲肾上腺素 · 唤醒与聚焦',
+    brain: '蓝斑调控全脑的唤醒水平：过低=困倦，适中=专注，过高=恐慌。Phasic模式=任务聚焦。',
+    ai: 'Temperature参数=AI的"唤醒水平"——低温=保守精确(低唤醒)，高温=发散创造(高唤醒)。Top-P采样=phasic过滤。RLHF中的KL惩罚=防止模型"过度兴奋"偏离安全区。o1的思考预算=蓝斑根据任务难度调节资源分配。',
+    icon: 'sun',
+  },
+]
 </script>
 
 <template>
@@ -1540,6 +1615,41 @@ const aiReading = [
         </div>
       </section>
 
+      <!-- 43. 类脑架构 -->
+      <section data-section="brain" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">43</span> 类脑架构 · 人脑蓝图映射AI</h2>
+        <p class="section-desc">每一个经典AI架构，都能在人脑中找到对应的神经结构——不是巧合，是功能收敛。</p>
+        <div class="brain-grid">
+          <div v-for="(br, i) in brainInspired" :key="br.region" class="brain-card" :class="{ visible: visibleSections['brain'] }" :style="{ '--delay': `${i*0.08}s` }">
+            <div class="brain-card-header">
+              <div class="brain-icon">
+                <svg v-if="br.icon==='eye'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg v-else-if="br.icon==='brain'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 00-3 3v1.066c-.706.094-1.399.26-2.074.495L5.512 5.147a3 3 0 10-2.121 2.121l1.414 1.414A8.02 8.02 0 004.4 10H3a3 3 0 000 6h1.4a8.02 8.02 0 00.405 1.318l-1.414 1.414a3 3 0 102.121 2.121l1.414-1.414c.675.235 1.368.4 2.074.495V21a3 3 0 006 0v-1.066a8.02 8.02 0 002.074-.495l1.414 1.414a3 3 0 102.121-2.121l-1.414-1.414A8.02 8.02 0 0019.6 16H21a3 3 0 000-6h-1.4a8.02 8.02 0 00-.405-1.318l1.414-1.414a3 3 0 10-2.121-2.121l-1.414 1.414A8.02 8.02 0 0015 6.066V5a3 3 0 00-3-3z"/></svg>
+                <svg v-else-if="br.icon==='target'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                <svg v-else-if="br.icon==='heart'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                <svg v-else-if="br.icon==='zap'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <svg v-else-if="br.icon==='cpu'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+                <svg v-else-if="br.icon==='compass'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                <svg v-else-if="br.icon==='git-branch'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9a9 9 0 01-9 9"/></svg>
+                <svg v-else-if="br.icon==='activity'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <svg v-else-if="br.icon==='users'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                <svg v-else-if="br.icon==='eye-off'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              </div>
+              <span class="brain-region">{{ br.region }}</span>
+            </div>
+            <div class="brain-row">
+              <span class="brain-label">脑</span>
+              <p class="brain-text">{{ br.brain }}</p>
+            </div>
+            <div class="brain-row">
+              <span class="brain-label ai-label">AI</span>
+              <p class="brain-text">{{ br.ai }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- 结尾总结 -->
       <section data-section="summary" class="evo-section summary-section">
         <div class="summary-card" :class="{ visible: visibleSections['summary'] }">
@@ -2171,6 +2281,23 @@ const aiReading = [
 .rd-item { padding-left: 8px; border-left: 2px solid var(--accent); }
 .rd-item-name { font-size: 11px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
 .rd-item-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.55; }
+
+/* Brain Inspired */
+.brain-grid { display: flex; flex-direction: column; gap: 10px; }
+.brain-card {
+  padding: 14px 16px; border-radius: 12px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.brain-card.visible { opacity: 1; transform: translateY(0); }
+.brain-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+.brain-icon { display: flex; flex-shrink: 0; }
+.brain-region { font-size: 13px; font-weight: 800; color: var(--accent); }
+.brain-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+.brain-row:last-child { margin-bottom: 0; }
+.brain-label { font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; background: rgba(245,158,11,0.12); color: #f59e0b; }
+.brain-label.ai-label { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.brain-text { font-size: 10px; color: var(--text-secondary); line-height: 1.55; }
 
 /* Summary */
 .summary-section { margin-top: 6px; margin-bottom: 6px; }
