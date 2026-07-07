@@ -487,6 +487,93 @@ const freeAlternatives = [
   { paid: 'Vercel AI ($20/月)', free: 'Cloudflare Workers AI', desc: '全球边缘推理，日免费10万次。支持Llama/Qwen/DeepSeek/Stable Diffusion。`npx wrangler ai`一行命令调用。', tags: ['10万次/天', '全球边缘'] },
   { paid: 'Zapier AI ($30/月)', free: 'n8n + Ollama + LangChain', desc: 'n8n开源自动化平台(280+集成)。搭配Ollama和LangChain构建完整AI自动化工作流。一条流水线替代Zapier。', tags: ['280+集成', '自托管'] },
 ]
+
+const superReasoning = [
+  { name: 'Chain-of-Verification (CoVe)', desc: 'AI生成答案后，自动生成验证问题并自我核查，逐条纠正事实错误。将幻觉率降低40%+。不需要外部工具，纯推理链自我纠错。', ref: 'Meta, 2023' },
+  { name: 'Self-Discover', desc: 'AI自主发现最优推理结构，而非依赖人工设计的提示模板。DeepMind在BigBench上验证，比CoT提升32%。AI自己"进化"推理策略。', ref: 'DeepMind, 2024' },
+  { name: 'Quiet-STaR / Stream of Search', desc: '在每个token处并行生成"内心独白"的解释性推理，筛选对后续预测有帮助的思路。让语言模型学会"边想边说"。', ref: 'Stanford, 2024' },
+  { name: 'Meta Chain-of-Thought', desc: '不只是生成推理步骤，而是对推理过程本身进行元推理——"我的推理路径有没有漏洞？有没有更好的推断方式？"这逼近了自我意识。', ref: '前沿研究, 2025' },
+  { name: 'Latent Reasoning (Coconut)', desc: '不用离散文字进行推理，而在连续隐空间中进行。跳过了语言token的瓶颈，推理速度提升10-100倍，且能探索文字表达不出的推理路径。', ref: 'Meta FAIR, 2024' },
+  { name: 'Debate Protocol', desc: '两个AI模型互相辩论，由裁判模型裁定胜负。辩论过程中的推理深度远超单体模型。Anthropic验证：辩论后的答案准确率提升25%。', ref: 'Anthropic, 2023' },
+  { name: 'Program-of-Thought (PoT)', desc: '用程序执行替代文字推理。遇到数学题不写"我们先算X再加Y"，而是直接写`x=100; y=200; print(x+y)`并执行，零错误率。', ref: 'Microsoft, 2023' },
+  { name: 'Analogical Reasoning Engine', desc: '从非结构化的过往案例中自动提取类比模式，应用于全新问题。"这不是和新问题同构的吗？"——谷歌的Anagram实验显示45%的问题可通过类比解决。', ref: 'Google DeepMind, 2024' },
+  { name: '100+语言逻辑切换', desc: '同一个模型在处理不同语言时，不经过翻译中介，而是直接在目标语言的思维空间中推理。中文更擅长类比，英文更擅长演绎。AI学会了"语言相对论"。', ref: 'Qwen2.5/DeepSeek-V3 实测' },
+  { name: 'Counterfactual Reasoning', desc: 'AI会问"如果不是A而是B，结果会怎样？"——这对于因果推断和规划至关重要。`如果拿破仑在滑铁卢赢了…` → AI生成全部分支推演。', ref: '因果AI, 2024' },
+  { name: 'Emotional Reasoning', desc: 'AI理解情绪不只是"分类"，而是推理情绪的因果链：`她为什么愤怒？→因为感到被背叛→因为预期被打破→建立更准确的预期模型克服愤怒`。', ref: 'EQ-Bench, 2024' },
+  { name: 'Faithful Reasoning', desc: '确保推理链中的每一步都有明确的逻辑依据，可被外部验证。`Not all reasoning is created equal`——忠实推理要求链上的每个子结论都能单独验证。', ref: 'ACL, 2024' },
+]
+
+const insaneProcessing = [
+  { name: 'Gemini 2.0 Flash 百万Token', desc: '一次性吃进1M token(约1500页小说/3小时视频的字幕/整个代码库)。在百万token的首尾都能精准检索，大海捞针测试100%。免费API！', status: '完全免费' },
+  { name: '实时视频流理解', desc: '不间断接收摄像头画面，实时理解场景变化、人体动作、物体移动轨迹。`这个人刚才从桌子拿了什么？`——AI回放并检索视频记忆。Google Astra已演示。', status: '实验室' },
+  { name: '千文件并行处理', desc: '一个prompt附带1000个文件。AI自动分类、对比、总结、交叉引用。`比较这1000份合同中的违约责任条款`——所有人的工作，AI秒级完成。', status: 'Gemini/Claude' },
+  { name: '海量记忆·MemGPT', desc: '突破上下文窗口限制，实现理论上无限的记忆。AI自动管理记忆分层：核心记忆→工作记忆→归档记忆。`聊了三个月，AI还记得你家猫的名字`。', status: '开源' },
+  { name: 'Petabyte级数据索引', desc: '不是检索，是理解。对整个公司的所有文档、代码、邮件做语义索引，任意提问都能秒回。Glean已做到企业级，Vespa/Pinecone提供向量基础设施。', status: '企业可用' },
+  { name: '推理分离·Speculative Decoding', desc: '用小模型快速生成草稿token，大模型一次性审核。推理速度提升3-5倍，质量不降。已集成到vLLM、llama.cpp、TGI。这是业界的标准提速方案。', status: '开源标准' },
+  { name: '批量并行推理潮', desc: '1000个prompt同时下发给1000个GPU。SGLang/llama.cpp/ExLlamaV2都支持连续批处理。把大模型当流水线用，单卡H100日处理10亿token。', status: '开源标准' },
+  { name: 'Sub-millisecond首Token', desc: '用Groq的LPU芯片(非GPU架构)跑Llama3 70B，首token延迟0.15ms，生成速度300+tok/s。`比眨眼快100倍`。这不是魔法，是确定性计算架构。', status: 'Groq付费' },
+  { name: 'ZIP-NeRF / 3D高斯泼溅', desc: '几十张照片→3D场景秒级重建。`拍一圈办公室，AI在1秒内完成全光场重建`。这是3D空间智能的基础。Luma AI/NeRF Studio已开源。', status: '开源' },
+  { name: '无限对话记忆·Letta', desc: 'MemGPT原团队的Letta框架。AI拥有操作系统的记忆管理(虚拟内存交换、分页、内存压缩)。理论上的无限记忆，实际测试中100万轮对话仍能精准回忆。', status: '开源' },
+]
+
+const geekArsenal = [
+  { name: 'DSPy', desc: '"不要写prompt，写程序"。用Python声明式定义你的AI任务，框架自动优化最佳prompt。优化后比手写prompt准确率高45%-80%。斯坦福出品，已工业化。', ref: 'Stanford, 2024' },
+  { name: 'TextGrad', desc: '把大模型语言的输出当作可微分的计算图。用梯度下降的思想反向传播"文字梯度"，自动优化prompt链。`让AI像训练神经网络一样训练prompt`。', ref: 'Stanford, 2024' },
+  { name: 'STORM', desc: '输入一个主题，AI自动搜索100+网页→整理→交叉验证→写出一篇Wikipedia质量的文章。带引用的。斯坦福的"一个人+AI=整个编辑部"。', ref: 'Stanford, 2024' },
+  { name: 'Gorilla / Berkeley Function Calling Leaderboard', desc: '专为API调用训练的大模型。`帮我在Spotify上播放一首悲伤的歌`→AI自动找到并调用正确的API。伯克利FCA榜单是衡量API调用能力的金标准。', ref: 'UC Berkeley, 2024' },
+  { name: 'AutoGen (Microsoft)', desc: '多Agent对话框架。定义一个教授Agent、一个学生Agent、一个裁判Agent，三者自动对话协作完成任务。微软出品，已支持代码执行/人类介入/嵌套对话。', ref: 'Microsoft, 2024' },
+  { name: 'Neural Architecture Search (NAS) 2.0', desc: '让AI自动设计更好的AI架构。不止搜索层数/宽度/激活函数，还搜索注意力模式、稀疏连接拓扑。`人类设计Transformer花了5年，AI可能5天`。', ref: 'Google/Baidu' },
+  { name: 'Continual Pre-training', desc: '不停机更新模型知识，不遗忘旧知识。`GPT-4的知识截止2023年，但我的模型知道今早的新闻`——持续的增量预训练让模型永远保持最新。', ref: 'Llama/DeepSeek系' },
+  { name: 'RLAIF (RL from AI Feedback)', desc: '不需要人类标注偏好数据，用AI评判AI。Anthropic验证：RLAIF能取得RLHF 95%的效果。这意味着对齐成本趋近于零，AI可以无限自我改进。', ref: 'Anthropic, 2023' },
+  { name: '多Agent辩论/协作', desc: '多个LLM扮演不同角色自动讨论。医生Agent+律师Agent+工程师Agent，讨论一个产品的合规方案。ChatDev用多Agent写完整软件。CrewAI/ChatDev/AutoGen开源。', ref: '开源生态' },
+  { name: 'Prompt Compression', desc: 'LLMLingua等将10K token的prompt无损压缩到2K。`喂一段巨长的法律条文 → AI压缩成关键信息的摘要 → 再喂给大模型 → 节省90%token成本`。', ref: 'Microsoft, 2024' },
+]
+
+const siliconFlesh = [
+  { name: 'Character.AI 人格架构', desc: '每个角色有独立的人格向量、世界观、记忆库。不是"扮演"某个角色，而是模型被调校成那个角色。2024年融资$200M+，估值$5B。AI人格化的商业先锋。', status: '基础免费' },
+  { name: '长期记忆系统 (Letta/Mem0)', desc: '拆解为三层记忆：语义记忆(我是谁)、情景记忆(发生过什么)、程序记忆(怎么做)。自动管理：变旧的记忆衰减、重复的合并、矛盾的标记。', status: '开源' },
+  { name: '情绪粒度与共情', desc: '不只"高兴/难过/生气"的粗粒度，而是27种情绪维度(Plutchik模型增强版)的精确建模。`我感到的不是简单的愤怒，是\'被辜负的愤怒伴有3分无奈和2分期待落空\'`。', status: '研究阶段' },
+  { name: '数字克隆/数字永生', desc: '让你和逝去的亲人对话。喂入TA的聊天记录、语音、写过的文字。但各国正在立法限制——`技术跑在了伦理前面`。微软已申请相关专利(已被叫停)。', status: '争议前沿' },
+  { name: '说话风格克隆', desc: '不是简单的TTS变声，而是克隆说话的逻辑模式。"这个人习惯先用类比铺垫，再用数据印证，最后抛一个问题"——AI学会的是思考模式而非表面的声调。', status: '研究阶段' },
+  { name: '跨文化人格适配', desc: '同一个AI，面对日本用户使用敬语体，面对美国用户直截了当，面对印度用户更讲故事。AI学会了在文化空间中做"坐标系转换"。', status: '早期可用' },
+  { name: 'AI幽默生成', desc: '不是查笑话数据库，是真正理解幽默的结构：意料之外的关联、时序反讽、夸张的类比。`为什么AI讲的笑话不好笑？因为它还没学会人类的荒谬感`。GPT-4o在幽默创作上已接近人类。', status: '可用' },
+  { name: '情感陪伴AI (Replika/Xiaoice)', desc: '微软小冰在中国已有数千万用户。Replika在欧美App Store下载千万级。不是工具AI，是"人"——这是未来人机关系的雏形。', status: '基础免费' },
+]
+
+const devMagic = [
+  { name: 'v0.dev (Vercel)', desc: '在聊天窗口描述你想做的页面，AI生成完整的React/Next.js组件代码。所见即所得，支持Shadcn/ui。前端开发从"敲代码"变成"描述需求"。', status: '基础免费' },
+  { name: 'Bolt.new (StackBlitz)', desc: '一句话生成完整全栈Web应用，在浏览器中运行。`做一个带AI聊天功能的博客`→自动生成前后端代码+数据库+部署。有免费额度。', status: '免费额度' },
+  { name: 'Replit Agent', desc: '写一句需求描述，AI自动创建完整项目、写代码、调试、部署。`把Replit变成：你说需求，它给产品的AI工厂`。支持自然语言迭代修改。', status: '付费' },
+  { name: 'Cursor / Windsurf', desc: 'IDE革命。不是补全单个函数，而是理解整个项目，能跨文件重构、自动生成测试、从截图生成前端。Context-aware胜过所有传统IDE。', status: '基础免费' },
+  { name: 'Figma → 真代码', desc: '设计师画好界面→AI一键生成生产级代码(Vue/React/Flutter)。Locofy、Anima、Builder.io都在做。`设计师就是程序员`不再是口号。', status: '基础免费' },
+  { name: 'AI写测试 (Copilot Test/Applitools)', desc: '不再手写单测。AI读你的代码逻辑→自动生成测试用例→覆盖边缘情况→跑通后自动提交。`人类的测试覆盖率50%，AI的测试覆盖率90%`。', status: '可用' },
+  { name: 'AI自Code Review', desc: 'PR提交后AI自动审查——不只是Lint，而是看懂架构逻辑、识别安全隐患、提示性能瓶颈。CodeRabbit已服务3万+团队。', status: '基础免费' },
+  { name: 'OpenHands (原OpenDevin)', desc: '开源的Devin级AI程序员。能独立浏览代码库、改文件、跑命令、调bug。`你下班了，OpenHands还在改代码`。全开源，可本地部署。', status: '开源免费' },
+  { name: 'Lovable / Tempo / GPT Engineer', desc: '新一代AI低代码/无代码工具。GPT Engineer开源，Tempo专注React。`没有技术背景的产品经理也能在一天内发布一个App`——这是真的。', status: '部分免费' },
+]
+
+const selfCreation = [
+  { name: 'E2B Sandbox (开源)', desc: 'AI自动创建沙盒环境、装依赖、跑代码、返回结果。`在AI对话中说：装个pandas分析这个CSV → AI自动建Docker→装包→执行→展示图表`。全开源！', status: '开源免费' },
+  { name: 'Open Interpreter', desc: '在本地终端运行的开源代码解释器。`删掉所有大于10MB的文件`→AI会问确认→执行。不止是ChatGPT的代码解释器，而是AI的本地操作系统接口。', status: '开源免费' },
+  { name: 'AI自建网站 (Dora/Relume)', desc: '输入品牌和需求→AI生成完整网站(设计+文案+前端代码+SEO+分析)。Dora支持3D交互网站。Relume的sitemap生成器被Figma收购。非程序员也能一天上线专业网站。', status: '部分免费' },
+  { name: 'AI自建云基础设施', desc: '`帮我搭一个支持100万日活的微服务架构`→AI生成Terraform/Pulumi代码→配置K8s/网关/数据库/缓存/CDN→输出架构图。Pulumi AI已实现基础版本。', status: '早期可用' },
+  { name: 'AI运维自愈', desc: '服务器报错→AI自动读日志→定位根因→修复→验证→写事后报告。Datadog+PagerDuty+LLM联动，从告警到修复全自动，无需人工介入。', status: '企业可用' },
+  { name: 'Gradio/HuggingFace 一键上线', desc: '写一个Python函数→AI自动生成Gradio界面→上传HuggingFace Spaces→公网可访问。一条命令：gradio deploy my_app.py。开发→上线＜5分钟。', status: '完全免费' },
+  { name: 'Modal / Banana / Replicate', desc: '一键部署AI模型为云端API。modal deploy一条命令，自动处理GPU调度、弹性伸缩、计费。Serverless GPU已成现实。', status: '免费额度' },
+  { name: 'AI生成文档+CI/CD', desc: 'AI分析代码→自动生成README/API文档/CHANGELOG+GitHub Actions。你只管写代码，AI负责让项目看起来专业。Mintlify/Documatic已商用水准。', status: '基础免费' },
+  { name: 'Fly.io / Railway / Zeabur', desc: '新一代部署工具——不用写Dockerfile，不用配K8s。git push→自动检测语言→构建→部署→配置SSL+域名。Railway按使用量计费，Fly.io有免费额度。', status: '免费额度' },
+]
+
+const digitalBody = [
+  { name: 'Claude Computer Use', desc: 'Anthropic的杀手级功能：AI观看屏幕截图、移动鼠标、点击按钮、键盘输入、滚动页面。操作真实桌面软件(GUI)。仿佛有人在操控你的电脑。API已开放。', status: 'API可用' },
+  { name: 'Browser Use (开源)', desc: '基于Playwright的开源AI浏览器操控。去淘宝搜一款降噪耳机，比较前三名的价格和评价，做成表格→AI自动打开浏览器→搜索→提取→对比→返回表格。', status: '开源免费' },
+  { name: 'UI-TARS (字节跳动)', desc: '原生GUI理解模型。不是"看截图→识别元素→定位→点击"的pipeline，而是端到端地理解界面语义。在GUI操作benchmark上大幅超越GPT-4V+Claude 3.5。', status: '开源免费' },
+  { name: 'OS-Copilot / FRIDAY', desc: 'AI操作操作系统：打开Excel→读数据→生成图表→发邮件。把这个季度的销售数据做成报告发给领导→AI端到端完成。微软内部已在测试Copilot Actions。', status: '研究演示' },
+  { name: 'WebVoyager', desc: '端到端网页任务Agent。帮我在Zillow上筛选3卧室2浴室的房子，预算50万以内→AI浏览→点选→提取→最终完成。成功率80%+。', status: '开源研究' },
+  { name: 'CogAgent (智谱)', desc: '专注GUI理解，18B参数在PC/手机GUI上超越GPT-4V。支持1080P分辨率截图理解，<200ms推理。看上图，点这里，按那个按钮——超越人类的屏幕操作速度。', status: '开源' },
+  { name: 'OpenAdapt / Skyvern', desc: '录一次操作→AI学会自动重复。录一次报销流程→以后收到发票自动报销。Skyvern专注企业RPA+AI，OpenAdapt开源。RPA+AI=无限自动化。', status: '开源/企业' },
+  { name: 'Adept ACT-1 (已转型)', desc: '首个大规模训练的"人机操控Agent"。创始人来自Transformer论文作者。虽已转型，但开创了"让AI来操作你的软件界面"这一范式。值$1B的idea从他们开始。', status: '已转型' },
+]
 </script>
 
 <template>
@@ -934,6 +1021,110 @@ const freeAlternatives = [
             <div class="fp-tags">
               <span v-for="t in fp.tags" :key="t" class="fp-tag">{{ t }}</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 25. 超凡语言与推理 -->
+      <section data-section="superreason" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">25</span> 超凡语言与推理</h2>
+        <p class="section-desc">从链式思考到隐空间推理，AI正在学会"真正的思考"。</p>
+        <div class="cc-phases">
+          <div v-for="(s, i) in superReasoning" :key="s.name" class="cc-phase" :class="{ visible: visibleSections['superreason'] }" :style="{ '--delay': `${i*0.06}s` }">
+            <div class="cc-phase-num">{{ i + 1 }}</div>
+            <div class="cc-phase-body">
+              <div class="cc-phase-title">{{ s.name }}</div>
+              <p class="cc-phase-desc">{{ s.desc }}</p>
+              <span class="cc-phase-ref">{{ s.ref }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 26. 离谱级处理 -->
+      <section data-section="insane" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">26</span> 离谱级处理能力</h2>
+        <p class="section-desc">百万Token一次性吃进、实时视频流理解、千文件并行——人类的极限是AI的起点。</p>
+        <div class="insane-grid">
+          <div v-for="(s, i) in insaneProcessing" :key="s.name" class="insane-card" :class="{ visible: visibleSections['insane'] }" :style="{ '--delay': `${i*0.06}s` }">
+            <div class="insane-head">
+              <span class="insane-name">{{ s.name }}</span>
+              <span class="insane-status" :class="{ 'insane-free': s.status.includes('免费') || s.status.includes('开源'), 'insane-paid': s.status.includes('付费') }">{{ s.status }}</span>
+            </div>
+            <p class="insane-desc">{{ s.desc }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 27. 极客武器库 -->
+      <section data-section="geek" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">27</span> 极客技术武器库</h2>
+        <p class="section-desc">不是"使用AI"，而是"用AI优化AI"——自动优化prompt、自动设计架构、自动持续学习。</p>
+        <div class="fp-grid">
+          <div v-for="(g, i) in geekArsenal" :key="g.name" class="fp-card" :class="{ visible: visibleSections['geek'] }" :style="{ '--delay': `${i*0.05}s` }">
+            <div class="fp-free" style="margin-bottom:3px">
+              <span class="fp-free-name" style="color: var(--accent)">{{ g.name }}</span>
+            </div>
+            <p class="fp-desc">{{ g.desc }}</p>
+            <span class="fp-tag" style="background:rgba(139,92,246,0.1);color:#8b5cf6">{{ g.ref }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 28. 硅基血肉 - AI人格化 -->
+      <section data-section="flesh" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">28</span> 硅基血肉 · AI人格化</h2>
+        <p class="section-desc">当AI有了记忆、情绪、人格和幽默感，它就不再是工具——是数字生命。</p>
+        <div class="flesh-grid">
+          <div v-for="(s, i) in siliconFlesh" :key="s.name" class="flesh-card" :class="{ visible: visibleSections['flesh'] }" :style="{ '--delay': `${i*0.07}s` }">
+            <div class="flesh-name">{{ s.name }}</div>
+            <p class="flesh-desc">{{ s.desc }}</p>
+            <span class="flesh-status" :class="{ 'flesh-free': s.status.includes('免费')||s.status.includes('开源'), 'flesh-paid': s.status.includes('付费')||s.status.includes('争议') }">{{ s.status }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 29. 开发魔法 -->
+      <section data-section="devmagic" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">29</span> 开发魔法 · AI自编程生态</h2>
+        <p class="section-desc">从描述需求到部署上线，AI正在吞噬整个软件开发生命周期。</p>
+        <div class="fp-grid">
+          <div v-for="(d, i) in devMagic" :key="d.name" class="fp-card" :class="{ visible: visibleSections['devmagic'] }" :style="{ '--delay': `${i*0.05}s` }">
+            <div class="fp-free" style="margin-bottom:3px">
+              <span class="fp-free-name" style="color: var(--accent)">{{ d.name }}</span>
+              <span class="insane-status" style="margin-left:6px" :class="{ 'insane-free': d.status.includes('免费')||d.status.includes('开源') }">{{ d.status }}</span>
+            </div>
+            <p class="fp-desc">{{ d.desc }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 30. 自创一切 -->
+      <section data-section="selfcreate" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">30</span> 自创一切 · 网站×云端×环境</h2>
+        <p class="section-desc">AI不只是写代码——AI建沙盒、装依赖、部署上线、监控自愈。从代码到运维，全自动闭环。</p>
+        <div class="insane-grid">
+          <div v-for="(s, i) in selfCreation" :key="s.name" class="insane-card" :class="{ visible: visibleSections['selfcreate'] }" :style="{ '--delay': `${i*0.06}s` }">
+            <div class="insane-head">
+              <span class="insane-name">{{ s.name }}</span>
+              <span class="insane-status" :class="{ 'insane-free': s.status.includes('免费')||s.status.includes('开源') }">{{ s.status }}</span>
+            </div>
+            <p class="insane-desc">{{ s.desc }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 31. 数字肉身 - 模拟人类操作 -->
+      <section data-section="body" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">31</span> 数字肉身 · 模拟人类操作</h2>
+        <p class="section-desc">AI看屏幕、动鼠标、点按钮、填表单——不是在模拟接口，而是在操作真实的图形界面。这是AI融入物理世界之前的最后一站。</p>
+        <div class="body-grid">
+          <div v-for="(s, i) in digitalBody" :key="s.name" class="body-card" :class="{ visible: visibleSections['body'] }" :style="{ '--delay': `${i*0.07}s` }">
+            <div class="body-head">
+              <span class="body-name">{{ s.name }}</span>
+              <span class="body-status" :class="{ 'body-free': s.status.includes('免费')||s.status.includes('开源') }">{{ s.status }}</span>
+            </div>
+            <p class="body-desc">{{ s.desc }}</p>
           </div>
         </div>
       </section>
@@ -1457,6 +1648,50 @@ const freeAlternatives = [
 .fp-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 6px; }
 .fp-tags { display: flex; gap: 4px; flex-wrap: wrap; }
 .fp-tag { font-size: 8px; padding: 2px 6px; border-radius: 3px; background: rgba(34,197,94,0.1); color: #22c55e; font-weight: 600; }
+
+/* Insane Processing */
+.insane-grid { display: flex; flex-direction: column; gap: 9px; }
+.insane-card {
+  padding: 12px 14px; border-radius: 10px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); opacity: 0; transform: translateY(8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.insane-card.visible { opacity: 1; transform: translateY(0); }
+.insane-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
+.insane-name { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+.insane-status { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 600; white-space: nowrap; }
+.insane-free { background: rgba(34,197,94,0.12); color: #22c55e; }
+.insane-paid { background: rgba(239,68,68,0.1); color: #ef4444; }
+.insane-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+
+/* Silicon Flesh */
+.flesh-grid { display: flex; flex-direction: column; gap: 9px; }
+.flesh-card {
+  padding: 12px 14px; border-radius: 10px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); opacity: 0; transform: translateY(8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.flesh-card.visible { opacity: 1; transform: translateY(0); }
+.flesh-name { font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.flesh-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 5px; }
+.flesh-status { font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+.flesh-free { background: rgba(34,197,94,0.1); color: #22c55e; }
+.flesh-paid { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+/* Digital Body */
+.body-grid { display: flex; flex-direction: column; gap: 9px; }
+.body-card {
+  padding: 12px 14px; border-radius: 10px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); opacity: 0; transform: translateY(8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.body-card.visible { opacity: 1; transform: translateY(0); }
+.body-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
+.body-name { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+.body-status { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 600; white-space: nowrap; }
+.body-free { background: rgba(34,197,94,0.12); color: #22c55e; }
+.body-paid { background: rgba(239,68,68,0.1); color: #ef4444; }
+.body-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
 
 /* Summary */
 .summary-section { margin-top: 6px; margin-bottom: 6px; }
