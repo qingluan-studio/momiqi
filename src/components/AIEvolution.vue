@@ -376,6 +376,117 @@ const cognitiveCompilation = [
     color: '#ef4444',
   },
 ]
+
+const globalTech = [
+  {
+    region: '中国',
+    flag: 'CN',
+    color: '#ef4444',
+    items: [
+      { name: 'DeepSeek-V3/R1', org: '深度求索', desc: '开源旗舰。MoE架构，训练成本仅557万美元。R1首个公开推理模型完整思维链，在数学/编程上对齐o1。', status: '开源免费' },
+      { name: 'Qwen2.5 系列', org: '阿里通义', desc: '国内最强开源族。覆盖0.5B-72B全尺寸，多语言。Qwen2.5-Coder在HumanEval达92.7%。HuggingFace下载量前十。', status: '开源免费' },
+      { name: 'GLM-4 / ChatGLM', org: '智谱AI', desc: '国产闭源标杆。GLM-4支持128K上下文、All-Tools智能体。ChatGLM开源系列是国内最早的开源大模型之一。', status: '部分开源' },
+      { name: 'Kimi / Moonshot', org: '月之暗面', desc: '长上下文先驱，率先支持200万字输入。Kimi探索版可自主搜索+分析，类似Perplexity的深度研究模式。API已开放。', status: '基础免费' },
+      { name: '可灵 Kling', org: '快手', desc: '国内最强视频生成。支持文生视频、图生视频，最长2分钟。全球用户超千万，多项指标超越Runway Gen-3。', status: '基础免费' },
+      { name: '豆包/Seed系列', org: '字节跳动', desc: '豆包App月活6000万+。Seed系列模型覆盖语言/图像/语音/视频。低价API策略引发国内价格战。', status: '基础免费' },
+      { name: 'Step系列', org: '阶跃星辰', desc: 'Step-2万亿参数MoE模型，国内参数规模最大之一。Step-Video支持文生视频。Step-Audio实现端到端语音。', status: '部分开放' },
+      { name: 'Yi 系列', org: '零一万物(李开复)', desc: 'Yi-34B曾登顶HuggingFace开源榜。Yi-VL多模态、Yi-Coder代码模型。专注高性能中小尺寸模型。', status: '开源免费' },
+      { name: 'ERNIE 4.0', org: '百度', desc: '百度旗舰闭源模型。文心一言App月活过亿。ERNIE在多模态理解、长文本、工具调用上持续迭代。', status: '基础免费' },
+      { name: '混元/Hunyuan', org: '腾讯', desc: '覆盖语言/图像/视频/3D全模态。HunyuanVideo开源视频生成模型，HuggingFace热门。腾讯生态深度整合。', status: '部分开源' },
+      { name: 'MiniMax / 海螺AI', org: 'MiniMax稀宇', desc: '海螺AI主打语音和视频。MiniMax-01模型支持400万token超长上下文。Talkie出海App全球火爆。', status: '基础免费' },
+      { name: '魔搭 ModelScope', org: '阿里云', desc: '中国最大AI模型社区。超5000个模型，涵盖LLM/视觉/语音/科学计算。免费GPU资源(NPU T4)供开发者试用。', status: '完全免费' },
+    ],
+  },
+  {
+    region: '美国',
+    flag: 'US',
+    color: '#3b82f6',
+    items: [
+      { name: 'GPT-4o / o1/o3', org: 'OpenAI', desc: '行业标杆。o3在ARC-AGI上达87.5%。GPT-4o原生多模态。ChatGPT周活3亿+，但API定价较高。', status: '付费API' },
+      { name: 'Claude 3.5/4', org: 'Anthropic', desc: '编程和安全标杆。Claude 3.5 Sonnet在SWE-bench达49%。Computer Use可操控桌面软件。Artifacts实时预览代码。', status: '付费API' },
+      { name: 'Gemini 2.0/2.5', org: 'Google DeepMind', desc: '原生多模态+100万token上下文。Gemini 2.5 Pro推理大幅提升。深度整合Google生态(Search/Workspace/Android)。', status: '部分免费' },
+      { name: 'Llama 3/4', org: 'Meta', desc: '开源旗舰推动者。Llama 3 405B训练数据15T tokens。社区衍生模型超6万个。扎克伯格坚定开源路线。', status: '开源免费' },
+      { name: 'Grok-3', org: 'xAI (Elon Musk)', desc: '用20万H100集群训练。Grok-3在推理/数学/Coding上挑战o1。深度整合X平台实时数据。', status: '部分免费' },
+      { name: 'Cohere Command R+', org: 'Cohere', desc: '企业级RAG优化模型。128K上下文，原生支持多语言。专注企业市场，不做消费级产品。', status: '付费API' },
+      { name: 'Midjourney', org: 'Midjourney Inc.', desc: 'AI图像生成标杆。V6版本在写实、光影、构图上一骑绝尘。仅Discord使用，无公开API。', status: '付费订阅' },
+      { name: 'Stable Diffusion 3', org: 'Stability AI', desc: '开源图像生成旗舰。SD3 Medium 2B参数可本地运行。ComfyUI+大量社区模型形成生态。支持ControlNet/IP-Adapter等。', status: '开源免费' },
+      { name: 'Runway Gen-3', org: 'Runway', desc: '专业视频生成和编辑。Gen-3 Alpha支持高保真视频。提供全套AI视频工具(运动笔刷/口型同步/视频扩展)。', status: '付费订阅' },
+      { name: 'Cursor / Copilot', org: 'Cursor/GitHub', desc: 'AI编程双雄。Cursor基于VS Code深度定制，用Claude/GPT驱动。Copilot深度整合GitHub生态。改变程序员工作方式。', status: '基础免费' },
+      { name: 'NotebookLM', org: 'Google', desc: 'AI笔记研究工具。上传文档即可生成播客式深度对话。最惊艳的AI产品之一，完全免费。', status: '完全免费' },
+    ],
+  },
+  {
+    region: '欧洲',
+    flag: 'EU',
+    color: '#8b5cf6',
+    items: [
+      { name: 'Mistral Large 2', org: 'Mistral AI(法国)', desc: '欧洲AI旗舰。123B参数，支持多语言(含中文)。Mixtral 8x7B MoE模型在性价比上领先。引领欧洲开源生态。', status: '部分免费' },
+      { name: 'Aleph Alpha', org: 'Aleph Alpha(德国)', desc: '德国AI国家冠军。获5亿美元融资。专注企业级、可解释性、数据主权。提供全栈解决方案。', status: '企业付费' },
+      { name: 'Helsing', org: 'Helsing(德国)', desc: '国防AI先锋。获4.5亿欧元B轮融资。专注于战场感知、自主系统AI。欧洲最大AI国防公司。', status: '军事专用' },
+      { name: 'Synthesia', org: 'Synthesia(英国)', desc: 'AI数字人视频生成。140+语言，230+数字人形象。企业培训视频首选。估值超10亿美元。', status: '付费订阅' },
+      { name: 'Kyutai Moshi', org: 'Kyutai(法国)', desc: '全开源实时语音AI。端到端语音对话，延迟低至200ms。实验室非营利，全部开源(MIT协议)。挑战GPT-4o语音。', status: '完全免费开源' },
+      { name: 'Poolside', org: 'Poolside(法国)', desc: '专注AI编程。获5亿美元融资。另辟蹊径：用RL训练代码模型而非SFT。认为代码是通向AGI的最佳路径。', status: '未公开' },
+    ],
+  },
+  {
+    region: '日本',
+    flag: 'JP',
+    color: '#f59e0b',
+    items: [
+      { name: 'Sakana AI', org: 'Sakana AI', desc: 'Transformer²首创者：让模型在推理时动态调整权重，而非静态训练。自然启发(进化合并)的模型融合方法。获NVIDIA/Google投资。', status: '研究开源' },
+      { name: 'Swallow 系列', org: '东京工业/NII', desc: '基于Llama架构的日英双语模型。在日语MT-Bench上接近GPT-4。模型和数据全开源。', status: '开源免费' },
+      { name: 'Preferred Networks', org: 'PFN', desc: '日本AI先驱。自研MN-Core芯片。PLaMo-100B日语大模型。在工业AI(丰田/发那科)领域深耕。', status: '企业合作' },
+      { name: 'ELYZA LLM', org: 'ELYZA', desc: '日本AI初创。ELYZA-japanese-Llama-2-7b是首个日语Llama微调模型。70B版本在日语能力上接近GPT-4。', status: '开源免费' },
+    ],
+  },
+  {
+    region: '韩国',
+    flag: 'KR',
+    color: '#22c55e',
+    items: [
+      { name: 'EXAONE 3.5', org: 'LG AI Research', desc: 'LG的旗舰大模型。7.8B参数，在韩语和多语言上表现优秀。开源发布，刷新韩国开源模型性能纪录。', status: '开源免费' },
+      { name: 'HyperCLOVA X', org: 'Naver', desc: '韩国最大搜索引擎的AI。HyperCLOVA X对标GPT-4。深度整合Naver生态(搜索/购物/地图)。API已开放。', status: '部分免费' },
+      { name: 'Solar Pro', org: 'Upstage', desc: 'Solar-10.7B曾登顶HuggingFace开源榜(2023)。Solar Pro 22B采用深度放大技术(Depth Up-Scaling)。', status: '开源免费' },
+    ],
+  },
+  {
+    region: '中东',
+    flag: 'ME',
+    color: '#06b6d4',
+    items: [
+      { name: 'Falcon 3', org: 'TII(阿联酋)', desc: '阿联酋政府AI研究所出品。Falcon-180B曾是最大开源模型。Falcon 3 10B在MMLU上达75.7%。阿布扎比主权基金全力支持。', status: '开源免费' },
+      { name: 'Jais Chat', org: 'G42(阿联酋)', desc: '全球最强阿拉伯语AI。基于阿拉伯语+英语双底座训练。G42与Cerebras合作，用WSE-3晶圆级芯片训练。', status: '基础免费' },
+      { name: 'ALLaM', org: 'SDAIA(沙特)', desc: '沙特数据与AI局推出的阿拉伯语大模型。整合沙特2030愿景，以阿拉伯语和伊斯兰文化为特色。', status: '基础免费' },
+    ],
+  },
+  {
+    region: '其他重要力量',
+    flag: 'GL',
+    color: '#a855f7',
+    items: [
+      { name: 'SEA-LION', org: 'AI Singapore', desc: '东南亚首个开源大模型。专注东南亚语言和文化的代表性。覆盖印尼语/泰语/越南语/马来语等11种东南亚语言。', status: '开源免费' },
+      { name: 'Sarvam AI', org: 'Sarvam(印度)', desc: '印度AI领军。Sarvam-1覆盖10种印度语言。语音模型支持印地语/泰米尔语等方言。专注印度本土需求的AI基建。', status: '部分开源' },
+      { name: 'YandexGPT 4', org: 'Yandex(俄罗斯)', desc: '俄罗斯最大搜索引擎的AI。YandexGPT 4在俄语任务上对标GPT-4。集成Yandex浏览器和智能音箱Alice。', status: '基础免费' },
+      { name: 'BLOOM / BigScience', org: 'HuggingFace主导', desc: '全球1200+研究者协作的开源多语言模型。176B参数，覆盖46种语言和13种编程语言。AI民主化运动的里程碑。', status: '完全免费开源' },
+      { name: 'NVIDIA NIM/Nemo', org: 'NVIDIA', desc: 'NVIDIA的AI微服务和框架。NIM提供一键部署优化的LLM服务。NeMo用于训练和微调。全球最大GPU供应商的AI基础设施。', status: '部分免费' },
+    ],
+  },
+]
+
+const freeAlternatives = [
+  { paid: 'ChatGPT Plus ($20/月)', free: 'Ollama + Open WebUI', desc: '本地运行 Llama3/Qwen/DeepSeek，ChatGPT级别体验。零成本、零隐私泄露、无次数限制。', tags: ['完全免费', '隐私100%'] },
+  { paid: 'GitHub Copilot ($10/月)', free: 'Continue.dev + Codestral', desc: 'Continue.dev是VSCode/JetBrains开源AI编程插件。搭配Codestral API(免费层)或本地Ollama，实现完整的AI编程辅助。', tags: ['完全免费', '开源'] },
+  { paid: 'Midjourney ($30/月)', free: 'Stable Diffusion + ComfyUI', desc: 'SD3 Medium + ComfyUI完全免费本地运行。海量社区模型(CivitAI上10万+)、ControlNet、IP-Adapter。效果可定制性远超Midjourney。', tags: ['完全免费', '无限生成'] },
+  { paid: 'Runway Gen-3 ($15/月)', free: 'CogVideoX + LTX-Video', desc: '智谱CogVideoX开源5B视频生成。LTX-Video开源实时视频生成(4秒/次)。可灵Web免费额度也很足。', tags: ['开源', '本地运行'] },
+  { paid: 'Notion AI ($10/月)', free: 'Obsidian + Local GPT插件', desc: 'Obsidian免费知识管理+Local GPT插件在本地做AI笔记分析。支持RAG、自动标签、语义搜索。数据完全本地。', tags: ['完全免费', '本地优先'] },
+  { paid: 'ElevenLabs ($5/月)', free: 'Fish Speech + GPT-SoVITS', desc: 'Fish Speech完全开源TTS，支持多语言+声音克隆。GPT-SoVITS支持5秒声音样本克隆。零成本达到商用级语音合成。', tags: ['开源', '声音克隆'] },
+  { paid: 'Jasper AI ($49/月)', free: 'Ollama + LangChain 写作链', desc: '用本地LLM+LangChain构建写作流水线(大纲→初稿→润色→SEO)。完全可定制，不依赖任何付费服务。', tags: ['零月费', '无限生成'] },
+  { paid: 'Pinecone ($70/月)', free: 'Qdrant / Chroma / LanceDB', desc: 'Qdrant开源向量数据库，Rust编写高性能。Chroma极简API。LanceDB基于Lance列式格式，零拷贝查询。全部免费自托管。', tags: ['开源', '自托管'] },
+  { paid: 'LangSmith ($39/月)', free: 'LangFuse / Phoenix', desc: 'LangFuse开源LLM可观测平台，追踪/评估/监控/调试全链路。Arize Phoenix同样开源。功能对齐LangSmith，零成本。', tags: ['开源', '企业级'] },
+  { paid: 'AWS SageMaker', free: 'HuggingFace Spaces + Gradio', desc: '免费T4 16GB GPU + Gradio搭建Web应用。ZeroGPU可共享GPU。Colab免费T4 GPU跑训练。完全够个人开发者使用。', tags: ['免费GPU', 'T4 16GB'] },
+  { paid: 'Vercel AI ($20/月)', free: 'Cloudflare Workers AI', desc: '全球边缘推理，日免费10万次。支持Llama/Qwen/DeepSeek/Stable Diffusion。`npx wrangler ai`一行命令调用。', tags: ['10万次/天', '全球边缘'] },
+  { paid: 'Zapier AI ($30/月)', free: 'n8n + Ollama + LangChain', desc: 'n8n开源自动化平台(280+集成)。搭配Ollama和LangChain构建完整AI自动化工作流。一条流水线替代Zapier。', tags: ['280+集成', '自托管'] },
+]
 </script>
 
 <template>
@@ -771,6 +882,58 @@ const cognitiveCompilation = [
           <div class="cc-result" :class="{ visible: visibleSections['cc'] }">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
             <p>{{ cc.result }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 23. 全球AI技术版图 -->
+      <section data-section="global" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">23</span> 全球AI技术版图</h2>
+        <p class="section-desc">按国家/地区梳理最前沿的公开可用AI技术，标注免费与付费状态。</p>
+
+        <div class="global-tabs">
+          <div v-for="g in globalTech" :key="g.region" class="gtab-section" :class="{ visible: visibleSections['global'] }">
+            <div class="gtab-header" :style="{ background: g.color+'12', borderColor: g.color+'30' }">
+              <span class="gtab-flag" :style="{ background: g.color, color: '#fff' }">{{ g.flag }}</span>
+              <span class="gtab-region" :style="{ color: g.color }">{{ g.region }}</span>
+              <span class="gtab-count">{{ g.items.length }} 项</span>
+            </div>
+            <div class="gtab-items">
+              <div v-for="item in g.items" :key="item.name" class="gtab-item">
+                <div class="gtab-item-head">
+                  <span class="gtab-name">{{ item.name }}</span>
+                  <span class="gtab-status" :class="{ 'gtab-free': item.status.includes('免费') || item.status.includes('开源'), 'gtab-paid': item.status.includes('付费') }">{{ item.status }}</span>
+                </div>
+                <span class="gtab-org">{{ item.org }}</span>
+                <p class="gtab-desc">{{ item.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 24. 付费转免费完全指南 -->
+      <section data-section="freepaid" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">24</span> 付费转免费完全指南</h2>
+        <p class="section-desc">每一个收费AI服务，都有一个甚至多个免费开源替代。不是"降级版"，是真正的替代。</p>
+
+        <div class="fp-grid">
+          <div v-for="(fp, i) in freeAlternatives" :key="fp.paid" class="fp-card" :class="{ visible: visibleSections['freepaid'] }" :style="{ '--delay': `${i*0.05}s` }">
+            <div class="fp-paid">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              {{ fp.paid }}
+            </div>
+            <div class="fp-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+            </div>
+            <div class="fp-free">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+              <span class="fp-free-name">{{ fp.free }}</span>
+            </div>
+            <p class="fp-desc">{{ fp.desc }}</p>
+            <div class="fp-tags">
+              <span v-for="t in fp.tags" :key="t" class="fp-tag">{{ t }}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -1260,6 +1423,40 @@ const cognitiveCompilation = [
 .cc-result.visible { opacity: 1; transform: translateY(0); }
 .cc-result svg { flex-shrink: 0; margin-top: 1px; }
 .cc-result p { font-size: 11px; color: var(--text-secondary); line-height: 1.65; }
+
+/* Global Tech */
+.global-tabs { display: flex; flex-direction: column; gap: 14px; }
+.gtab-section { opacity: 0; transform: translateY(8px); transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); }
+.gtab-section.visible { opacity: 1; transform: translateY(0); }
+.gtab-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; border: 1px solid; margin-bottom: 8px; }
+.gtab-flag { display: inline-flex; width: 24px; height: 24px; border-radius: 6px; font-size: 9px; font-weight: 800; align-items: center; justify-content: center; flex-shrink: 0; }
+.gtab-region { font-size: 14px; font-weight: 700; }
+.gtab-count { font-size: 10px; color: var(--text-tertiary); margin-left: auto; }
+.gtab-items { display: flex; flex-direction: column; gap: 7px; }
+.gtab-item { padding: 9px 12px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); }
+.gtab-item-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px; }
+.gtab-name { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+.gtab-status { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 600; white-space: nowrap; }
+.gtab-free { background: rgba(34,197,94,0.12); color: #22c55e; }
+.gtab-paid { background: rgba(239,68,68,0.1); color: #ef4444; }
+.gtab-org { font-size: 9px; color: var(--text-tertiary); display: block; margin-bottom: 2px; }
+.gtab-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.45; }
+
+/* Free vs Paid */
+.fp-grid { display: flex; flex-direction: column; gap: 9px; }
+.fp-card {
+  padding: 12px 14px; border-radius: 12px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); opacity: 0; transform: translateY(8px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.fp-card.visible { opacity: 1; transform: translateY(0); }
+.fp-paid { font-size: 11px; font-weight: 600; color: #ef4444; display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
+.fp-arrow { display: flex; justify-content: center; margin: 2px 0; }
+.fp-free { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+.fp-free-name { font-size: 12px; font-weight: 700; color: #22c55e; }
+.fp-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 6px; }
+.fp-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.fp-tag { font-size: 8px; padding: 2px 6px; border-radius: 3px; background: rgba(34,197,94,0.1); color: #22c55e; font-weight: 600; }
 
 /* Summary */
 .summary-section { margin-top: 6px; margin-bottom: 6px; }
