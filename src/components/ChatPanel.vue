@@ -77,11 +77,11 @@ async function sendMessage() {
         ? [{ role: 'system' as const, content: '请对每个问题给出详细的推理过程、分析步骤和最终结论。中文回答。' }, ...allMessages]
         : allMessages
 
-    const result = await chatWithFallback(messages, (provider, text) => {
-      props.chat.updateLastAssistant(props.session.id, text, provider)
+    const result = await chatWithFallback(messages, (provider, text, tokens) => {
+      props.chat.updateLastAssistant(props.session.id, text, provider, tokens)
     })
 
-    props.chat.updateLastAssistant(props.session.id, result.content, result.provider)
+    props.chat.updateLastAssistant(props.session.id, result.content, result.provider, result.tokens)
   } catch (err: any) {
     props.chat.updateLastAssistant(
       props.session.id,
@@ -111,6 +111,18 @@ function handleInput() {
 
 function copyMessage(content: string) {
   navigator.clipboard.writeText(content).catch(() => {})
+}
+
+function handleContainerClick(e: Event) {
+  const btn = (e.target as HTMLElement).closest('.code-copy-btn') as HTMLButtonElement | null
+  if (!btn) return
+  const pre = btn.parentElement
+  if (!pre) return
+  const code = pre.textContent
+  if (!code) return
+  navigator.clipboard.writeText(code).catch(() => {})
+  btn.textContent = '已复制'
+  setTimeout(() => { btn.textContent = '复制' }, 1500)
 }
 
 function regenerate() {
@@ -174,7 +186,7 @@ function exportChat() {
       </div>
     </div>
 
-    <div ref="messagesContainer" class="messages-container">
+    <div ref="messagesContainer" class="messages-container" @click="handleContainerClick">
       <div
         v-for="msg in session.messages"
         :key="msg.id"
@@ -195,8 +207,9 @@ function exportChat() {
               @click="regenerate"
             >重新生成</button>
           </div>
-          <div v-if="msg.provider" class="msg-meta">
-            {{ { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq', kimi: 'Kimi' }[msg.provider] }}
+          <div class="msg-meta">
+            <span v-if="msg.provider">{{ { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq', kimi: 'Kimi' }[msg.provider] }}</span>
+            <span v-if="msg.tokens" class="msg-tokens">{{ msg.tokens }} tokens</span>
           </div>
         </div>
       </div>
@@ -412,6 +425,27 @@ function exportChat() {
   font-size: 12px;
   margin: 8px 0;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.msg-content :deep(.code-copy-btn) {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+  font-size: 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.msg-content :deep(pre:hover .code-copy-btn),
+.msg-content :deep(.code-copy-btn:active) {
+  opacity: 1;
 }
 
 .msg-content :deep(code) {
@@ -446,6 +480,14 @@ function exportChat() {
   color: var(--text-tertiary);
   margin-top: 4px;
   padding: 0 4px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.msg-tokens {
+  color: var(--text-tertiary);
+  font-size: 10px;
 }
 
 .msg-actions {

@@ -24,9 +24,9 @@ export const deepseekAPI: ProviderAPI = {
     }
   },
 
-  parseResponse(data: any): string {
+  parseResponse(data: any) {
     if (data?.choices?.[0]?.message?.content) {
-      return data.choices[0].message.content
+      return { text: data.choices[0].message.content, tokens: data.usage?.total_tokens }
     }
     throw new Error('DeepSeek 返回格式异常')
   },

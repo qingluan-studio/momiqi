@@ -6,6 +6,7 @@ export interface ChatMessage {
   content: string
   timestamp: number
   provider?: AIProvider
+  tokens?: number
 }
 
 export interface ChatSession {
@@ -43,7 +44,7 @@ export interface ProviderAPI {
   defaultModel: string
   buildHeaders: (apiKey: string) => Record<string, string>
   buildBody: (model: string, messages: { role: string; content: string }[]) => unknown
-  parseResponse: (data: any) => string
+  parseResponse: (data: any) => { text: string; tokens?: number }
 }
 
 export interface APIError {

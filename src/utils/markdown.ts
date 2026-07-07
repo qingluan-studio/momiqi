@@ -10,7 +10,12 @@ export function renderMarkdown(text: string): string {
   const cleaned = text
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
-  return marked(cleaned) as string
+  const html = marked(cleaned) as string
+
+  return html.replace(
+    /<pre(\s[^>]*)?>/g,
+    '<pre$1><button class="code-copy-btn" onclick="this.blur()">复制</button>',
+  )
 }
 
 export function generateId(): string {

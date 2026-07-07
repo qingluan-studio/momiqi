@@ -21,7 +21,7 @@ async function callProvider(
   model: string,
   messages: { role: string; content: string }[],
   settings: ProviderConfig
-): Promise<string> {
+): Promise<{ text: string; tokens?: number }> {
   const api = apiMap[provider]
   const cfg = settings[provider]
 
@@ -50,8 +50,8 @@ async function callProvider(
 
 export async function chatWithFallback(
   messages: { role: string; content: string }[],
-  onChunk?: (provider: AIProvider, text: string) => void
-): Promise<{ provider: AIProvider; content: string }> {
+  onChunk?: (provider: AIProvider, text: string, tokens?: number) => void
+): Promise<{ provider: AIProvider; content: string; tokens?: number }> {
   const settings = getItem<ProviderConfig>('settings', {} as ProviderConfig)
   const providers = getProviders(settings)
 
@@ -64,9 +64,9 @@ export async function chatWithFallback(
 
   if (providers.includes(activeProvider)) {
     try {
-      const content = await callProvider(activeProvider, activeModel, messages, settings)
-      onChunk?.(activeProvider, content)
-      return { provider: activeProvider, content }
+      const { text, tokens } = await callProvider(activeProvider, activeModel, messages, settings)
+      onChunk?.(activeProvider, text, tokens)
+      return { provider: activeProvider, content: text, tokens }
     } catch (err) {
       const apiErr = err as APIError
       if (apiErr.status === 401 || apiErr.status === 403) {
@@ -82,9 +82,9 @@ export async function chatWithFallback(
     const model = settings[provider]?.models?.[0] || apiMap[provider]?.defaultModel || ''
 
     try {
-      const content = await callProvider(provider, model, messages, settings)
-      onChunk?.(provider, content)
-      return { provider, content }
+      const { text, tokens } = await callProvider(provider, model, messages, settings)
+      onChunk?.(provider, text, tokens)
+      return { provider, content: text, tokens }
     } catch (err) {
       const apiErr = err as APIError
       console.warn(`[Router] ${provider} fallback 失败:`, apiErr.message)

@@ -45,9 +45,9 @@ export const geminiAPI: ProviderAPI = {
     }
   },
 
-  parseResponse(data: any): string {
+  parseResponse(data: any) {
     if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      return data.candidates[0].content.parts[0].text
+      return { text: data.candidates[0].content.parts[0].text, tokens: data.usageMetadata?.totalTokenCount }
     }
     throw new Error('Gemini 返回格式异常')
   },
