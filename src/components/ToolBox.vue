@@ -12,6 +12,8 @@ import TranslateTool from './TranslateTool.vue'
 import FileGenTool from './FileGenTool.vue'
 import MultiViewTool from './MultiViewTool.vue'
 import WorkflowTool from './WorkflowTool.vue'
+import FormatTool from './FormatTool.vue'
+import EncodeTool from './EncodeTool.vue'
 
 defineProps<{
   settings: ReturnType<typeof import('../stores/settings').useSettings>
@@ -32,6 +34,8 @@ const subTabs = [
   { id: 'filegen', label: '文件' },
   { id: 'multiview', label: '多角度' },
   { id: 'workflow', label: '工作流' },
+  { id: 'format', label: '格式' },
+  { id: 'encode', label: '编码' },
 ]
 </script>
 
@@ -59,6 +63,8 @@ const subTabs = [
       <FileGenTool v-if="subTab === 'filegen'" :settings="settings" />
       <MultiViewTool v-if="subTab === 'multiview'" :settings="settings" />
       <WorkflowTool v-if="subTab === 'workflow'" :settings="settings" />
+      <FormatTool v-if="subTab === 'format'" :settings="settings" />
+      <EncodeTool v-if="subTab === 'encode'" :settings="settings" />
     </div>
   </div>
 </template>

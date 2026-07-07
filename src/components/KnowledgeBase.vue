@@ -101,6 +101,19 @@ ${userMsgs.join('\n')}
     learnLoading.value = false
   }
 }
+
+function exportAll() {
+  const md = filteredNotes.value.map(n =>
+    `# ${n.title}\n\n分类: ${n.category} | 来源: ${n.source === 'auto-learn' ? '自动学习' : '手动'}\n\n${n.content}\n`
+  ).join('\n---\n\n')
+  const blob = new Blob([md], { type: 'text/markdown' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'knowledge_export.md'
+  a.click()
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -123,6 +136,11 @@ ${userMsgs.join('\n')}
             {{ learnLoading ? '提取中...' : '从对话中学习' }}
           </button>
           <span v-if="learnStatus" class="learn-status">{{ learnStatus }}</span>
+        </div>
+
+        <div v-if="filteredNotes.length > 0" class="list-toolbar">
+          <span class="count">{{ filteredNotes.length }} 条</span>
+          <button class="export-note-btn" @click="exportAll">导出</button>
         </div>
 
         <div v-if="filteredNotes.length === 0" class="empty">
@@ -206,6 +224,18 @@ ${userMsgs.join('\n')}
 }
 .learn-btn:disabled { opacity: 0.5; }
 .learn-status { font-size: 12px; color: var(--text-tertiary); }
+
+.list-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.count { font-size: 12px; color: var(--text-tertiary); }
+
+.export-note-btn {
+  padding: 4px 10px; border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent; color: var(--text-secondary); font-size: 11px; cursor: pointer;
+}
 
 .empty { text-align: center; color: var(--text-tertiary); padding: 40px 0; font-size: 13px; }
 

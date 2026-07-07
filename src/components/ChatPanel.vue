@@ -109,6 +109,25 @@ function handleInput() {
   }
 }
 
+function copyMessage(content: string) {
+  navigator.clipboard.writeText(content).catch(() => {})
+}
+
+function regenerate() {
+  const msgs = [...props.session.messages]
+  const lastUserIdx = msgs.map((m, i) => ({ m, i })).reverse().find(x => x.m.role === 'user')
+  if (!lastUserIdx) return
+  inputText.value = msgs[lastUserIdx.i].content
+  props.session.messages.splice(lastUserIdx.i)
+  props.chat.save()
+  sendMessage()
+}
+
+function clearConversation() {
+  props.session.messages.length = 0
+  props.chat.save()
+}
+
 function exportChat() {
   const providerLabel: Record<string, string> = { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq', kimi: 'Kimi' }
   const lines = props.session.messages.map(m => {
@@ -142,7 +161,12 @@ function exportChat() {
         <button class="think-toggle" :class="{ on: deepThink }" @click="deepThink = !deepThink">
           深度思考{{ deepThink ? ' ON' : ' OFF' }}
         </button>
-        <button class="export-btn" @click="exportChat" title="导出为 Markdown">
+        <button v-if="session.messages.length > 0" class="header-btn" @click="clearConversation" title="清空对话">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+          </svg>
+        </button>
+        <button class="export-btn" @click="exportChat" title="导出 Markdown">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
           </svg>
@@ -162,6 +186,15 @@ function exportChat() {
         </div>
         <div class="msg-body">
           <div class="msg-content" v-html="renderMarkdown(msg.content)" />
+          <div class="msg-actions">
+            <button class="msg-action-btn" @click="copyMessage(msg.content)">复制</button>
+            <button
+              v-if="msg.role === 'assistant' && msg === session.messages[session.messages.length - 1]"
+              class="msg-action-btn"
+              :disabled="isLoading"
+              @click="regenerate"
+            >重新生成</button>
+          </div>
           <div v-if="msg.provider" class="msg-meta">
             {{ { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq', kimi: 'Kimi' }[msg.provider] }}
           </div>
@@ -267,6 +300,18 @@ function exportChat() {
   border-color: var(--accent);
   color: var(--accent);
   background: rgba(99,102,241,0.1);
+}
+
+.header-btn {
+  width: 26px; height: 26px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .export-btn {
@@ -402,6 +447,26 @@ function exportChat() {
   margin-top: 4px;
   padding: 0 4px;
 }
+
+.msg-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+.msg-action-btn {
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.msg-action-btn:active { border-color: var(--accent); color: var(--accent); }
+.msg-action-btn:disabled { opacity: 0.5; }
 
 .error-banner {
   margin: 0 16px;
