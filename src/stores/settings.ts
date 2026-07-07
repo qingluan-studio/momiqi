@@ -1,0 +1,65 @@
+import { reactive } from 'vue'
+import type { AppSettings, AIProvider, ProviderConfig } from '../types'
+import { getItem, setItem } from '../utils/storage'
+
+const DEFAULT_SETTINGS: AppSettings = {
+  providers: {
+    deepseek: { enabled: false, apiKey: '', models: ['deepseek-chat'], priority: 1 },
+    gemini: { enabled: false, apiKey: '', models: ['gemini-2.0-flash'], priority: 2 },
+    groq: { enabled: false, apiKey: '', models: ['llama-3.3-70b-versatile'], priority: 3 },
+  },
+  activeProvider: 'deepseek',
+  theme: 'dark',
+  fontSize: 'medium',
+  language: 'zh-CN',
+}
+
+export function useSettings() {
+  const settings = reactive<AppSettings>(getItem<AppSettings>('settings', DEFAULT_SETTINGS))
+
+  function save() {
+    setItem('settings', { ...settings })
+  }
+
+  function setProviderEnabled(provider: AIProvider, enabled: boolean) {
+    settings.providers[provider].enabled = enabled
+    save()
+  }
+
+  function setProviderApiKey(provider: AIProvider, apiKey: string) {
+    settings.providers[provider].apiKey = apiKey
+    save()
+  }
+
+  function setProviderPriority(provider: AIProvider, priority: number) {
+    settings.providers[provider].priority = priority
+    save()
+  }
+
+  function setActiveProvider(provider: AIProvider) {
+    settings.activeProvider = provider
+    setItem('activeProvider', provider)
+    save()
+  }
+
+  function getProviderConfig(provider: AIProvider) {
+    return settings.providers[provider]
+  }
+
+  function getEnabledProviders(): AIProvider[] {
+    return (Object.entries(settings.providers) as [AIProvider, { enabled: boolean }][])
+      .filter(([, v]) => v.enabled)
+      .map(([k]) => k)
+  }
+
+  return {
+    settings,
+    save,
+    setProviderEnabled,
+    setProviderApiKey,
+    setProviderPriority,
+    setActiveProvider,
+    getProviderConfig,
+    getEnabledProviders,
+  }
+}

@@ -1,0 +1,53 @@
+export type AIProvider = 'deepseek' | 'gemini' | 'groq'
+
+export interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  timestamp: number
+  provider?: AIProvider
+}
+
+export interface ChatSession {
+  id: string
+  title: string
+  messages: ChatMessage[]
+  createdAt: number
+  updatedAt: number
+  provider: AIProvider
+  model: string
+}
+
+export interface ProviderSettings {
+  enabled: boolean
+  apiKey: string
+  models: string[]
+  priority: number
+}
+
+export type ProviderConfig = Record<AIProvider, ProviderSettings>
+
+export interface AppSettings {
+  providers: ProviderConfig
+  activeProvider: AIProvider
+  theme: 'dark' | 'light' | 'system'
+  fontSize: 'small' | 'medium' | 'large'
+  language: 'zh-CN' | 'en-US'
+}
+
+export interface ProviderAPI {
+  name: string
+  basePath: string
+  chatEndpoint: string
+  modelsEndpoint: string
+  defaultModel: string
+  buildHeaders: (apiKey: string) => Record<string, string>
+  buildBody: (model: string, messages: { role: string; content: string }[]) => unknown
+  parseResponse: (data: any) => string
+}
+
+export interface APIError {
+  provider: AIProvider
+  status: number
+  message: string
+}
