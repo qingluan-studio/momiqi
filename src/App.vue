@@ -9,10 +9,16 @@ import ChatPanel from './components/ChatPanel.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import WelcomeScreen from './components/WelcomeScreen.vue'
 import TestPanel from './components/TestPanel.vue'
+import TabBar from './components/TabBar.vue'
+import VisionTool from './components/VisionTool.vue'
+import CodeGenTool from './components/CodeGenTool.vue'
+import TranslateTool from './components/TranslateTool.vue'
+import PromptLibrary from './components/PromptLibrary.vue'
 
 const chatStore = useChat()
 const settingsStore = useSettings()
 
+const activeTab = ref('chat')
 const showSidebar = ref(false)
 const showSettings = ref(false)
 const showTest = ref(false)
@@ -44,6 +50,13 @@ function handleDeleteSession(id: string) {
 function openSettings() {
   showSettings.value = true
   showSidebar.value = false
+}
+
+function switchTab(tab: string) {
+  activeTab.value = tab
+  if (tab === 'chat' && !currentSession.value) {
+    startNewChat()
+  }
 }
 </script>
 
@@ -78,17 +91,17 @@ function openSettings() {
     <div class="app-main">
       <header class="app-header">
         <button class="icon-btn" @click="showSidebar = !showSidebar" aria-label="菜单">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="6" x2="21" y2="6" />
             <line x1="3" y1="12" x2="21" y2="12" />
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
         <span class="app-title">
-          {{ currentSession?.title || 'AI 工具箱' }}
+          {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', translate: '翻译助手', prompts: '模板库' }[activeTab] }}
         </span>
         <button class="icon-btn" @click="showSettings = true" aria-label="设置">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3" />
             <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
           </svg>
@@ -96,20 +109,29 @@ function openSettings() {
       </header>
 
       <main class="app-content">
-        <WelcomeScreen
-          v-if="!currentSession"
-          :chat="chatStore"
-          :use-settings="settingsStore"
-          @start="startNewChat()"
-          @test="showTest = true"
-        />
-        <ChatPanel
-          v-else
-          :chat="chatStore"
-          :session="currentSession!"
-          :settings="settingsStore"
-        />
+        <template v-if="activeTab === 'chat'">
+          <WelcomeScreen
+            v-if="!currentSession"
+            :chat="chatStore"
+            :use-settings="settingsStore"
+            @start="startNewChat()"
+            @test="showTest = true"
+          />
+          <ChatPanel
+            v-else
+            :chat="chatStore"
+            :session="currentSession!"
+            :settings="settingsStore"
+          />
+        </template>
+
+        <VisionTool v-if="activeTab === 'vision'" :settings="settingsStore" />
+        <CodeGenTool v-if="activeTab === 'code'" :settings="settingsStore" />
+        <TranslateTool v-if="activeTab === 'translate'" :settings="settingsStore" />
+        <PromptLibrary v-if="activeTab === 'prompts'" :settings="settingsStore" />
       </main>
+
+      <TabBar :active="activeTab" @change="switchTab" />
     </div>
 
     <div v-if="showSidebar" class="overlay" @click="showSidebar = false" />
@@ -138,15 +160,15 @@ function openSettings() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-primary);
   flex-shrink: 0;
-  min-height: 48px;
+  min-height: 46px;
 }
 
 .app-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.5px;
   max-width: 60%;
@@ -159,8 +181,8 @@ function openSettings() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border: none;
   border-radius: 8px;
   background: transparent;
