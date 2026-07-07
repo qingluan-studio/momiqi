@@ -3,6 +3,9 @@ import { ref } from 'vue'
 import PromptLibrary from './PromptLibrary.vue'
 import DocumentSummarizer from './DocumentSummarizer.vue'
 import ContentGenerator from './ContentGenerator.vue'
+import RegexTool from './RegexTool.vue'
+import SqlTool from './SqlTool.vue'
+import NamingTool from './NamingTool.vue'
 
 defineProps<{
   settings: ReturnType<typeof import('../stores/settings').useSettings>
@@ -14,6 +17,9 @@ const subTabs = [
   { id: 'prompts', label: 'Prompt' },
   { id: 'summary', label: '摘要' },
   { id: 'content', label: '文案' },
+  { id: 'regex', label: '正则' },
+  { id: 'sql', label: 'SQL' },
+  { id: 'naming', label: '命名' },
 ]
 </script>
 
@@ -32,6 +38,9 @@ const subTabs = [
       <PromptLibrary v-if="subTab === 'prompts'" :settings="settings" />
       <DocumentSummarizer v-if="subTab === 'summary'" :settings="settings" />
       <ContentGenerator v-if="subTab === 'content'" :settings="settings" />
+      <RegexTool v-if="subTab === 'regex'" :settings="settings" />
+      <SqlTool v-if="subTab === 'sql'" :settings="settings" />
+      <NamingTool v-if="subTab === 'naming'" :settings="settings" />
     </div>
   </div>
 </template>
@@ -46,22 +55,26 @@ const subTabs = [
 
 .sub-nav {
   display: flex;
-  gap: 4px;
-  padding: 8px 16px;
+  gap: 2px;
+  padding: 6px 10px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-primary);
   flex-shrink: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sub-nav button {
-  padding: 6px 16px;
+  padding: 5px 12px;
   border-radius: 8px;
   border: none;
   background: transparent;
   color: var(--text-tertiary);
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .sub-nav button.active {

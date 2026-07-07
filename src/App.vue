@@ -14,6 +14,8 @@ import VisionTool from './components/VisionTool.vue'
 import CodeGenTool from './components/CodeGenTool.vue'
 import TranslateTool from './components/TranslateTool.vue'
 import ToolBox from './components/ToolBox.vue'
+import AgentSelector from './components/AgentSelector.vue'
+import { type SubAgent } from './stores/agents'
 
 const chatStore = useChat()
 const settingsStore = useSettings()
@@ -22,6 +24,8 @@ const activeTab = ref('chat')
 const showSidebar = ref(false)
 const showSettings = ref(false)
 const showTest = ref(false)
+const showAgents = ref(false)
+const activeAgent = ref<SubAgent | null>(null)
 
 const currentSession = computed(() => chatStore.getCurrentSession())
 
@@ -50,6 +54,19 @@ function handleDeleteSession(id: string) {
 function openSettings() {
   showSettings.value = true
   showSidebar.value = false
+}
+
+function handleSelectAgent(agent: SubAgent) {
+  activeAgent.value = agent
+  showAgents.value = false
+  if (!currentSession.value) {
+    startNewChat()
+  }
+}
+
+function handleToggleDefault() {
+  activeAgent.value = null
+  showAgents.value = false
 }
 
 function switchTab(tab: string) {
@@ -88,6 +105,14 @@ function switchTab(tab: string) {
 
     <TestPanel v-if="showTest" @close="showTest = false" />
 
+    <Transition name="slide">
+      <AgentSelector
+        v-if="showAgents"
+        @select="handleSelectAgent"
+        @toggle-default="handleToggleDefault"
+      />
+    </Transition>
+
     <div class="app-main">
       <header class="app-header">
         <button class="icon-btn" @click="showSidebar = !showSidebar" aria-label="菜单">
@@ -114,14 +139,18 @@ function switchTab(tab: string) {
             v-if="!currentSession"
             :chat="chatStore"
             :use-settings="settingsStore"
+            :active-agent="activeAgent"
             @start="startNewChat()"
             @test="showTest = true"
+            @open-agents="showAgents = true"
           />
           <ChatPanel
             v-else
             :chat="chatStore"
             :session="currentSession!"
             :settings="settingsStore"
+            :active-agent="activeAgent"
+            @open-agents="showAgents = true"
           />
         </template>
 

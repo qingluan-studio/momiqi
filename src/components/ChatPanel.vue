@@ -4,11 +4,17 @@ import type { ChatSession, AIProvider } from '../types'
 import { chatWithFallback } from '../api/router'
 import { renderMarkdown, generateId } from '../utils/markdown'
 import type { AppSettings } from '../types'
+import type { SubAgent } from '../stores/agents'
 
 const props = defineProps<{
   chat: ReturnType<typeof import('../stores/chat').useChat>
   session: ChatSession
   settings: ReturnType<typeof import('../stores/settings').useSettings>
+  activeAgent: SubAgent | null
+}>()
+
+const emit = defineEmits<{
+  openAgents: []
 }>()
 
 const inputText = ref('')
@@ -59,10 +65,14 @@ async function sendMessage() {
   isLoading.value = true
 
   try {
-    const messages = props.session.messages
+    const allMessages = props.session.messages
       .filter((m) => m.role !== 'system')
       .slice(0, -1)
       .map((m) => ({ role: m.role, content: m.content }))
+
+    const messages = props.activeAgent
+      ? [{ role: 'system' as const, content: props.activeAgent.systemPrompt }, ...allMessages]
+      : allMessages
 
     const result = await chatWithFallback(messages, (provider, text) => {
       props.chat.updateLastAssistant(props.session.id, text, provider)
@@ -102,6 +112,13 @@ function handleInput() {
     <div class="provider-badge">
       <span class="dot"></span>
       {{ activeProviderName }}
+      <span v-if="props.activeAgent" class="agent-pill" @click="$emit('openAgents')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path :d="props.activeAgent.icon" />
+        </svg>
+        {{ props.activeAgent.name }}
+      </span>
+      <button v-else class="agent-add-btn" @click="$emit('openAgents')">+ 子代理</button>
     </div>
 
     <div ref="messagesContainer" class="messages-container">
@@ -165,10 +182,39 @@ function handleInput() {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 6px 14px;
   font-size: 12px;
   color: var(--text-tertiary);
   border-bottom: 1px solid var(--border-color);
+}
+
+.agent-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: rgba(99,102,241,0.15);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: auto;
+  max-width: 140px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.agent-add-btn {
+  margin-left: auto;
+  padding: 2px 10px;
+  border-radius: 10px;
+  border: 1px dashed var(--border-color);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  cursor: pointer;
 }
 
 .dot {

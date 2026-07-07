@@ -5,11 +5,13 @@ import { getItem } from '../utils/storage'
 const props = defineProps<{
   chat: ReturnType<typeof import('../stores/chat').useChat>
   useSettings: ReturnType<typeof import('../stores/settings').useSettings>
+  activeAgent: import('../stores/agents').SubAgent | null
 }>()
 
 const emit = defineEmits<{
   start: []
   test: []
+  openAgents: []
 }>()
 
 function handleStart() {
@@ -62,8 +64,13 @@ function handleStart() {
       </div>
 
       <div class="actions">
-        <button class="primary-btn" @click="handleStart">开始对话</button>
-        <button class="secondary-btn" @click="$emit('test')">先测试连接</button>
+        <button class="primary-btn" @click="handleStart">
+          {{ activeAgent ? `以"${activeAgent.name}"身份开始` : '开始对话' }}
+        </button>
+        <button class="secondary-btn" @click="$emit('openAgents')">
+          {{ activeAgent ? '切换子代理' : '选择子代理' }}
+        </button>
+        <button class="tertiary-btn" @click="$emit('test')">先测试连接</button>
       </div>
     </div>
   </div>
@@ -120,4 +127,14 @@ h1 { font-size: 24px; font-weight: 700; margin: 0 0 6px 0; }
 }
 
 .secondary-btn:active { border-color: var(--accent); }
+
+.tertiary-btn {
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  cursor: pointer;
+}
 </style>
