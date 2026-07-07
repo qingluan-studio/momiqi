@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { getItem } from '../utils/storage'
 import type { AIProvider, ProviderConfig } from '../types'
 import { useAgentStore, type SubAgent } from '../stores/agents'
+import { useEvolution } from '../stores/evolution'
 
 defineProps<{
   activeAgent: SubAgent | null
@@ -19,6 +20,7 @@ const providerNames: Record<AIProvider, string> = {
 }
 
 const agentStore = useAgentStore()
+const evolution = useEvolution()
 const settings = getItem<ProviderConfig>('settings', {} as ProviderConfig)
 const activeProvider = getItem<AIProvider>('activeProvider', 'deepseek')
 
@@ -80,6 +82,26 @@ const currentModel = computed(() => settings[activeProvider]?.models?.[0] || '')
             </div>
           </div>
 
+          <div class="aci-section evo-section">
+            <div class="aci-label">AI 进化等级</div>
+            <div class="evo-stage-row">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <path :d="evolution.stageIcons[evolution.state.stage]" />
+              </svg>
+              <span class="evo-stage-label">{{ evolution.getStageInfo().label }}</span>
+            </div>
+            <div class="evo-bar-wrap">
+              <div class="evo-bar-track">
+                <div class="evo-bar-fill" :style="{ width: evolution.getStageInfo().progress + '%' }" />
+              </div>
+              <span class="evo-bar-text">{{ evolution.getStageInfo().progress }}%</span>
+            </div>
+            <div class="evo-stats">
+              <span>累计 {{ evolution.state.totalTokens }} tokens</span>
+              <span>下一级: {{ evolution.getStageInfo().nextLabel }}</span>
+            </div>
+          </div>
+
           <div class="aci-section">
             <div class="aci-label">工具集 (12 项)</div>
             <div class="aci-tags">
@@ -121,6 +143,14 @@ const currentModel = computed(() => settings[activeProvider]?.models?.[0] || '')
 .aci-tag.dim { background: var(--bg-secondary); color: var(--text-tertiary); }
 .aci-empty { font-size: 12px; color: var(--text-tertiary); }
 .aci-prompt { font-size: 12px; color: var(--text-secondary); background: var(--bg-secondary); padding: 8px 10px; border-radius: 8px; line-height: 1.5; max-height: 100px; overflow: auto; }
+.evo-section { padding: 12px; border-radius: 12px; background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.1); }
+.evo-stage-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.evo-stage-label { font-size: 15px; font-weight: 700; color: var(--accent); }
+.evo-bar-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.evo-bar-track { flex: 1; height: 6px; border-radius: 3px; background: var(--bg-tertiary); overflow: hidden; }
+.evo-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), #a855f7); transition: width 0.5s; }
+.evo-bar-text { font-size: 11px; color: var(--text-tertiary); min-width: 32px; }
+.evo-stats { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-tertiary); }
 .aci-slide-enter-active, .aci-slide-leave-active { transition: transform 0.25s ease; }
 .aci-slide-enter-from, .aci-slide-leave-to { transform: translateY(100%); }
 </style>

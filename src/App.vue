@@ -19,10 +19,12 @@ import KnowledgeBase from './components/KnowledgeBase.vue'
 import AgentSelector from './components/AgentSelector.vue'
 import ACIPanel from './components/ACIPanel.vue'
 import { type SubAgent } from './stores/agents'
+import { useEvolution } from './stores/evolution'
 
 const chatStore = useChat()
 const settingsStore = useSettings()
 const promptsStore = usePrompts()
+const evolution = useEvolution()
 
 const activeTab = ref('chat')
 const showSidebar = ref(false)
@@ -181,6 +183,12 @@ function switchTab(tab: string) {
             <rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
           </svg>
         </button>
+        <div class="evo-badge" :title="`${evolution.getStageInfo().label} | 累计 ${evolution.getStageInfo().totalTokens} tokens`">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path :d="evolution.stageIcons[evolution.state.stage]" />
+          </svg>
+          <span class="evo-label">{{ evolution.getStageInfo().label }}</span>
+        </div>
         <button class="icon-btn" @click="showSettings = true" aria-label="设置">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3" />
@@ -283,6 +291,27 @@ function switchTab(tab: string) {
 
 .icon-btn:active {
   background: var(--bg-hover);
+}
+
+.evo-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: rgba(99,102,241,0.1);
+  border: 1px solid rgba(99,102,241,0.2);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: default;
+}
+
+.evo-label {
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-content {

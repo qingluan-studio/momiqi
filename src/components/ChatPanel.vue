@@ -4,6 +4,7 @@ import type { ChatSession, AIProvider } from '../types'
 import { chatWithFallback } from '../api/router'
 import { renderMarkdown, generateId } from '../utils/markdown'
 import type { SubAgent } from '../stores/agents'
+import { useEvolution } from '../stores/evolution'
 
 const props = defineProps<{
   chat: ReturnType<typeof import('../stores/chat').useChat>
@@ -26,6 +27,7 @@ const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const deepThink = ref(false)
 const editingMessageId = ref<string | null>(null)
 const editContent = ref('')
+const evolution = useEvolution()
 
 onMounted(() => {
   if (props.pendingPrompt) {
@@ -89,9 +91,11 @@ async function sendMessage() {
 
     const result = await chatWithFallback(messages, (provider, text, tokens) => {
       props.chat.updateLastAssistant(props.session.id, text, provider, tokens)
+      if (tokens) evolution.addTokens(tokens)
     })
 
     props.chat.updateLastAssistant(props.session.id, result.content, result.provider, result.tokens)
+    if (result.tokens) evolution.addTokens(result.tokens)
   } catch (err: any) {
     props.chat.updateLastAssistant(
       props.session.id,
