@@ -13,6 +13,7 @@ const tabs = [
   { id: 'code', label: '代码', icon: 'M16 18l6-6-6-6 M8 6l-6 6 6 6' },
   { id: 'tools', label: '工具', icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8' },
   { id: 'knowledge', label: '知识库', icon: 'M4 19.5A2.5 2.5 0 016.5 17H20 M8 7v6m4-3v3m4-5v5M6.5 2h11A2.5 2.5 0 0120 4.5v15a2.5 2.5 0 01-2.5 2.5h-11A2.5 2.5 0 013 19.5v-15A2.5 2.5 0 016.5 2z' },
+  { id: 'evolution', label: '进化', icon: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z' },
 ]
 </script>
 

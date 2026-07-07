@@ -16,6 +16,7 @@ import VisionTool from './components/VisionTool.vue'
 import CodeGenTool from './components/CodeGenTool.vue'
 import ToolBox from './components/ToolBox.vue'
 import KnowledgeBase from './components/KnowledgeBase.vue'
+import AIEvolution from './components/AIEvolution.vue'
 import AgentSelector from './components/AgentSelector.vue'
 import ACIPanel from './components/ACIPanel.vue'
 import { type SubAgent } from './stores/agents'
@@ -176,7 +177,7 @@ function switchTab(tab: string) {
           </svg>
         </button>
         <span class="app-title">
-          {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', tools: '工具箱', knowledge: '知识库' }[activeTab] }}
+          {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', tools: '工具箱', knowledge: '知识库', evolution: 'AI 进化之路' }[activeTab] }}
         </span>
         <button class="icon-btn" @click="showACI = true" aria-label="ACI面板">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -226,6 +227,7 @@ function switchTab(tab: string) {
         <CodeGenTool v-if="activeTab === 'code'" :settings="settingsStore" />
         <ToolBox v-if="activeTab === 'tools'" :settings="settingsStore" />
         <KnowledgeBase v-if="activeTab === 'knowledge'" :settings="settingsStore" />
+        <AIEvolution v-if="activeTab === 'evolution'" />
       </main>
 
       <TabBar :active="activeTab" @change="switchTab" />
