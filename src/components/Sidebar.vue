@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import type { ChatSession } from '../types'
 import { formatTime, truncateText } from '../utils/markdown'
 
-defineProps<{
+const props = defineProps<{
   chat: ReturnType<typeof import('../stores/chat').useChat>
   sessions: ChatSession[]
   currentId: string
@@ -15,6 +16,55 @@ defineEmits<{
   delete: [id: string]
   newChat: []
 }>()
+
+const search = ref('')
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const filteredSessions = computed(() => {
+  if (!search.value.trim()) return props.sessions
+  const q = search.value.toLowerCase()
+  return props.sessions.filter(s =>
+    s.title.toLowerCase().includes(q) ||
+    s.messages.some(m => m.content.toLowerCase().includes(q))
+  )
+})
+
+function exportData() {
+  const data: Record<string, unknown> = {}
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key) data[key] = JSON.parse(localStorage.getItem(key) || 'null')
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `ai-toolkit-backup-${new Date().toISOString().slice(0,10)}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function importData() {
+  fileInput.value?.click()
+}
+
+function handleImport(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result as string)
+      for (const [key, value] of Object.entries(data)) {
+        localStorage.setItem(key, JSON.stringify(value))
+      }
+      location.reload()
+    } catch {
+      alert('文件格式错误')
+    }
+  }
+  reader.readAsText(file)
+}
 </script>
 
 <template>
@@ -35,9 +85,16 @@ defineEmits<{
       新建对话
     </button>
 
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <input v-model="search" placeholder="搜索对话..." class="search-input" />
+    </div>
+
     <div class="session-list">
       <div
-        v-for="s in sessions"
+        v-for="s in filteredSessions"
         :key="s.id"
         class="session-item"
         :class="{ active: s.id === currentId }"
@@ -58,8 +115,8 @@ defineEmits<{
           </svg>
         </button>
       </div>
-      <div v-if="sessions.length === 0" class="empty-list">
-        暂无对话记录
+      <div v-if="filteredSessions.length === 0" class="empty-list">
+        {{ search ? '无匹配结果' : '暂无对话记录' }}
       </div>
     </div>
 
@@ -71,6 +128,17 @@ defineEmits<{
         </svg>
         设置
       </button>
+      <div class="backup-row">
+        <button class="backup-btn" @click="exportData">备份</button>
+        <button class="backup-btn" @click="importData">恢复</button>
+        <input
+          ref="fileInput"
+          type="file"
+          accept=".json"
+          style="display:none"
+          @change="handleImport"
+        />
+      </div>
     </div>
   </aside>
 </template>
@@ -136,6 +204,28 @@ defineEmits<{
 .new-chat-btn:active {
   border-color: var(--accent);
 }
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--bg-primary);
+  color: var(--text-tertiary);
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+
+.search-input::placeholder { color: var(--text-tertiary); }
 
 .session-list {
   flex: 1;
@@ -226,4 +316,24 @@ defineEmits<{
 .footer-btn:active {
   background: var(--bg-hover);
 }
+
+.backup-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 0 4px;
+}
+
+.backup-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.backup-btn:active { border-color: var(--accent); color: var(--accent); }
 </style>

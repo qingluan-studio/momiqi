@@ -1,0 +1,23 @@
+{
+  "name": "AI Toolkit",
+  "short_name": "AI Kit",
+  "description": "免费多模型 AI 工具箱 - DeepSeek/Kimi/Gemini/Groq",
+  "start_url": "/momiqi/",
+  "scope": "/momiqi/",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/momiqi/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/momiqi/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
