@@ -52,6 +52,11 @@ export function useSettings() {
     save()
   }
 
+  function setTheme(theme: 'dark' | 'light' | 'system') {
+    settings.theme = theme
+    save()
+  }
+
   function getProviderConfig(provider: AIProvider) {
     return settings.providers[provider]
   }
@@ -70,6 +75,7 @@ export function useSettings() {
     setProviderApiKey,
     setProviderPriority,
     setActiveProvider,
+    setTheme,
     getProviderConfig,
     getEnabledProviders,
   }

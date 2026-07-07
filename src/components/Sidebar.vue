@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { ChatSession } from '../types'
-import { formatTime, truncateText } from '../utils/markdown'
+import { formatTime, truncateText, generateId } from '../utils/markdown'
 
 const props = defineProps<{
   chat: ReturnType<typeof import('../stores/chat').useChat>
@@ -9,21 +9,32 @@ const props = defineProps<{
   currentId: string
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   close: []
   settings: []
   select: [id: string]
   delete: [id: string]
   newChat: []
+  togglePin: [id: string]
 }>()
 
 const search = ref('')
 const fileInput = ref<HTMLInputElement | null>(null)
+const importFileInput = ref<HTMLInputElement | null>(null)
+
+const sortedSessions = computed(() => {
+  const arr = [...props.sessions]
+  arr.sort((a, b) => {
+    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
+    return b.updatedAt - a.updatedAt
+  })
+  return arr
+})
 
 const filteredSessions = computed(() => {
-  if (!search.value.trim()) return props.sessions
+  if (!search.value.trim()) return sortedSessions.value
   const q = search.value.toLowerCase()
-  return props.sessions.filter(s =>
+  return sortedSessions.value.filter(s =>
     s.title.toLowerCase().includes(q) ||
     s.messages.some(m => m.content.toLowerCase().includes(q))
   )
@@ -65,6 +76,69 @@ function handleImport(e: Event) {
   }
   reader.readAsText(file)
 }
+
+function openImportChat() {
+  importFileInput.value?.click()
+}
+
+function handleImportChat(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    const text = reader.result as string
+    const messages: { role: 'user' | 'assistant'; content: string }[] = []
+    const lines = text.split('\n')
+    let currentRole: 'user' | 'assistant' | null = null
+    let currentContent = ''
+    let title = '导入的对话'
+
+    for (const line of lines) {
+      if (line.startsWith('## 我')) {
+        if (currentRole && currentContent.trim()) {
+          messages.push({ role: currentRole as 'user' | 'assistant', content: currentContent.trim() })
+        }
+        currentRole = 'user'
+        currentContent = ''
+        continue
+      }
+      if (line.startsWith('## AI') || line.startsWith('## DeepSeek') || line.startsWith('## Gemini') || line.startsWith('## Groq') || line.startsWith('## Kimi')) {
+        if (currentRole && currentContent.trim()) {
+          messages.push({ role: currentRole as 'user' | 'assistant', content: currentContent.trim() })
+        }
+        currentRole = 'assistant'
+        currentContent = ''
+        continue
+      }
+      if (line.startsWith('# ')) {
+        title = line.slice(2).trim() || title
+        continue
+      }
+      if (line === '---') continue
+      currentContent += line + '\n'
+    }
+    if (currentRole && currentContent.trim()) {
+      messages.push({ role: currentRole as 'user' | 'assistant', content: currentContent.trim() })
+    }
+
+    if (messages.length === 0) {
+      alert('未识别到对话内容，请确认文件格式为 Markdown 导出的对话记录。')
+      return
+    }
+
+    const session = props.chat.createSession('deepseek', 'deepseek-chat')
+    session.title = title
+    for (const m of messages) {
+      props.chat.addMessage(session.id, {
+        id: generateId(),
+        role: m.role,
+        content: m.content,
+        timestamp: Date.now(),
+      })
+    }
+  }
+  reader.readAsText(file)
+}
 </script>
 
 <template>
@@ -97,9 +171,14 @@ function handleImport(e: Event) {
         v-for="s in filteredSessions"
         :key="s.id"
         class="session-item"
-        :class="{ active: s.id === currentId }"
+        :class="{ active: s.id === currentId, pinned: s.pinned }"
         @click="$emit('select', s.id)"
       >
+        <button class="pin-btn" :class="{ on: s.pinned }" @click.stop="$emit('togglePin', s.id)" :aria-label="s.pinned ? '取消置顶' : '置顶'">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z" />
+          </svg>
+        </button>
         <div class="session-info">
           <div class="session-title">{{ truncateText(s.title, 25) }}</div>
           <div class="session-time">{{ formatTime(s.updatedAt) }}</div>
@@ -131,12 +210,20 @@ function handleImport(e: Event) {
       <div class="backup-row">
         <button class="backup-btn" @click="exportData">备份</button>
         <button class="backup-btn" @click="importData">恢复</button>
+        <button class="backup-btn" @click="openImportChat">导入</button>
         <input
           ref="fileInput"
           type="file"
           accept=".json"
           style="display:none"
           @change="handleImport"
+        />
+        <input
+          ref="importFileInput"
+          type="file"
+          accept=".md"
+          style="display:none"
+          @change="handleImportChat"
         />
       </div>
     </div>
@@ -247,6 +334,27 @@ function handleImport(e: Event) {
 .session-item:active, .session-item.active {
   background: var(--bg-hover);
 }
+
+.pin-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.pin-btn.on { opacity: 1; color: var(--accent); }
+
+.session-item:active .pin-btn { opacity: 1; }
 
 .session-info {
   flex: 1;

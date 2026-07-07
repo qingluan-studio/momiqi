@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import type { ChatSession, AIProvider } from '../types'
 import { chatWithFallback } from '../api/router'
 import { renderMarkdown, generateId } from '../utils/markdown'
-import type { AppSettings } from '../types'
 import type { SubAgent } from '../stores/agents'
 
 const props = defineProps<{
@@ -11,10 +10,12 @@ const props = defineProps<{
   session: ChatSession
   settings: ReturnType<typeof import('../stores/settings').useSettings>
   activeAgent: SubAgent | null
+  pendingPrompt: string
 }>()
 
 const emit = defineEmits<{
   openAgents: []
+  openPrompts: []
 }>()
 
 const inputText = ref('')
@@ -23,6 +24,15 @@ const errorText = ref('')
 const messagesContainer = ref<HTMLElement | null>(null)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const deepThink = ref(false)
+const editingMessageId = ref<string | null>(null)
+const editContent = ref('')
+
+onMounted(() => {
+  if (props.pendingPrompt) {
+    inputText.value = props.pendingPrompt
+    textareaRef.value?.focus()
+  }
+})
 
 const activeProviderName = computed(() => {
   const p = props.settings.settings.activeProvider
@@ -113,6 +123,31 @@ function copyMessage(content: string) {
   navigator.clipboard.writeText(content).catch(() => {})
 }
 
+function startEditMessage(msgId: string, content: string) {
+  editingMessageId.value = msgId
+  editContent.value = content
+}
+
+function cancelEdit() {
+  editingMessageId.value = null
+  editContent.value = ''
+}
+
+function submitEdit() {
+  const text = editContent.value.trim()
+  if (!text || !editingMessageId.value) return
+  const session = props.session
+  const idx = session.messages.findIndex(m => m.id === editingMessageId.value)
+  if (idx < 0) return
+
+  session.messages.splice(idx + 1)
+  session.messages[idx].content = deepThink.value ? `[深度思考模式]\n${text}` : text
+  props.chat.save()
+  editingMessageId.value = null
+  editContent.value = ''
+  sendMessage()
+}
+
 function handleContainerClick(e: Event) {
   const btn = (e.target as HTMLElement).closest('.code-copy-btn') as HTMLButtonElement | null
   if (!btn) return
@@ -197,20 +232,34 @@ function exportChat() {
           {{ msg.role === 'user' ? '我' : 'AI' }}
         </div>
         <div class="msg-body">
-          <div class="msg-content" v-html="renderMarkdown(msg.content)" />
-          <div class="msg-actions">
-            <button class="msg-action-btn" @click="copyMessage(msg.content)">复制</button>
-            <button
-              v-if="msg.role === 'assistant' && msg === session.messages[session.messages.length - 1]"
-              class="msg-action-btn"
-              :disabled="isLoading"
-              @click="regenerate"
-            >重新生成</button>
-          </div>
-          <div class="msg-meta">
-            <span v-if="msg.provider">{{ { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq', kimi: 'Kimi' }[msg.provider] }}</span>
-            <span v-if="msg.tokens" class="msg-tokens">{{ msg.tokens }} tokens</span>
-          </div>
+          <template v-if="editingMessageId === msg.id">
+            <textarea v-model="editContent" class="edit-textarea" rows="3" @keydown.enter.exact.prevent="submitEdit" @keydown.escape="cancelEdit" />
+            <div class="edit-actions">
+              <button class="edit-btn cancel" @click="cancelEdit">取消</button>
+              <button class="edit-btn save" @click="submitEdit">重新发送</button>
+            </div>
+          </template>
+          <template v-else>
+            <div
+              class="msg-content"
+              :class="{ editable: msg.role === 'user' }"
+              v-html="renderMarkdown(msg.content)"
+              @click="msg.role === 'user' && startEditMessage(msg.id, msg.content)"
+            />
+            <div class="msg-actions">
+              <button class="msg-action-btn" @click="copyMessage(msg.content)">复制</button>
+              <button
+                v-if="msg.role === 'assistant' && msg === session.messages[session.messages.length - 1]"
+                class="msg-action-btn"
+                :disabled="isLoading"
+                @click="regenerate"
+              >重新生成</button>
+            </div>
+            <div class="msg-meta">
+              <span v-if="msg.provider">{{ { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq', kimi: 'Kimi' }[msg.provider] }}</span>
+              <span v-if="msg.tokens" class="msg-tokens">{{ msg.tokens }} tokens</span>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -220,6 +269,12 @@ function exportChat() {
     </div>
 
     <div class="input-area">
+      <button class="prompt-btn" @click="$emit('openPrompts')" title="Prompt 模板">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+          <polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
+        </svg>
+      </button>
       <textarea
         ref="textareaRef"
         v-model="inputText"
@@ -490,6 +545,50 @@ function exportChat() {
   font-size: 10px;
 }
 
+.msg-content.editable:active {
+  opacity: 0.7;
+}
+
+.edit-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--accent);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  outline: none;
+  font-family: inherit;
+  resize: none;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.edit-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.edit-btn.cancel {
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.edit-btn.save {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+}
+
 .msg-actions {
   display: flex;
   gap: 6px;
@@ -528,6 +627,22 @@ function exportChat() {
   border-top: 1px solid var(--border-color);
   background: var(--bg-primary);
 }
+
+.prompt-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.prompt-btn:active { border-color: var(--accent); color: var(--accent); }
 
 .chat-input {
   flex: 1;

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useChat } from './stores/chat'
 import { useSettings } from './stores/settings'
+import { usePrompts } from './stores/prompts'
 import { getItem } from './utils/storage'
 import type { AIProvider } from './types'
 import Sidebar from './components/Sidebar.vue'
 import ChatPanel from './components/ChatPanel.vue'
+import PromptLibrary from './components/PromptLibrary.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import WelcomeScreen from './components/WelcomeScreen.vue'
 import TestPanel from './components/TestPanel.vue'
@@ -20,6 +22,7 @@ import { type SubAgent } from './stores/agents'
 
 const chatStore = useChat()
 const settingsStore = useSettings()
+const promptsStore = usePrompts()
 
 const activeTab = ref('chat')
 const showSidebar = ref(false)
@@ -28,6 +31,8 @@ const showTest = ref(false)
 const showAgents = ref(false)
 const showACI = ref(false)
 const activeAgent = ref<SubAgent | null>(null)
+const showPromptLib = ref(false)
+const pendingPrompt = ref('')
 
 const currentSession = computed(() => chatStore.getCurrentSession())
 
@@ -72,6 +77,35 @@ function handleToggleDefault() {
   showAgents.value = false
 }
 
+function handleTogglePin(id: string) {
+  chatStore.togglePin(id)
+}
+
+function applyTheme(theme: string) {
+  const root = document.documentElement
+  const isLight = theme === 'light' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches)
+
+  root.style.setProperty('--bg-primary', isLight ? '#ffffff' : '#111827')
+  root.style.setProperty('--bg-secondary', isLight ? '#f9fafb' : '#1f2937')
+  root.style.setProperty('--bg-tertiary', isLight ? '#f3f4f6' : '#374151')
+  root.style.setProperty('--bg-hover', isLight ? '#e5e7eb' : '#374151')
+  root.style.setProperty('--text-primary', isLight ? '#111827' : '#f9fafb')
+  root.style.setProperty('--text-secondary', isLight ? '#4b5563' : '#d1d5db')
+  root.style.setProperty('--text-tertiary', isLight ? '#9ca3af' : '#6b7280')
+  root.style.setProperty('--border-color', isLight ? '#e5e7eb' : '#374151')
+  root.style.setProperty('--accent', '#6366f1')
+  root.style.setProperty('--danger', '#ef4444')
+  root.style.setProperty('color-scheme', isLight ? 'light' : 'dark')
+}
+
+onMounted(() => applyTheme(settingsStore.settings.theme))
+watch(() => settingsStore.settings.theme, applyTheme)
+
+const themeMediaQuery = window.matchMedia('(prefers-color-scheme: light)')
+themeMediaQuery.addEventListener('change', () => {
+  if (settingsStore.settings.theme === 'system') applyTheme('system')
+})
+
 function switchTab(tab: string) {
   activeTab.value = tab
   if (tab === 'chat' && !currentSession.value) {
@@ -95,6 +129,7 @@ function switchTab(tab: string) {
         @select="handleSelectSession"
         @delete="handleDeleteSession"
         @new-chat="startNewChat"
+        @toggle-pin="handleTogglePin"
       />
     </Transition>
 
@@ -122,6 +157,12 @@ function switchTab(tab: string) {
         @toggle-default="handleToggleDefault"
       />
     </Transition>
+
+    <PromptLibrary
+      v-if="showPromptLib"
+      @close="showPromptLib = false"
+      @select="(content) => { pendingPrompt = content; showPromptLib = false }"
+    />
 
     <div class="app-main">
       <header class="app-header">
@@ -155,9 +196,11 @@ function switchTab(tab: string) {
             :chat="chatStore"
             :use-settings="settingsStore"
             :active-agent="activeAgent"
+            :pending-prompt="pendingPrompt"
             @start="startNewChat()"
             @test="showTest = true"
             @open-agents="showAgents = true"
+            @open-prompts="showPromptLib = true"
           />
           <ChatPanel
             v-else
@@ -165,7 +208,9 @@ function switchTab(tab: string) {
             :session="currentSession!"
             :settings="settingsStore"
             :active-agent="activeAgent"
+            :pending-prompt="pendingPrompt"
             @open-agents="showAgents = true"
+            @open-prompts="showPromptLib = true"
           />
         </template>
 

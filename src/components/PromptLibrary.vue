@@ -1,233 +1,278 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { getItem, setItem } from '../utils/storage'
-import { generateId } from '../utils/markdown'
-import { chatWithFallback } from '../api/router'
+import { usePrompts } from '../stores/prompts'
+import type { PromptTemplate } from '../types'
 
-defineProps<{
-  settings: ReturnType<typeof import('../stores/settings').useSettings>
-}>()
+const emit = defineEmits<{ close: []; select: [content: string] }>()
 
-interface PromptTemplate {
-  id: string
-  title: string
-  content: string
-  category: string
-  createdAt: number
+const store = usePrompts()
+const activeCategory = ref<string>('全部')
+const showNewForm = ref(false)
+const newTitle = ref('')
+const newContent = ref('')
+const newCategory = ref<'创作' | '编程' | '翻译' | '分析' | '效率' | '通用'>('通用')
+
+const allCategories = computed(() => ['全部', ...store.categories])
+
+const filtered = computed(() =>
+  activeCategory.value === '全部'
+    ? store.templates
+    : store.templates.filter(t => t.category === activeCategory.value)
+)
+
+function selectTemplate(t: PromptTemplate) {
+  emit('select', t.content)
+  emit('close')
 }
 
-const templates = ref<PromptTemplate[]>(getItem<PromptTemplate[]>('prompts', []))
-const showAdd = ref(false)
-const editTitle = ref('')
-const editContent = ref('')
-const editCategory = ref('通用')
-const result = ref('')
-const resultLoading = ref(false)
-const editingId = ref<string | null>(null)
-
-const categories = ['通用', '代码', '写作', '翻译', '分析', '创意', '自定义']
-
-function save() {
-  setItem('prompts', templates.value)
-}
-
-function addPrompt() {
-  if (!editTitle.value.trim() || !editContent.value.trim()) return
-  templates.value.unshift({
-    id: generateId(),
-    title: editTitle.value.trim(),
-    content: editContent.value.trim(),
-    category: editCategory.value,
-    createdAt: Date.now(),
+function saveNew() {
+  if (!newTitle.value.trim() || !newContent.value.trim()) return
+  store.addTemplate({
+    title: newTitle.value.trim(),
+    content: newContent.value.trim(),
+    category: newCategory.value,
   })
-  editTitle.value = ''
-  editContent.value = ''
-  editCategory.value = '通用'
-  showAdd.value = false
-  save()
+  newTitle.value = ''
+  newContent.value = ''
+  showNewForm.value = false
 }
 
-function deletePrompt(id: string) {
-  const idx = templates.value.findIndex(t => t.id === id)
-  if (idx >= 0) {
-    templates.value.splice(idx, 1)
-    save()
-  }
-}
-
-async function runPrompt(template: PromptTemplate) {
-  resultLoading.value = true
-  result.value = ''
-  try {
-    const res = await chatWithFallback([{ role: 'user', content: template.content }])
-    result.value = res.content
-  } catch (err: any) {
-    result.value = '错误: ' + (err.message || '执行失败')
-  } finally {
-    resultLoading.value = false
-  }
-}
-
-const defaultPrompts: PromptTemplate[] = [
-  { id: 'builtin-1', title: '代码审查', content: '请审查以下代码，指出潜在的问题和改进建议：\n\n', category: '代码', createdAt: 0 },
-  { id: 'builtin-2', title: '中英翻译', content: '请将以下中文翻译成英文，保持专业术语准确：\n\n', category: '翻译', createdAt: 0 },
-  { id: 'builtin-3', title: '文章总结', content: '请用3-5句话总结以下内容的核心要点：\n\n', category: '分析', createdAt: 0 },
-  { id: 'builtin-4', title: '周报生成', content: '根据以下工作内容，帮我生成一份简洁的周报：\n\n本周完成：\n下周计划：\n问题与风险：\n\n输出格式：Markdown', category: '写作', createdAt: 0 },
-]
-
-const allPrompts = computed(() => {
-  const userIds = new Set(templates.value.map(t => t.id))
-  const builtins = defaultPrompts.filter(p => !userIds.has(p.id))
-  return [...templates.value, ...builtins]
-})
 </script>
 
 <template>
-  <div class="prompt-tool">
-    <div class="tool-header">
-      <h2>Prompt 模板</h2>
-      <button class="add-btn" @click="showAdd = !showAdd; editingId = null">
-        {{ showAdd ? '取消' : '+ 新建' }}
-      </button>
-    </div>
-
-    <form v-if="showAdd" class="add-form" @submit.prevent="addPrompt">
-      <input v-model="editTitle" class="form-input" placeholder="模板名称" />
-      <textarea v-model="editContent" class="form-textarea" placeholder="Prompt 内容..." rows="3" />
-      <select v-model="editCategory" class="form-select">
-        <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-      </select>
-      <button type="submit" class="form-btn">保存模板</button>
-    </form>
-
-    <div class="prompt-list">
-      <div
-        v-for="t in allPrompts"
-        :key="t.id"
-        class="prompt-card"
-        @click="runPrompt(t)"
-      >
-        <div class="card-top">
-          <span class="card-title">{{ t.title }}</span>
-          <span class="card-cat">{{ t.category }}</span>
-        </div>
-        <div class="card-preview">{{ t.content.slice(0, 80) }}...</div>
-        <button
-          v-if="t.id.startsWith('builtin-')"
-          class="card-action save-action"
-          @click.stop="editTitle = t.title; editContent = t.content; editCategory = t.category; showAdd = true"
-        >收藏</button>
-        <button
-          v-else
-          class="card-action del-action"
-          @click.stop="deletePrompt(t.id)"
-        >删除</button>
+  <div class="prompt-overlay" @click.self="$emit('close')">
+    <div class="prompt-panel">
+      <div class="pp-header">
+        <h3>Prompt 模板</h3>
+        <button class="icon-btn" @click="$emit('close')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
       </div>
-    </div>
 
-    <div v-if="result" class="result-card">
-      <div v-if="resultLoading" class="loading-text">执行中...</div>
-      <div v-else class="result-text" v-text="result" />
+      <div class="pp-categories">
+        <button
+          v-for="cat in allCategories"
+          :key="cat"
+          class="cat-btn"
+          :class="{ active: activeCategory === cat }"
+          @click="activeCategory = cat"
+        >{{ cat }}</button>
+      </div>
+
+      <div class="pp-list">
+        <div
+          v-for="t in filtered"
+          :key="t.id"
+          class="pp-item"
+          @click="selectTemplate(t)"
+        >
+          <div class="pp-item-header">
+            <span class="pp-item-title">{{ t.title }}</span>
+            <span class="pp-item-cat">{{ t.category }}</span>
+            <button
+              v-if="!t.isBuiltin"
+              class="pp-del-btn"
+              @click.stop="store.deleteTemplate(t.id)"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+              </svg>
+            </button>
+          </div>
+          <div class="pp-item-preview">{{ t.content.slice(0, 80) }}{{ t.content.length > 80 ? '...' : '' }}</div>
+        </div>
+      </div>
+
+      <div class="pp-footer">
+        <button v-if="!showNewForm" class="add-btn" @click="showNewForm = true">+ 新建模板</button>
+        <div v-else class="new-form">
+          <input v-model="newTitle" placeholder="模板名称" class="form-input" />
+          <select v-model="newCategory" class="form-select">
+            <option v-for="c in store.categories" :key="c" :value="c">{{ c }}</option>
+          </select>
+          <textarea v-model="newContent" placeholder="模板内容，用 {{变量}} 做占位符" class="form-textarea" rows="4" />
+          <div class="form-actions">
+            <button class="btn-cancel" @click="showNewForm = false">取消</button>
+            <button class="btn-save" @click="saveNew">保存</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.prompt-tool {
-  padding: 16px;
+.prompt-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  overflow-y: auto;
-  height: 100%;
+  align-items: flex-end;
+  justify-content: center;
 }
 
-.tool-header { display: flex; align-items: center; justify-content: space-between; }
-.tool-header h2 { margin: 0; font-size: 18px; }
+.prompt-panel {
+  background: var(--bg-secondary);
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pp-header h3 { margin: 0; font-size: 16px; }
+
+.icon-btn {
+  width: 32px; height: 32px; border: none; border-radius: 8px;
+  background: transparent; color: var(--text-secondary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.pp-categories {
+  display: flex;
+  gap: 6px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cat-btn {
+  padding: 5px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cat-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.pp-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pp-item {
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.pp-item:active { background: var(--bg-hover); }
+
+.pp-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.pp-item-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.pp-item-cat {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+}
+
+.pp-del-btn {
+  width: 22px; height: 22px; border: none; border-radius: 4px;
+  background: transparent; color: var(--text-tertiary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.pp-item-preview {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pp-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color);
+}
 
 .add-btn {
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--accent);
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px dashed var(--border-color);
   background: transparent;
-  color: var(--accent);
-  font-size: 13px;
+  color: var(--text-secondary);
+  font-size: 14px;
   cursor: pointer;
 }
 
-.add-form {
+.new-form {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 14px;
-  background: var(--bg-secondary);
-  border-radius: 12px;
 }
 
-.form-input, .form-textarea, .form-select {
-  width: 100%;
+.form-input, .form-select, .form-textarea {
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--border-color);
   background: var(--bg-primary);
   color: var(--text-primary);
   font-size: 13px;
-  font-family: inherit;
-  box-sizing: border-box;
+  outline: none;
 }
 
-.form-textarea { resize: vertical; }
+.form-textarea { resize: vertical; font-family: inherit; }
 
-.form-btn {
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  background: var(--accent);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
+.form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
-.prompt-list { display: flex; flex-direction: column; gap: 8px; }
-
-.prompt-card {
-  padding: 12px 14px;
-  background: var(--bg-secondary);
-  border-radius: 10px;
-  cursor: pointer;
-  position: relative;
-}
-
-.prompt-card:active { opacity: 0.8; }
-
-.card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-
-.card-title { font-size: 14px; font-weight: 600; }
-.card-cat { font-size: 10px; padding: 2px 8px; border-radius: 6px; background: rgba(99,102,241,0.1); color: var(--accent); }
-.card-preview { font-size: 12px; color: var(--text-tertiary); }
-
-.card-action {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  padding: 3px 10px;
-  border-radius: 6px;
+.btn-cancel {
+  padding: 6px 16px; border-radius: 8px;
   border: 1px solid var(--border-color);
-  background: var(--bg-primary);
-  font-size: 11px;
-  cursor: pointer;
+  background: transparent; color: var(--text-secondary);
+  font-size: 13px; cursor: pointer;
 }
 
-.save-action { color: var(--accent); }
-.del-action { color: #ef4444; }
-
-.result-card {
-  padding: 14px;
-  background: var(--bg-secondary);
-  border-radius: 12px;
+.btn-save {
+  padding: 6px 16px; border-radius: 8px; border: none;
+  background: var(--accent); color: #fff;
+  font-size: 13px; cursor: pointer;
 }
-
-.loading-text { font-size: 13px; color: var(--text-tertiary); }
-.result-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
 </style>

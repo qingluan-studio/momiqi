@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import type { AIProvider } from '../types'
 import { getItem } from '../utils/storage'
 
@@ -6,17 +7,25 @@ const props = defineProps<{
   chat: ReturnType<typeof import('../stores/chat').useChat>
   useSettings: ReturnType<typeof import('../stores/settings').useSettings>
   activeAgent: import('../stores/agents').SubAgent | null
+  pendingPrompt: string
 }>()
 
 const emit = defineEmits<{
   start: []
   test: []
   openAgents: []
+  openPrompts: []
 }>()
 
 function handleStart() {
   emit('start')
 }
+
+onMounted(() => {
+  if (props.pendingPrompt) {
+    handleStart()
+  }
+})
 </script>
 
 <template>

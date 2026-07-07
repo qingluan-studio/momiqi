@@ -71,6 +71,13 @@ export function useChat() {
     return findSession(currentSessionId.value)
   }
 
+  function togglePin(id: string) {
+    const s = findSession(id)
+    if (!s) return
+    s.pinned = !s.pinned
+    save()
+  }
+
   function switchSession(id: string) {
     currentSessionId.value = id
     save()
@@ -85,6 +92,7 @@ export function useChat() {
     deleteSession,
     getCurrentSession,
     switchSession,
+    togglePin,
     findSession,
     save,
   }

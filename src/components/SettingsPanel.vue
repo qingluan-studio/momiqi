@@ -115,6 +115,19 @@ function handleModel(provider: AIProvider, model: string) {
         </div>
       </div>
 
+      <div class="theme-section">
+        <h3>主题</h3>
+        <div class="theme-options">
+          <button
+            v-for="t in [{k:'dark',l:'深色'},{k:'light',l:'浅色'},{k:'system',l:'跟随系统'}]"
+            :key="t.k"
+            class="theme-btn"
+            :class="{ active: settings.settings.theme === t.k }"
+            @click="settings.setTheme(t.k as 'dark'|'light'|'system')"
+          >{{ t.l }}</button>
+        </div>
+      </div>
+
       <div class="settings-footer">
         <button class="save-btn" @click="emit('close')">完成</button>
       </div>
@@ -271,6 +284,33 @@ function handleModel(provider: AIProvider, model: string) {
 
 .settings-footer {
   margin-top: 16px;
+}
+
+.theme-section h3 {
+  font-size: 14px;
+  margin: 16px 0 8px;
+}
+
+.theme-options {
+  display: flex;
+  gap: 8px;
+}
+
+.theme-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.theme-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(99,102,241,0.1);
 }
 
 .save-btn {

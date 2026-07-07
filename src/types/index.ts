@@ -17,6 +17,15 @@ export interface ChatSession {
   updatedAt: number
   provider: AIProvider
   model: string
+  pinned?: boolean
+}
+
+export interface PromptTemplate {
+  id: string
+  title: string
+  content: string
+  category: '创作' | '编程' | '翻译' | '分析' | '效率' | '通用'
+  isBuiltin?: boolean
 }
 
 export interface ProviderSettings {
