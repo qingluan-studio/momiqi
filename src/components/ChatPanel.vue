@@ -22,10 +22,11 @@ const isLoading = ref(false)
 const errorText = ref('')
 const messagesContainer = ref<HTMLElement | null>(null)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
+const deepThink = ref(false)
 
 const activeProviderName = computed(() => {
   const p = props.settings.settings.activeProvider
-  const names: Record<string, string> = { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq' }
+  const names: Record<string, string> = { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq', kimi: 'Kimi' }
   return names[p] || p
 })
 
@@ -49,7 +50,7 @@ async function sendMessage() {
   const userMsg = {
     id: generateId(),
     role: 'user' as const,
-    content: text,
+    content: deepThink.value ? `[深度思考模式]\n${text}` : text,
     timestamp: Date.now(),
   }
   props.chat.addMessage(props.session.id, userMsg)
@@ -72,7 +73,9 @@ async function sendMessage() {
 
     const messages = props.activeAgent
       ? [{ role: 'system' as const, content: props.activeAgent.systemPrompt }, ...allMessages]
-      : allMessages
+      : deepThink.value
+        ? [{ role: 'system' as const, content: '请对每个问题给出详细的推理过程、分析步骤和最终结论。中文回答。' }, ...allMessages]
+        : allMessages
 
     const result = await chatWithFallback(messages, (provider, text) => {
       props.chat.updateLastAssistant(props.session.id, text, provider)
@@ -105,6 +108,22 @@ function handleInput() {
     el.style.height = Math.min(el.scrollHeight, 120) + 'px'
   }
 }
+
+function exportChat() {
+  const providerLabel: Record<string, string> = { deepseek: 'DeepSeek', gemini: 'Gemini', groq: 'Groq', kimi: 'Kimi' }
+  const lines = props.session.messages.map(m => {
+    const author = m.role === 'user' ? '我' : (m.provider ? providerLabel[m.provider] || 'AI' : 'AI')
+    return `## ${author}\n\n${m.content}\n`
+  })
+  const md = `# ${props.session.title}\n\n` + lines.join('\n---\n\n')
+  const blob = new Blob([md], { type: 'text/markdown' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${props.session.title || 'chat'}.md`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -119,6 +138,16 @@ function handleInput() {
         {{ props.activeAgent.name }}
       </span>
       <button v-else class="agent-add-btn" @click="$emit('openAgents')">+ 子代理</button>
+      <div class="header-actions">
+        <button class="think-toggle" :class="{ on: deepThink }" @click="deepThink = !deepThink">
+          深度思考{{ deepThink ? ' ON' : ' OFF' }}
+        </button>
+        <button class="export-btn" @click="exportChat" title="导出为 Markdown">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div ref="messagesContainer" class="messages-container">
@@ -207,7 +236,6 @@ function handleInput() {
 }
 
 .agent-add-btn {
-  margin-left: auto;
   padding: 2px 10px;
   border-radius: 10px;
   border: 1px dashed var(--border-color);
@@ -215,6 +243,42 @@ function handleInput() {
   color: var(--text-tertiary);
   font-size: 11px;
   cursor: pointer;
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.think-toggle {
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.think-toggle.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(99,102,241,0.1);
+}
+
+.export-btn {
+  width: 26px; height: 26px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dot {

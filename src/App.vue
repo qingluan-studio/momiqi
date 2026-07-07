@@ -15,6 +15,7 @@ import CodeGenTool from './components/CodeGenTool.vue'
 import ToolBox from './components/ToolBox.vue'
 import KnowledgeBase from './components/KnowledgeBase.vue'
 import AgentSelector from './components/AgentSelector.vue'
+import ACIPanel from './components/ACIPanel.vue'
 import { type SubAgent } from './stores/agents'
 
 const chatStore = useChat()
@@ -25,6 +26,7 @@ const showSidebar = ref(false)
 const showSettings = ref(false)
 const showTest = ref(false)
 const showAgents = ref(false)
+const showACI = ref(false)
 const activeAgent = ref<SubAgent | null>(null)
 
 const currentSession = computed(() => chatStore.getCurrentSession())
@@ -106,6 +108,13 @@ function switchTab(tab: string) {
 
     <TestPanel v-if="showTest" @close="showTest = false" />
 
+    <ACIPanel
+      :active-agent="activeAgent"
+      :active-tab="activeTab"
+      :show="showACI"
+      @close="showACI = false"
+    />
+
     <Transition name="slide">
       <AgentSelector
         v-if="showAgents"
@@ -126,6 +135,11 @@ function switchTab(tab: string) {
         <span class="app-title">
           {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', tools: '工具箱', knowledge: '知识库' }[activeTab] }}
         </span>
+        <button class="icon-btn" @click="showACI = true" aria-label="ACI面板">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
+          </svg>
+        </button>
         <button class="icon-btn" @click="showSettings = true" aria-label="设置">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3" />

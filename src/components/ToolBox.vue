@@ -9,6 +9,9 @@ import NamingTool from './NamingTool.vue'
 import CommitGenTool from './CommitGenTool.vue'
 import SearchTool from './SearchTool.vue'
 import TranslateTool from './TranslateTool.vue'
+import FileGenTool from './FileGenTool.vue'
+import MultiViewTool from './MultiViewTool.vue'
+import WorkflowTool from './WorkflowTool.vue'
 
 defineProps<{
   settings: ReturnType<typeof import('../stores/settings').useSettings>
@@ -26,6 +29,9 @@ const subTabs = [
   { id: 'commit', label: 'Commit' },
   { id: 'search', label: '搜索' },
   { id: 'translate', label: '翻译' },
+  { id: 'filegen', label: '文件' },
+  { id: 'multiview', label: '多角度' },
+  { id: 'workflow', label: '工作流' },
 ]
 </script>
 
@@ -50,6 +56,9 @@ const subTabs = [
       <CommitGenTool v-if="subTab === 'commit'" :settings="settings" />
       <SearchTool v-if="subTab === 'search'" :settings="settings" />
       <TranslateTool v-if="subTab === 'translate'" :settings="settings" />
+      <FileGenTool v-if="subTab === 'filegen'" :settings="settings" />
+      <MultiViewTool v-if="subTab === 'multiview'" :settings="settings" />
+      <WorkflowTool v-if="subTab === 'workflow'" :settings="settings" />
     </div>
   </div>
 </template>
