@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { chatWithFallback } from '../api/router'
+import { computeCognitiveInvariants, type InvariantsResult } from '../utils/cognitive-invariants'
 
 defineProps<{
   settings?: ReturnType<typeof import('../stores/settings').useSettings>
@@ -61,10 +62,21 @@ const techs = [
     color: '#ffd200',
     interactive: true,
   },
+  {
+    id: 'invariant',
+    code: 'T6',
+    name: '认知几何不变量',
+    subtitle: 'Project Invariant',
+    icon: '📐',
+    desc: '用数学不变量度量认知质量，零人工干预',
+    status: '可交互',
+    color: '#f472b6',
+    interactive: true,
+  },
 ]
 
 function openTech(id: string) {
-  if (id === 'prism' || id === 'genesis') {
+  if (id === 'prism' || id === 'genesis' || id === 'invariant') {
     subTab.value = id
   }
 }
@@ -198,9 +210,69 @@ function copyResult(text: string) {
   navigator.clipboard.writeText(text).catch(() => {})
 }
 
+// ===== T6 认知几何不变量 =====
+const invariantText = ref('')
+const invariantResult = ref<InvariantsResult | null>(null)
+const invariantComputing = ref(false)
+
+function computeInvariants() {
+  if (!invariantText.value.trim()) return
+  invariantComputing.value = true
+  setTimeout(() => {
+    invariantResult.value = computeCognitiveInvariants(invariantText.value)
+    invariantComputing.value = false
+  }, 30)
+}
+
+watch(invariantText, () => {
+  if (invariantText.value.length > 50) {
+    computeInvariants()
+  }
+})
+
+const radarPoints = computed(() => {
+  if (!invariantResult.value) return []
+  const r = invariantResult.value
+  const norm = (v: number, max: number) => Math.min(1, v / max)
+  const axes = [
+    { label: 'ITC 拓扑', value: norm(r.itc, 5) },
+    { label: 'SCS 曲率', value: norm(r.scs, 3.5) },
+    { label: 'IEC 熵', value: r.iec },
+    { label: 'PFFT 投影', value: r.pfft },
+  ]
+  const cx = 120, cy = 120, maxR = 90
+  return axes.map((a, i) => {
+    const angle = (Math.PI * 2 * i) / axes.length - Math.PI / 2
+    const r = a.value * maxR
+    return {
+      ...a,
+      x: cx + r * Math.cos(angle),
+      y: cy + r * Math.sin(angle),
+      axisX: cx + maxR * Math.cos(angle),
+      axisY: cy + maxR * Math.sin(angle),
+      labelX: cx + (maxR + 18) * Math.cos(angle),
+      labelY: cy + (maxR + 18) * Math.sin(angle),
+    }
+  })
+})
+
+const radarPolygon = computed(() => radarPoints.value.map(p => `${p.x},${p.y}`).join(' '))
+
+function radarRings(radius: number): string {
+  const axes = 4
+  const cx = 120, cy = 120
+  const points: string[] = []
+  for (let i = 0; i < axes; i++) {
+    const angle = (Math.PI * 2 * i) / axes - Math.PI / 2
+    points.push(`${cx + radius * Math.cos(angle)},${cy + radius * Math.sin(angle)}`)
+  }
+  return points.join(' ')
+}
+
 const sampleTexts = {
   prism: '自由市场是人类已知最高效的资源配置机制。当个体在市场中自由追求自身利益时，价格作为信息载体，将分散在无数参与者头脑中的知识汇聚为单一信号。没有任何中央计划者能够获取并处理如此庞大的分布式信息。政府干预的问题在于，它截断了这一自发信息流的完整循环。最低工资法扭曲了劳动力的供需信号，租金管制制造了住房短缺，补贴扭曲了生产决策。每一次干预都在价格系统中制造了一个"盲点"，这些盲点层层叠加，最终导致整个系统的信息失真。',
   genesis: '我们正处于一场前所未有的注意力危机中。现代科技公司的商业模式建立在"掠夺注意力"之上，每一次推送、每一个红点，都是经过精密计算的神经劫持。因此，真正的数字极简主义不是简单地卸载几个App，而是从底层重构人与技术的契约。我们必须夺回注意力的主权，将注意力视为不可再生的核心资产。只有当个体建立起坚不可摧的认知边界，拒绝被算法投喂，我们才能在信息洪流中保持清醒。',
+  invariant: '认知几何不变量假说是一个深刻的思想：任何认知产物都可以嵌入高维认知流形，其上存在独立于观察者的内在几何不变量。信息拓扑紧致性（ITC）衡量命题关联图的小世界网络特征，好的论证既有高聚类系数又有短路径长度。语义曲率平滑度（SCS）检测语义嵌入路径的曲率突变，识别逻辑跳跃和不自洽。信息熵临界性（IEC）定位混沌边缘——既非低熵废话也非高熵噪音。投影保真度-自由度权衡（PFFT）在忠实表达和原创独立之间寻找帕累托最优。这四个不变量共同构成了认知质量的四维空间，使AI无需人类标注即可自主判断知识质量。',
 }
 </script>
 
@@ -327,6 +399,161 @@ const sampleTexts = {
           <div class="result-content" v-html="genesisResult.replace(/\n/g, '<br>')" />
         </div>
         <div v-if="genesisError" class="error-box">{{ genesisError }}</div>
+      </div>
+
+      <!-- T6 认知几何不变量 -->
+      <div v-if="subTab === 'invariant'" class="tool-view">
+        <div class="tool-header">
+          <h2>📐 认知几何不变量</h2>
+          <p>Project Invariant · 用数学度量认知质量，零人工干预</p>
+        </div>
+
+        <div class="invariant-intro">
+          <div class="inv-grid">
+            <div class="inv-card" style="--c: #ff6b6b">
+              <div class="inv-code">ITC</div>
+              <div class="inv-name">拓扑紧致性</div>
+              <div class="inv-desc">小世界网络特征</div>
+            </div>
+            <div class="inv-card" style="--c: #b478ff">
+              <div class="inv-code">SCS</div>
+              <div class="inv-name">曲率平滑度</div>
+              <div class="inv-desc">论证路径顺滑</div>
+            </div>
+            <div class="inv-card" style="--c: #00d9ff">
+              <div class="inv-code">IEC</div>
+              <div class="inv-name">熵临界性</div>
+              <div class="inv-desc">混沌边缘最优</div>
+            </div>
+            <div class="inv-card" style="--c: #ffd200">
+              <div class="inv-code">PFFT</div>
+              <div class="inv-name">投影权衡</div>
+              <div class="inv-desc">保真×自由</div>
+            </div>
+          </div>
+        </div>
+
+        <textarea
+          v-model="invariantText"
+          class="text-input"
+          placeholder="粘贴一篇文章或一段文字，系统将实时计算四大几何不变量..."
+          rows="5"
+        />
+
+        <div class="sample-row">
+          <button @click="invariantText = sampleTexts.invariant">📐 示例：认知不变量</button>
+        </div>
+
+        <div v-if="invariantResult" class="invariant-result">
+          <div class="score-overview">
+            <div class="total-score">
+              <div class="score-value">{{ (invariantResult.overallScore * 100).toFixed(0) }}</div>
+              <div class="score-label">综合质量分</div>
+              <div class="score-grade">{{ invariantResult.grade }}</div>
+            </div>
+            <div class="radar-container">
+              <svg width="240" height="240" viewBox="0 0 240 240">
+                <polygon v-for="i in 5" :key="'ring'+i"
+                  :points="radarRings(24 * i / 5)"
+                  fill="none" stroke="var(--border-color)" stroke-width="0.5" />
+                <line v-for="p in radarPoints" :key="'axis'+p.label"
+                  x1="120" y1="120" :x2="p.axisX" :y2="p.axisY"
+                  stroke="var(--border-color)" stroke-width="0.5" />
+                <polygon :points="radarPolygon"
+                  fill="rgba(244, 114, 182, 0.2)" stroke="#f472b6" stroke-width="2" />
+                <circle v-for="p in radarPoints" :key="'dot'+p.label"
+                  :cx="p.x" :cy="p.y" r="4" fill="#f472b6" />
+                <text v-for="p in radarPoints" :key="'label'+p.label"
+                  :x="p.labelX" :y="p.labelY" text-anchor="middle" dominant-baseline="middle"
+                  fill="var(--text-secondary)" font-size="11">
+                  {{ p.label }}
+                </text>
+              </svg>
+            </div>
+          </div>
+
+          <div class="metric-bars">
+            <div class="metric-bar-item">
+              <div class="metric-bar-label">
+                <span>ITC 信息拓扑紧致性</span>
+                <span class="metric-bar-value">{{ invariantResult.itc.toFixed(2) }}</span>
+              </div>
+              <div class="metric-bar-track">
+                <div class="metric-bar-fill" style="width: calc(min(100%, var(--val) * 20%)); --val: invariantResult.itc; background: #ff6b6b" :style="{ width: Math.min(100, invariantResult.itc * 20) + '%', background: '#ff6b6b' }" />
+              </div>
+              <div class="metric-bar-detail">
+                聚类系数 {{ invariantResult.details.itc.clustering.toFixed(3) }} · 平均路径 {{ invariantResult.details.itc.pathLength.toFixed(1) }}
+              </div>
+            </div>
+
+            <div class="metric-bar-item">
+              <div class="metric-bar-label">
+                <span>SCS 语义曲率平滑度</span>
+                <span class="metric-bar-value">{{ invariantResult.scs.toFixed(2) }}</span>
+              </div>
+              <div class="metric-bar-track">
+                <div class="metric-bar-fill" :style="{ width: Math.min(100, invariantResult.scs * 28.5) + '%', background: '#b478ff' }" />
+              </div>
+              <div class="metric-bar-detail">
+                曲率变化均值 {{ invariantResult.details.scs.meanDeltaKappa.toFixed(4) }} · 检测到 {{ invariantResult.details.scs.curvatures.length }} 个曲率点
+              </div>
+            </div>
+
+            <div class="metric-bar-item">
+              <div class="metric-bar-label">
+                <span>IEC 信息熵临界性</span>
+                <span class="metric-bar-value">{{ (invariantResult.iec * 100).toFixed(0) }}%</span>
+              </div>
+              <div class="metric-bar-track">
+                <div class="metric-bar-fill" :style="{ width: invariantResult.iec * 100 + '%', background: '#00d9ff' }" />
+              </div>
+              <div class="metric-bar-detail">
+                当前熵 {{ invariantResult.details.iec.entropy.toFixed(2) }} · 临界值 {{ invariantResult.details.iec.criticalEntropy.toFixed(2) }}
+              </div>
+            </div>
+
+            <div class="metric-bar-item">
+              <div class="metric-bar-label">
+                <span>PFFT 投影保真-自由权衡</span>
+                <span class="metric-bar-value">{{ (invariantResult.pfft * 100).toFixed(0) }}%</span>
+              </div>
+              <div class="metric-bar-track">
+                <div class="metric-bar-fill" :style="{ width: invariantResult.pfft * 100 + '%', background: '#ffd200' }" />
+              </div>
+              <div class="metric-bar-detail">
+                结构保真度 {{ (invariantResult.details.pfft.fidelity * 100).toFixed(0) }}% · 表达自由度 {{ (invariantResult.details.pfft.freedom * 100).toFixed(0) }}%
+              </div>
+            </div>
+          </div>
+
+          <div class="diagnosis-section">
+            <h4>🔍 AI 诊断报告</h4>
+            <div class="diagnosis-list">
+              <div v-for="(d, i) in invariantResult.diagnosis" :key="i" class="diagnosis-item">
+                {{ d }}
+              </div>
+            </div>
+          </div>
+
+          <div class="graph-info">
+            <h4>📊 命题关联图</h4>
+            <p class="graph-meta">
+              {{ invariantResult.graph.nodes.length }} 个命题节点 · {{ invariantResult.graph.edges.length }} 条逻辑关联边
+            </p>
+            <p class="graph-sentences">
+              <span v-for="(s, i) in invariantResult.sentences.slice(0, 5)" :key="i" class="sentence-tag">
+                S{{ i + 1 }}: {{ s.slice(0, 30) }}{{ s.length > 30 ? '...' : '' }}
+              </span>
+              <span v-if="invariantResult.sentences.length > 5" class="sentence-tag more">
+                +{{ invariantResult.sentences.length - 5 }} 更多
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div v-if="!invariantResult && invariantText.length > 0 && invariantText.length <= 50" class="hint-text">
+          💡 输入更多内容（至少3句话），开始计算不变量...
+        </div>
       </div>
     </div>
   </div>
@@ -667,5 +894,233 @@ const sampleTexts = {
   color: #ef4444;
   font-size: 13px;
   margin-top: 12px;
+}
+
+/* ===== T6 认知几何不变量 ===== */
+.invariant-intro {
+  margin-bottom: 14px;
+}
+
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.inv-card {
+  padding: 10px 6px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  border-top: 3px solid var(--c);
+}
+
+.inv-code {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c);
+  letter-spacing: 0.5px;
+}
+
+.inv-name {
+  font-size: 11px;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.inv-desc {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+
+.invariant-result {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.score-overview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.total-score {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.score-value {
+  font-size: 48px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f472b6, #b478ff, #00d9ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.score-grade {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 12px;
+  border-radius: 20px;
+  background: rgba(244, 114, 182, 0.15);
+  color: #f472b6;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.radar-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.metric-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.metric-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.metric-bar-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-bar-track {
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.metric-bar-detail {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.diagnosis-section {
+  background: rgba(244, 114, 182, 0.06);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(244, 114, 182, 0.15);
+}
+
+.diagnosis-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--text-primary);
+}
+
+.diagnosis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.diagnosis-item {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.graph-info {
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+.graph-info h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--text-primary);
+}
+
+.graph-meta {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin: 0 0 8px;
+}
+
+.graph-sentences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+}
+
+.sentence-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sentence-tag.more {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.hint-text {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+@media (max-width: 420px) {
+  .inv-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .score-overview {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 </style>
