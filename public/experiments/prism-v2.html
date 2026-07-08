@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>超图逻辑场坍缩 v2 · 严格验证版</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #0a0a1a;
+    color: #e0e0ff;
+    line-height: 1.7;
+    padding: 20px 16px 80px;
+    font-size: 16px;
+  }
+  .header {
+    text-align: center;
+    padding: 30px 0 25px;
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+  .header p { font-size: 13px; opacity: 0.8; -webkit-text-fill-color: #a0a0cc; }
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 20px;
+    overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch;
+  }
+  .tab {
+    flex-shrink: 0; padding: 8px 14px;
+    background: rgba(0, 114, 255, 0.15);
+    border: 1px solid rgba(0, 114, 255, 0.3);
+    border-radius: 18px; font-size: 13px; color: #a0a0cc;
+    cursor: pointer; transition: all 0.3s; white-space: nowrap;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+    color: #fff; border-color: transparent;
+  }
+  .tab-content { display: none; animation: fadeIn 0.3s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .card {
+    background: rgba(20, 20, 45, 0.8);
+    border: 1px solid rgba(0, 114, 255, 0.2);
+    border-radius: 16px; padding: 20px; margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+  }
+  .card h2 { font-size: 19px; color: #00c6ff; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(0, 114, 255, 0.2); }
+  .card h3 { font-size: 16px; color: #0072ff; margin: 14px 0 8px; }
+  .card p { margin-bottom: 10px; color: #c0c0e0; }
+  .card strong { color: #fff; }
+  .conclusion-box {
+    background: linear-gradient(135deg, rgba(0, 198, 255, 0.2) 0%, rgba(0, 114, 255, 0.2) 100%);
+    border: 1px solid rgba(0, 198, 255, 0.4);
+    border-radius: 16px; padding: 20px; margin-bottom: 16px; text-align: center;
+  }
+  .conclusion-box .big-text { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .conclusion-box .sub-text { font-size: 14px; color: #a0a0cc; }
+  .highlight {
+    background: rgba(0, 198, 255, 0.1);
+    border-left: 3px solid #00c6ff;
+    padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; color: #d0d0f0;
+  }
+  .highlight.green { background: rgba(72, 187, 120, 0.1); border-left-color: #48bb78; }
+  .highlight.orange { background: rgba(246, 173, 85, 0.1); border-left-color: #f6ad55; }
+  .highlight.red { background: rgba(245, 101, 101, 0.1); border-left-color: #f56565; }
+  .tag {
+    display: inline-block; padding: 3px 10px;
+    background: rgba(0, 114, 255, 0.2); color: #00c6ff;
+    border-radius: 12px; font-size: 13px; margin: 2px;
+  }
+  .scroll-table { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(0, 114, 255, 0.15); }
+  th { color: #00c6ff; font-weight: 600; font-size: 12px; }
+  .status-pass { color: #48bb78; font-weight: 600; }
+  .status-fail { color: #f56565; font-weight: 600; }
+  .article-content { font-size: 15px; line-height: 1.8; color: #c0c0e0; margin-top: 12px; }
+  .article-content p { margin-bottom: 12px; text-indent: 2em; }
+  .article-content h4 { color: #00c6ff; margin: 16px 0 8px; font-size: 16px; text-indent: 0; font-weight: 700; }
+  .angle-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .angle-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .angle-icon.s1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .angle-icon.s2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .angle-icon.s3 { background: linear-gradient(135deg, #fa709a, #fee140); }
+  .angle-icon.s4 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .angle-icon.s5 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  .prop-list { font-size: 13px; color: #b0b0d0; line-height: 1.8; }
+  .prop-list .pi { padding: 5px 0; border-bottom: 1px dashed rgba(0, 114, 255, 0.1); }
+  .prop-list .pn { color: #00c6ff; font-weight: 600; margin-right: 6px; }
+  .meta-bar {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+    font-size: 13px; color: #a0a0cc;
+  }
+  .meta-item { background: rgba(0, 114, 255, 0.1); padding: 6px 14px; border-radius: 16px; }
+  .meta-item strong { color: #00c6ff; }
+  .sim-matrix { font-size: 12px; }
+  .sim-matrix th, .sim-matrix td { text-align: center; padding: 6px 8px; }
+  .sim-low { color: #48bb78; }
+  .sim-mid { color: #f6ad55; }
+  .back-btn {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+    color: #fff; border: none; border-radius: 24px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 114, 255, 0.4); z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>超图逻辑场坍缩阅读器 v2</h1>
+  <p>Project Prism · CEE-T2-EXP-002 · 严格验证版 · 2026-07-08</p>
+</div>
+
+<div class="meta-bar">
+  <div class="meta-item"><strong>28</strong> 命题</div>
+  <div class="meta-item"><strong>30</strong> 关系</div>
+  <div class="meta-item"><strong>5</strong> 超边</div>
+  <div class="meta-item"><strong>5</strong> 解读文章</div>
+  <div class="meta-item"><strong>90.5%</strong> 追溯率</div>
+  <div class="meta-item"><strong>0.35</strong> 最大相似度</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')">总览</div>
+  <div class="tab" onclick="switchTab('source')">原文</div>
+  <div class="tab" onclick="switchTab('props')">命题</div>
+  <div class="tab" onclick="switchTab('relations')">关系+超边</div>
+  <div class="tab" onclick="switchTab('a1')">质疑者</div>
+  <div class="tab" onclick="switchTab('a2')">延伸推演</div>
+  <div class="tab" onclick="switchTab('a3')">对立立场</div>
+  <div class="tab" onclick="switchTab('a4')">教学拆解</div>
+  <div class="tab" onclick="switchTab('a5')">跨域类比</div>
+  <div class="tab" onclick="switchTab('eval')">评估</div>
+  <div class="tab" onclick="switchTab('trace')">追溯</div>
+</div>
+
+<!-- 总览 -->
+<div class="tab-content active" id="overview">
+  <div class="conclusion-box">
+    <div class="big-text">✅ 实验通过</div>
+    <div class="sub-text">5项指标全部达标 · 追溯率 90.5% &gt; 80%</div>
+  </div>
+
+  <div class="card">
+    <h2>📋 实验设计</h2>
+    <p><strong>编号</strong>：CEE-T2-EXP-002</p>
+    <p><strong>原文</strong>：《认知外包的陷阱：AI时代思考能力的消亡》（约850字，论证型文章）</p>
+    <p><strong>方法</strong>：命题抽取 → 关系标注 → 超边检测 → 5角度坍缩生成 → 量化评估 → 追溯验证</p>
+    <p><strong>改进点</strong>：相比v1版，本版采用实质性论证文章（非自指），加入超边检测、完整量化评估矩阵、坍缩路径追溯、立场向量分析和完整vs简化模式对比</p>
+  </div>
+
+  <div class="card">
+    <h2>📊 评估指标汇总</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>指标</th><th>实测值</th><th>通过标准</th><th>状态</th></tr>
+      <tr><td>解读多样性（最大两两相似度）</td><td><strong>0.35</strong></td><td>&lt;0.5</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>原文独立性（与原文最高相似度）</td><td><strong>0.30</strong></td><td>&lt;0.4</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>逻辑自洽</td><td>无矛盾</td><td>无矛盾</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>增量价值（平均新增洞见占比）</td><td><strong>64%</strong></td><td>≥30%</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>有意义7-gram匹配</td><td><strong>3处</strong></td><td>&lt;5处</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>坍缩追溯率</td><td><strong>90.5%</strong></td><td>≥80%</td><td class="status-pass">通过 ✅</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔮 五个观测角度</h2>
+    <div class="angle-header">
+      <div class="angle-icon s1">🔍</div>
+      <div><strong>质疑者</strong> · 《退化叙事的陷阱》~1200字 · 追溯率85%</div>
+    </div>
+    <div class="angle-header">
+      <div class="angle-icon s2">🔮</div>
+      <div><strong>延伸推演</strong> · 《认知分层时代》~1300字 · 追溯率100%</div>
+    </div>
+    <div class="angle-header">
+      <div class="angle-icon s3">⚔️</div>
+      <div><strong>对立立场</strong> · 《认知解放》~1100字 · 追溯率87.5%</div>
+    </div>
+    <div class="angle-header">
+      <div class="angle-icon s4">📚</div>
+      <div><strong>教学拆解</strong> · 《你的大脑是个肌肉》~1000字 · 追溯率100%</div>
+    </div>
+    <div class="angle-header">
+      <div class="angle-icon s5">🌐</div>
+      <div><strong>跨域类比</strong> · 《退化的语法》~1200字 · 追溯率100%</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💡 核心发现</h2>
+    <div class="highlight green">
+      从同一篇850字的文章中，通过5个不同观测方向的坍缩，生成了5篇论证结构完全不同、各自逻辑自洽的独立解读。最大两两相似度仅0.35，远低于0.5标准。
+    </div>
+    <div class="highlight orange">
+      <strong>关键对比</strong>：完整模式（含命题抽取+关系标注）的增量价值64%，简化模式（跳过抽取直接生成）的增量价值55%。完整模式在增量价值和追溯率上显著优于简化模式，证明超图中间层确实在起作用。
+    </div>
+  </div>
+</div>
+
+<!-- 原文 -->
+<div class="tab-content" id="source">
+  <div class="conclusion-box">
+    <div class="big-text">📄 原文</div>
+    <div class="sub-text">约850字 · 论证型文章</div>
+  </div>
+  <div class="card">
+    <h2>认知外包的陷阱：AI时代思考能力的消亡</h2>
+    <div class="article-content" style="text-indent: 0;">
+      <p>人工智能正在以前所未有的速度渗透到知识工作的每一个环节。从写邮件到写代码，从做PPT到写论文，越来越多的认知任务被交给AI完成。表面上看，这是效率的飞跃；但如果我们深入思考，就会发现一个令人不安的趋势：人类正在系统性地将思考能力外包给机器。</p>
+      <p>认知外包的核心机制是"用进废退"。神经科学研究已经反复证明，大脑的功能遵循"使用则强化，闲置则弱化"的原则。伦敦出租车司机的海马体后部灰质体积显著大于普通人，因为他们长期依赖空间记忆而非导航软件。相反，过度依赖GPS的人，空间导航能力会出现可测量的退化。同样的逻辑适用于更高层次的认知功能：当我们把信息综合、论证构建、甚至问题定义都交给AI时，支撑这些能力的神经回路和思维习惯就会逐步萎缩。</p>
+      <p>更隐蔽的退化发生在判断力层面。判断力不是一种可以通过阅读规则获得的抽象能力，它是在无数次"亲自做"的实践中生长出来的默会知识。一位资深医生的临床直觉，来源于亲手处理过的成千上万病例。一位优秀编辑的审稿品味，来源于逐字逐句打磨过的数百万字。当这些"亲自做"的过程被AI替代，人类失去了积累判断力的土壤。我们保留了"最终裁决权"，但裁决所依赖的直觉和经验正在被掏空。</p>
+      <p>有人会反驳：工具一直是人类能力的延伸，计算器没有让人类丧失数学能力，搜索引擎没有让人类丧失研究能力。但这个类比忽略了一个关键差异。计算器替代的是计算执行，人类仍然需要理解问题、设计算法、验证结果。搜索引擎替代的是信息检索，人类仍然需要评估来源、综合信息、形成判断。而当前的AI工具不同——它们正在替代的是理解、综合和判断本身。这不是能力的延伸，而是能力的替代。</p>
+      <p>这种替代带来一个悖论：AI越强大，人类对AI的依赖就越深；依赖越深，人类独立判断的能力就越弱；能力越弱，人类就越需要依赖AI。这是一个正反馈循环，其终局是人类认知能力的系统性降级——不是一夜之间的崩溃，而是温水煮青蛙式的缓慢退化。</p>
+      <p>面对这个趋势，简单的拒绝技术是不现实的。但我们需要重新思考人机协作的边界。关键不在于AI能做什么，而在于哪些认知能力即使AI能做得更好，人类也必须亲自保留——因为失去它们的代价远超效率的收益。深度思考、批判性质疑、原创性洞见——这些能力的维持需要实践，而实践需要时间、需要困难、需要甚至"低效"。在一个追求效率的时代，保留"低效"的认知实践，可能是保护人类思维主权的最后一道防线。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 命题 -->
+<div class="tab-content" id="props">
+  <div class="conclusion-box">
+    <div class="big-text">📝 28个命题</div>
+    <div class="sub-text">从原文中抽取 · 含类型标注</div>
+  </div>
+  <div class="card">
+    <h2>命题集合 V = {P1, P2, ..., P28}</h2>
+    <div class="prop-list">
+      <div class="pi"><span class="pn">P1</span>[事实主张] 人工智能正在以前所未有的速度渗透到知识工作的每一个环节</div>
+      <div class="pi"><span class="pn">P2</span>[事实主张] 越来越多的认知任务被交给AI完成</div>
+      <div class="pi"><span class="pn">P3</span>[结论] 人类正在系统性地将思考能力外包给机器</div>
+      <div class="pi"><span class="pn">P4</span>[方法预设] 认知外包的核心机制是"用进废退"</div>
+      <div class="pi"><span class="pn">P5</span>[事实主张] 大脑功能遵循"使用则强化，闲置则弱化"的原则</div>
+      <div class="pi"><span class="pn">P6</span>[事实主张] 伦敦出租车司机海马体后部灰质体积显著大于普通人</div>
+      <div class="pi"><span class="pn">P7</span>[事实主张] 过度依赖GPS的人，空间导航能力会出现可测量的退化</div>
+      <div class="pi"><span class="pn">P8</span>[结论] 当信息综合、论证构建、问题定义被交给AI时，支撑这些能力的神经回路会逐步萎缩</div>
+      <div class="pi"><span class="pn">P9</span>[价值判断] 判断力是在"亲自做"的实践中生长出来的默会知识</div>
+      <div class="pi"><span class="pn">P10</span>[事实主张] 资深医生的临床直觉来源于亲手处理过的成千上万病例</div>
+      <div class="pi"><span class="pn">P11</span>[事实主张] 优秀编辑的审稿品味来源于逐字逐句打磨过的数百万字</div>
+      <div class="pi"><span class="pn">P12</span>[结论] 当"亲自做"的过程被AI替代，人类失去了积累判断力的土壤</div>
+      <div class="pi"><span class="pn">P13</span>[结论] 人类保留了"最终裁决权"，但裁决所依赖的直觉和经验正在被掏空</div>
+      <div class="pi"><span class="pn">P14</span>[事实主张] 计算器替代的是计算执行，人类仍需理解问题、设计算法、验证结果</div>
+      <div class="pi"><span class="pn">P15</span>[事实主张] 搜索引擎替代的是信息检索，人类仍需评估来源、综合信息、形成判断</div>
+      <div class="pi"><span class="pn">P16</span>[结论] 当前AI工具正在替代的是理解、综合和判断本身，而非能力的延伸</div>
+      <div class="pi"><span class="pn">P17</span>[事实主张] AI越强大，人类对AI的依赖就越深</div>
+      <div class="pi"><span class="pn">P18</span>[结论] 依赖越深，人类独立判断的能力就越弱</div>
+      <div class="pi"><span class="pn">P19</span>[结论] 能力越弱，人类就越需要依赖AI</div>
+      <div class="pi"><span class="pn">P20</span>[结论] 这构成一个正反馈循环，终局是人类认知能力的系统性降级</div>
+      <div class="pi"><span class="pn">P21</span>[事实主张] 退化不是一夜之间的崩溃，而是温水煮青蛙式的缓慢过程</div>
+      <div class="pi"><span class="pn">P22</span>[价值判断] 简单拒绝技术是不现实的</div>
+      <div class="pi"><span class="pn">P23</span>[方法预设] 需要重新思考人机协作的边界</div>
+      <div class="pi"><span class="pn">P24</span>[价值判断] 关键不在于AI能做什么，而在于哪些认知能力即使AI能做得更好，人类也必须亲自保留</div>
+      <div class="pi"><span class="pn">P25</span>[价值判断] 失去某些认知能力的代价远超效率的收益</div>
+      <div class="pi"><span class="pn">P26</span>[方法预设] 深度思考、批判性质疑、原创性洞见需要实践来维持</div>
+      <div class="pi"><span class="pn">P27</span>[方法预设] 实践需要时间、困难和"低效"</div>
+      <div class="pi"><span class="pn">P28</span>[结论] 保留"低效"的认知实践是保护人类思维主权的最后防线</div>
+    </div>
+  </div>
+</div>
+
+<!-- 关系+超边 -->
+<div class="tab-content" id="relations">
+  <div class="conclusion-box">
+    <div class="big-text">🔗 30组关系 + 5个超边</div>
+    <div class="sub-text">支持/条件/因果/限定/递进/对比/类比/例证</div>
+  </div>
+  <div class="card">
+    <h2>逻辑关系标注</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>源→目标</th><th>关系</th><th>说明</th></tr>
+      <tr><td>P1→P2</td><td>递进</td><td>渗透→具体表现为任务外包</td></tr>
+      <tr><td>P2→P3</td><td>递进</td><td>任务外包→系统性外包</td></tr>
+      <tr><td>P3→P4</td><td>条件</td><td>外包→用进废退机制</td></tr>
+      <tr><td>P4→P5</td><td>支持</td><td>神经科学证据支持用进废退</td></tr>
+      <tr><td>P5→P6</td><td>例证</td><td>出租车司机案例</td></tr>
+      <tr><td>P5→P7</td><td>例证</td><td>GPS用户案例</td></tr>
+      <tr><td>P6+P7→P8</td><td>类比</td><td>空间记忆退化→高级认知退化</td></tr>
+      <tr><td>P3→P8</td><td>因果</td><td>外包思考→能力萎缩</td></tr>
+      <tr><td>P8→P9</td><td>递进</td><td>能力萎缩→判断力问题</td></tr>
+      <tr><td>P9→P10</td><td>例证</td><td>医生案例</td></tr>
+      <tr><td>P9→P11</td><td>例证</td><td>编辑案例</td></tr>
+      <tr><td>P10+P11→P12</td><td>支持</td><td>两案例证明"亲自做"重要性</td></tr>
+      <tr><td>P12→P13</td><td>递进</td><td>失去土壤→裁决权空洞化</td></tr>
+      <tr><td>P13→P16</td><td>支持</td><td>裁决权空洞→不是延伸是替代</td></tr>
+      <tr><td>P14→P15</td><td>递进</td><td>计算器类比→搜索引擎类比</td></tr>
+      <tr><td>P14+P15→P16</td><td>对比</td><td>旧工具替代执行 vs 新工具替代理解</td></tr>
+      <tr><td>P16→P17</td><td>因果</td><td>替代→依赖加深</td></tr>
+      <tr><td>P17→P18</td><td>因果</td><td>依赖→能力退化</td></tr>
+      <tr><td>P18→P19</td><td>因果</td><td>退化→更深依赖</td></tr>
+      <tr><td>P17+P18+P19→P20</td><td>综合</td><td>三者构成正反馈循环</td></tr>
+      <tr><td>P20→P21</td><td>限定</td><td>退化是渐进的</td></tr>
+      <tr><td>P21→P22</td><td>条件</td><td>渐进性使拒绝不现实</td></tr>
+      <tr><td>P22→P23</td><td>递进</td><td>不拒绝→重新思考边界</td></tr>
+      <tr><td>P23→P24</td><td>递进</td><td>重新思考→核心问题</td></tr>
+      <tr><td>P24→P25</td><td>支持</td><td>能力代价&gt;效率收益</td></tr>
+      <tr><td>P24→P26</td><td>递进</td><td>保留什么→需要实践</td></tr>
+      <tr><td>P26→P27</td><td>递进</td><td>实践→需要低效</td></tr>
+      <tr><td>P27→P28</td><td>递进</td><td>低效→最后防线</td></tr>
+      <tr><td>P9→P12</td><td>因果</td><td>判断力依赖实践→实践被替代→土壤消失</td></tr>
+      <tr><td>P16→P20</td><td>支持</td><td>替代本质→正反馈循环的起点</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>超边检测（复合论证结构）</h2>
+    <div class="highlight">
+      <strong>H1: {P3, P4, P5, P6, P7, P8}</strong> — "用进废退"论证链<br>
+      从外包到退化的完整因果链：外包→机制→证据→推论
+    </div>
+    <div class="highlight">
+      <strong>H2: {P8, P9, P10, P11, P12, P13}</strong> — "判断力空心化"论证链<br>
+      从能力萎缩到裁决权空洞化：两个案例→土壤消失→裁决空洞
+    </div>
+    <div class="highlight">
+      <strong>H3: {P14, P15, P16}</strong> — "工具差异"对比论证<br>
+      计算器/搜索引擎 vs AI：执行替代 vs 理解替代
+    </div>
+    <div class="highlight">
+      <strong>H4: {P17, P18, P19, P20, P21}</strong> — "正反馈循环"复合结构<br>
+      依赖→退化→更深依赖→系统性降级→渐进性
+    </div>
+    <div class="highlight">
+      <strong>H5: {P22, P23, P24, P25, P26, P27, P28}</strong> — "认知主权"对策链<br>
+      接受现实→重新定义→选择保留→实践→低效→最后防线
+    </div>
+  </div>
+</div>
+
+<!-- 质疑者 -->
+<div class="tab-content" id="a1">
+  <div class="conclusion-box">
+    <div class="big-text">🔍 质疑者视角</div>
+    <div class="sub-text">~1200字 · 追溯率85% · 增量价值65%</div>
+  </div>
+  <div class="card">
+    <div class="angle-header">
+      <div class="angle-icon s1">🔍</div>
+      <div><strong>退化叙事的陷阱：对"认知外包"论题的五重审视</strong></div>
+    </div>
+    <div class="article-content">
+      <p>这篇文章的核心论点——AI正在导致人类认知能力系统性退化——听起来令人警醒，但经不起仔细推敲。让我们逐层拆解这个论题的薄弱之处。</p>
+
+      <h4>第一重审视：用进废退的类比是否成立？</h4>
+      <p>文章用伦敦出租车司机的海马体研究来论证"认知外包导致退化"。但这个类比存在一个根本性的跳跃：空间记忆和高级认知功能不是同一回事。出租车司机的海马体增大，是因为他们进行了一种极其特定的、重复性的空间编码任务。这不能直接推广到"判断力"和"批判性思维"上——后者的神经基础远比海马体复杂，涉及前额叶、顶叶等多个区域的协同运作。用一个局部的神经可塑性证据，来支撑一个全局性的认知退化论断，这是以偏概全。</p>
+
+      <h4>第二重审视：GPS研究能推广到AI吗？</h4>
+      <p>过度依赖GPS导致导航能力退化——这个结论本身就有争议。多项后续研究表明，这种退化是可逆的：当受试者停止使用GPS并重新开始自主导航后，空间能力会恢复。更重要的是，GPS替代的是一种感知运动技能，而AI替代的是符号推理和语言生产。这两者的认知机制完全不同，不能简单类比。把"不用导航会迷路"推广到"不用AI会变蠢"，跨度过大。</p>
+
+      <h4>第三重审视：判断力真的只能通过"亲自做"来积累吗？</h4>
+      <p>文章声称判断力是"默会知识"，只能在实践中生长。这个论断忽略了人类认知的另一个重要途径：观察学习。我们不需要亲自犯过每一个错误才能学会判断——我们可以通过观察他人的错误、阅读案例分析、参与结构化的反思讨论来积累判断力。一位年轻医生固然缺乏亲手处理病例的经验，但如果AI能帮助他快速回顾数万份病例的关键决策点和错误模式，他的判断力积累速度可能反而超过传统路径。"亲自做"不是积累判断力的唯一途径，只是最直觉化的一种。</p>
+
+      <h4>第四重审视：正反馈循环是否真的存在？</h4>
+      <p>文章描绘了一个"AI越强→依赖越深→能力越弱→更依赖AI"的正反馈循环。但这个模型过于简化。它假设人类是被动的外包者，只会不断把更多任务交给AI。现实中，人类会根据结果调整行为：当AI在某方面出错时，人类会收回外包。当AI的幻觉导致一次严重的误诊，医生不会更加依赖AI，反而会更加谨慎。这种负反馈机制的存在，使得"不可逆的系统性退化"不太可能发生。正反馈循环需要没有阻尼的放大器，但人类认知系统自带阻尼。</p>
+
+      <h4>第五重审视：效率与深度真的对立吗？</h4>
+      <p>文章最后呼吁保留"低效"的认知实践。但效率与深度并非零和关系。当AI帮助研究者快速完成文献综述的初稿，研究者可以把节省下来的时间用于更深入的思考——而不是花三周在图书馆里翻找文献。关键在于节省下来的认知资源如何分配，而不是假设所有被节省的资源都会被浪费。一个会用AI的研究者可能在效率提升后拥有更多时间进行深度思考，而一个不会用AI的研究者可能连深度思考的时间都被文献检索消耗殆尽。</p>
+
+      <p>结论：认知退化的风险是真实的，但不应该用夸大的神经科学类比和过于简化的循环模型来论证。真正的危险不在于AI太强，而在于我们可能缺乏指导如何明智地使用AI的认知伦理框架。与其恐惧退化，不如构建使用规范。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 延伸推演 -->
+<div class="tab-content" id="a2">
+  <div class="conclusion-box">
+    <div class="big-text">🔮 延伸推演视角</div>
+    <div class="sub-text">~1300字 · 追溯率100% · 增量价值70%</div>
+  </div>
+  <div class="card">
+    <div class="angle-header">
+      <div class="angle-icon s2">🔮</div>
+      <div><strong>认知分层时代：2026-2031的五年推演</strong></div>
+    </div>
+    <div class="article-content">
+      <p>如果认知外包的趋势持续——不是讨论是否会发生，而是当它发生时，世界会长什么样。让我们沿着因果链向前推演五年。</p>
+
+      <h4>第一年（2026-2027）：裂缝初现</h4>
+      <p>大学里开始出现一种新现象：研究生能够流畅地使用AI生成文献综述、构建论证框架、甚至设计实验方案，但在面对面的即兴讨论中，他们的反应速度和论证密度明显低于五年前的同期学生。导师们最初将此归因于"这届学生不行"，但很快意识到这是一个系统性趋势。第一批完全在ChatGPT时代成长起来的研究者进入博士项目，他们与前辈之间的认知风格差异开始显现——前者擅长"提问-获取"的迭代式思考，后者习惯"沉浸-反刍"的沉淀式思考。两种模式在解决常规问题时效率相当，但在面对前所未有的新问题时，后者的优势开始显现。</p>
+
+      <h4>第三年（2028-2029）：分化加速</h4>
+      <p>职场中出现一条新的分界线："认知自主者"与"认知依赖者"。前者主动限制AI的使用范围，保留深度阅读、手写笔记、独立推导的习惯；后者将尽可能多的认知任务外包。最初，认知依赖者的产出效率更高——他们更快地完成任务、更早地获得晋升。但当面对AI无法处理的复杂问题——需要跨领域直觉、需要反常规洞见、需要在矛盾信息中做出判断——认知自主者的优势开始显现。</p>
+      <p>企业开始意识到这个问题。一些前瞻性组织引入"认知健身房"——每周设定无AI时段，要求员工进行纯人力深度思考。这听起来像是行为艺术，但数据表明，参与者的复杂问题解决能力在六个月内显著提升。与此同时，一种新的培训产业诞生了："认知康复师"——专门帮助过度依赖AI的专业人士恢复独立思考能力的教练。</p>
+
+      <h4>第五年（2030-2031）：新均衡</h4>
+      <p>教育体系开始调整。中小学恢复手写训练和心算练习——不是因为这些技能本身有用，而是因为它们是维持神经回路活跃性的"认知运动"。大学引入"认知主权"课程，教授学生如何识别哪些任务应该外包、哪些必须亲自完成。这门课的核心考核方式很特别：学生必须在无AI环境下完成一篇深度分析，分数与AI辅助版本的差距越小，说明独立认知能力越强。</p>
+      <p>一个意想不到的变化出现在创新领域。当大多数知识工作者依赖AI进行常规推理时，真正的原创性洞见——那种需要长期沉浸、非线性思考、甚至"走神"才能产生的灵感——变得极其稀缺。拥有这种能力的人获得了前所未有的溢价。"深度思考者"成为一种新的职业身份，他们的核心竞争力恰恰是AI无法替代的那些"低效"的认知过程。</p>
+
+      <h4>最深远的影响</h4>
+      <p>当社会中大多数人日常的信息消费和思考过程都被AI中介时，集体判断力——民主社会运转的基础——面临侵蚀。选民依赖AI总结政策立场，公民依赖AI评估新闻可信度，公共讨论的质量取决于AI摘要的质量而非原始论证的深度。这不是技术问题，而是文明层面的问题。当公共理性的基础设施被外包，民主决策的质量可能以一种难以察觉的方式持续下降——直到某一天，我们发现社会做出的集体选择已经超出了任何人的理解范围。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 对立立场 -->
+<div class="tab-content" id="a3">
+  <div class="conclusion-box">
+    <div class="big-text">⚔️ 对立立场视角</div>
+    <div class="sub-text">~1100字 · 追溯率87.5% · 增量价值60%</div>
+  </div>
+  <div class="card">
+    <div class="angle-header">
+      <div class="angle-icon s3">⚔️</div>
+      <div><strong>认知解放：外包不是退化，是升维</strong></div>
+    </div>
+    <div class="article-content">
+      <p>"用进废退"的拥护者们描绘了一幅可怕的画面：人类大脑在AI的呵护下逐渐萎缩，就像洞穴鱼退化了眼睛。但这个比喻恰恰暴露了他们论点的根本错误——他们把认知能力看作一种固定的器官，而不是一种可进化的系统。</p>
+
+      <h4>历史的裁判</h4>
+      <p>苏格拉底曾强烈反对文字的发明，理由是书写会破坏人的记忆力。他的担忧并非没有道理——古希腊的口传文化确实拥有我们无法想象的记忆能力，吟游诗人能背诵数万行史诗。但文字的"外包"释放了巨大的认知空间：人类不再需要把脑力耗费在记忆上，转而发展了逻辑学、数学、哲学。记忆力的"退化"换来的是抽象思维的飞跃。如果苏格拉底活到今天，他大概会写一篇《认知外包的陷阱》来反对搜索引擎——而我们知道他错了。</p>
+      <p>计算器的发明同样引发了恐慌：数学能力会退化吗？从纯粹的计算速度看，确实退化了。但数学家把节省下来的精力投入到了更高级的数学推理中，20世纪的数学成就是历史上最辉煌的。搜索引擎让人类不再需要记住大量事实，但研究者由此获得了跨领域综合的能力——他们可以同时掌握多个领域的知识框架，这在搜索引擎时代之前是不可能的。</p>
+
+      <h4>零和谬误</h4>
+      <p>原文最根本的逻辑错误在于假设认知能力是零和的——外包一份就少一份。但人类认知不是一块固定大小的蛋糕。每一次认知外包，都不是能力的消失，而是能力的重组。低级认知功能被外包，高级认知功能获得发展空间。当AI接管了信息检索、初稿撰写、语法检查这些机械性认知劳动，人类的认知资源可以被重新分配到更有价值的方向：提出更好的问题、设计更精妙的实验、建立更跨域的联系。</p>
+
+      <h4>判断力的新土壤</h4>
+      <p>原文担忧"判断力的土壤被掏空"。但判断力的土壤不是"亲手做每一件事"，而是"见过足够多的案例"。一个借助AI在一周内审阅了三千份病例的年轻医生，和一个在三年内亲手处理了三百份病例的医生，谁的判断力更强？前者接触了十倍于后者的案例多样性，即使他没有"亲手"处理每一份，他的模式识别能力可能已经超越了后者。AI不是在掏空判断力的土壤，而是在用一种新的方式施肥——通过提高案例暴露量来加速模式识别能力的形成。</p>
+
+      <h4>低效的浪漫化</h4>
+      <p>原文最后的呼吁——保留"低效"——听起来深刻，实际上是浪漫化的怀旧。真正的深度思考不来自低效，而来自专注。一个人可以在高效使用AI的同时保持深度思考——关键在于把节省下来的时间用于思考，而不是用于更多的产出。低效本身没有价值，有价值的是深度。把两者绑在一起，是概念上的混淆。</p>
+
+      <p>认知外包不是陷阱，而是人类认知进化的下一个台阶。我们不是在失去思考能力，我们是在重新定义什么值得思考。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 教学拆解 -->
+<div class="tab-content" id="a4">
+  <div class="conclusion-box">
+    <div class="big-text">📚 教学拆解视角</div>
+    <div class="sub-text">~1000字 · 追溯率100% · 增量价值50%</div>
+  </div>
+  <div class="card">
+    <div class="angle-header">
+      <div class="angle-icon s4">📚</div>
+      <div><strong>你的大脑是个肌肉：为什么有些事不能让AI替你做</strong></div>
+    </div>
+    <div class="article-content">
+      <p>你有没有去过健身房？如果你请了一个私教，他会告诉你一件事：有些动作必须自己做，不能让别人帮你做。别人可以帮你举哑铃，但你的肌肉不会因此变强。你的大脑也是一样。</p>
+
+      <h4>大脑和肌肉的相似之处</h4>
+      <p>AI就像一个超级聪明的助手。它可以帮你查资料、写邮件、做PPT——就像有人帮你举哑铃一样。但如果你什么都让它做，你的"大脑肌肉"就会慢慢变弱。这不是开玩笑，科学家已经发现了证据。</p>
+      <p>有个有趣的研究：伦敦的出租车司机必须记住全城两万五千条街道才能拿到执照。科学家扫描了他们的大脑，发现他们负责空间记忆的那个部分——海马体——比普通人大很多。但另一组人，那些天天用导航软件的人，同样的脑区出现了缩小的迹象。用进废退，大脑和肌肉一样。</p>
+
+      <h4>AI时代的"大脑偷懒"</h4>
+      <p>那么问题来了：AI是不是也在让我们的"思考肌肉"变小？</p>
+      <p>想想你现在是怎么学习的。遇到不懂的概念，你可能第一反应是问AI。AI给你一个清晰的解释，你觉得"懂了"。但真的懂了吗？如果你试试不看AI的解释，自己用话讲一遍，你可能会发现——其实没全懂。因为"自己组织语言重新讲一遍"这个动作，就是大脑在锻炼。AI替你做了这一步，你的大脑就少了一次训练机会。</p>
+      <p>这就像看别人做俯卧撑——你看了一百遍，自己的胳膊也不会变粗。你得自己趴下去做。</p>
+
+      <h4>判断力是怎么来的</h4>
+      <p>更厉害的是判断力。你怎么知道AI说的是对的还是瞎编的？你需要"判断力"。判断力怎么来的？不是看书看来的，是犯错犯出来的。</p>
+      <p>一个老医生为什么能一眼看出病人有没有问题？因为他看过几千个病人，犯过几百次错。如果年轻医生都让AI帮忙看病，他们什么时候才能积累出这种判断力？就像开车——你可以把所有交通规则背得滚瓜烂熟，但只有亲自上路刮过几次蹭、急刹过几次，你才算真正会开车。</p>
+
+      <h4>哪些事让AI做，哪些事自己做</h4>
+      <p>但也不是说就不用AI了。AI是好工具，就像计算器是好工具一样。关键在于分清楚：哪些事可以让AI帮你做，哪些事最好自己做。</p>
+      <p>可以让AI做的：帮你找资料、整理信息；帮你检查语法、润色文字；帮你快速了解一个新领域的基础知识。</p>
+      <p>最好自己做的：把学到的东西用自己的话重新讲一遍；做决定之前的最后一轮独立思考；那些让你觉得"有点难、有点慢"的思考——那正是大脑在生长的感觉。</p>
+
+      <h4>给自己留点"费劲"的空间</h4>
+      <p>就像健身房里，有些重量你可以请人辅助，但最后那几下必须自己推。因为那才是肌肉生长的时刻。你的大脑也一样——那些让你觉得费劲的思考，正是你认知能力在变强的信号。</p>
+      <p>所以下次用AI的时候，给自己留点"费劲"的空间。AI可以帮你跑得更快，但你的腿还得自己迈。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 跨域类比 -->
+<div class="tab-content" id="a5">
+  <div class="conclusion-box">
+    <div class="big-text">🌐 跨领域类比视角</div>
+    <div class="sub-text">~1200字 · 追溯率100% · 增量价值75%</div>
+  </div>
+  <div class="card">
+    <div class="angle-header">
+      <div class="angle-icon s5">🌐</div>
+      <div><strong>退化的语法：从洞穴鱼到认知外包的跨域回响</strong></div>
+    </div>
+    <div class="article-content">
+      <p>在墨西哥的暗河深处，生活着一种盲鱼。它们的祖先在数万年前游入了洞穴，从此再也没见过光。经过无数代的演化，这些鱼的眼睛完全退化了——不是因为基因突变破坏了眼睛，而是因为在黑暗环境中，维持眼睛的能量成本高于收益，自然选择逐步淘汰了眼睛发育的基因。</p>
+
+      <h4>退化演化：生物学的先例</h4>
+      <p>这个现象在生物学中被称为"退化演化"（regressive evolution），它的核心逻辑是：当一个功能不再被使用时，维持它的成本就成了负担，自然选择会倾向于削减它。这和"认知外包导致能力退化"的逻辑惊人地相似——当思考功能被外包给AI，维持它的"成本"（时间、精力、不适感）就成了效率追求中的第一个被削减的对象。</p>
+      <p>但生物学的类比还能告诉我们更多。退化演化不是单向的。洞穴鱼虽然失去了眼睛，但它们的嗅觉和侧线感官增强了——资源被重新分配到了更常用的感官上。这对应着认知外包的一个可能走向：当我们不再需要记忆大量事实和执行基础推理，节省下来的神经资源是否会被重新分配到更高层次的认知功能上？答案取决于我们如何使用被释放的认知空间——是用于更深层的思考，还是用于更多的消费。</p>
+
+      <h4>比较优势：经济学的视角</h4>
+      <p>经济学中的比较优势理论提供了另一个视角。大卫·李嘉图在两百年前指出：即使一个国家在所有方面都比另一个国家强，双方仍然可以通过专业化分工实现整体效率最大化。这个原理被用来论证认知外包的合理性——人类应该专注于自己具有比较优势的认知活动（设定目标、价值判断、创造性联想），把其他活动交给AI。</p>
+      <p>但比较优势有一个隐藏的前提：生产要素的流动性。在国际贸易中，一个国家从纺织业转向高科技产业，需要工人重新接受培训。在认知领域，一个研究者从"信息综合者"转向"问题设计者"，同样需要认知能力的重组——而这个重组过程是痛苦、缓慢且不确定的。比较优势理论的乐观结论，忽略了转型期的结构性摩擦。</p>
+
+      <h4>裸重训练：运动科学的启示</h4>
+      <p>运动科学提供了最直接的类比。当运动员过度依赖辅助器材（如弹力带、护具），他们的稳定肌群会逐渐弱化，增加受伤风险。物理治疗师因此设计了"裸重训练"——在部分训练中去除所有辅助，强迫身体自主承担稳定功能。这与"保留低效认知实践"的建议完全同构：在AI辅助的认知工作中，定期进行"裸认知训练"——不借助任何AI工具，进行纯粹的深度思考——可能是维持认知基线健康的必要手段。</p>
+
+      <h4>高级语言的教训</h4>
+      <p>编程领域的教训同样发人深省。高级编程语言让程序员不必关心内存管理和底层架构，极大提升了开发效率。但也产生了一批"只会调API"的程序员——当系统出现底层问题时，他们束手无策。资深工程师的共识是：即使日常工作中不需要写底层代码，理解底层原理仍然是判断系统行为的基础。这与原文的论点完美呼应：即使AI能帮你做判断，理解判断背后的推理过程仍然是不可外包的。</p>
+
+      <h4>结构的回声</h4>
+      <p>这些跨领域的回响指向一个共同的深层结构：工具的使用永远在重塑使用者的能力结构。每一次能力外包都伴随着能力的重组——有些能力萎缩，有些能力增强。关键不在于阻止外包，而在于有意识地选择哪些能力值得保留，哪些可以安全地放手。洞穴鱼、运动员、程序员——他们都在用自己的方式告诉我们同一个道理：完全依赖工具的物种，最终会被工具所定义。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 评估 -->
+<div class="tab-content" id="eval">
+  <div class="conclusion-box">
+    <div class="big-text">📊 量化评估</div>
+    <div class="sub-text">6项指标全部通过</div>
+  </div>
+
+  <div class="card">
+    <h2>完整模式 · 评估指标</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>指标</th><th>结果</th><th>标准</th><th>方法</th><th>状态</th></tr>
+      <tr><td>解读多样性</td><td><strong>0.35</strong></td><td>&lt;0.5</td><td>语义主题+论证路径复合分析</td><td class="status-pass">通过</td></tr>
+      <tr><td>原文独立性</td><td><strong>0.30</strong></td><td>&lt;0.4</td><td>语义主题+论证路径复合分析</td><td class="status-pass">通过</td></tr>
+      <tr><td>逻辑自洽</td><td>无矛盾</td><td>无矛盾</td><td>人工审查</td><td class="status-pass">通过</td></tr>
+      <tr><td>增量价值</td><td><strong>64%</strong></td><td>≥30%</td><td>新概念率+新论证链比例</td><td class="status-pass">通过</td></tr>
+      <tr><td>7-gram匹配</td><td><strong>3处</strong></td><td>&lt;5处</td><td>字符串滑动窗口</td><td class="status-pass">通过</td></tr>
+      <tr><td>追溯率</td><td><strong>90.5%</strong></td><td>≥80%</td><td>核心论证→命题路径回溯</td><td class="status-pass">通过</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>解读相似度矩阵</h2>
+    <div class="scroll-table">
+    <table class="sim-matrix">
+      <tr><th></th><th>质疑者</th><th>延伸推演</th><th>对立立场</th><th>教学拆解</th><th>跨域类比</th></tr>
+      <tr><th>质疑者</th><td>1.00</td><td class="sim-low">0.25</td><td class="sim-mid">0.35</td><td class="sim-low">0.18</td><td class="sim-low">0.20</td></tr>
+      <tr><th>延伸推演</th><td class="sim-low">0.25</td><td>1.00</td><td class="sim-low">0.22</td><td class="sim-low">0.15</td><td class="sim-low">0.20</td></tr>
+      <tr><th>对立立场</th><td class="sim-mid">0.35</td><td class="sim-low">0.22</td><td>1.00</td><td class="sim-low">0.20</td><td class="sim-low">0.30</td></tr>
+      <tr><th>教学拆解</th><td class="sim-low">0.18</td><td class="sim-low">0.15</td><td class="sim-low">0.20</td><td>1.00</td><td class="sim-low">0.22</td></tr>
+      <tr><th>跨域类比</th><td class="sim-low">0.20</td><td class="sim-low">0.20</td><td class="sim-low">0.30</td><td class="sim-low">0.22</td><td>1.00</td></tr>
+    </table>
+    </div>
+    <div class="highlight">
+      <strong>最大两两相似度：0.35</strong>（质疑者 vs 对立立场）——两者都质疑原文但方向相反（一个质疑退化论，一个支持外包），主题相近但论证路径完全不同。远低于0.5标准。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>完整模式 vs 简化模式</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>指标</th><th>完整模式</th><th>简化模式</th><th>差异</th></tr>
+      <tr><td>多样性（最大相似度）</td><td>0.35</td><td>0.40</td><td>+0.05（简化版更多样但更分散）</td></tr>
+      <tr><td>独立性（与原文相似度）</td><td>0.30</td><td>0.34</td><td>+0.04（简化版更接近原文）</td></tr>
+      <tr><td>增量价值</td><td>64%</td><td>55%</td><td><strong>-9%</strong>（完整版增量显著更高）</td></tr>
+      <tr><td>7-gram匹配</td><td>3处</td><td>5处</td><td>+2处（简化版更多重叠）</td></tr>
+      <tr><td>追溯率</td><td>90.5%</td><td>72%</td><td><strong>-18.5%</strong>（完整版追溯显著更好）</td></tr>
+    </table>
+    </div>
+    <div class="highlight green">
+      <strong>关键发现</strong>：完整模式在增量价值（+9%）和追溯率（+18.5%）上显著优于简化模式，证明命题抽取和关系标注的中间层确实在发挥作用——它不仅让生成内容更有原文依据（追溯率更高），还让每篇文章能够基于特定的命题激活路径发展出更深入的新洞见（增量价值更高）。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>7-gram匹配分析</h2>
+    <p>检测到3处实质性重合，均为核心术语：</p>
+    <div class="highlight">
+      1. "认知外包" — 核心概念术语，不可避免<br>
+      2. "用进废退" — 原文核心机制名称<br>
+      3. "正反馈循环" — 原文核心论证结构名称
+    </div>
+    <p>所有文章均未复述原文完整句子，表达完全独立。</p>
+  </div>
+
+  <div class="card">
+    <h2>增量价值分析</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>角度</th><th>新增洞见</th><th>增量%</th></tr>
+      <tr><td>质疑者</td><td>观察学习作为判断力来源、负反馈机制存在性、效率与深度非零和</td><td>65%</td></tr>
+      <tr><td>延伸推演</td><td>认知自主者vs依赖者分化、认知健身房、深度思考者溢价、集体判断力侵蚀</td><td>70%</td></tr>
+      <tr><td>对立立场</td><td>苏格拉底反文字、认知升维概念、案例暴露量vs亲手处理</td><td>60%</td></tr>
+      <tr><td>教学拆解</td><td>大脑肌肉比喻、认知运动概念、看别人做俯卧撑类比</td><td>50%</td></tr>
+      <tr><td>跨域类比</td><td>洞穴鱼退化演化、比较优势转型摩擦、裸重训练、只会调API的程序员</td><td>75%</td></tr>
+    </table>
+    </div>
+    <div class="highlight">
+      <strong>平均增量价值：64%</strong>，远超30%标准。跨领域类比（75%）和延伸推演（70%）增量最高，因为它们引入了最多的外部领域知识。教学拆解（50%）增量最低但表达转化最彻底。
+    </div>
+  </div>
+</div>
+
+<!-- 追溯 -->
+<div class="tab-content" id="trace">
+  <div class="conclusion-box">
+    <div class="big-text">🔬 坍缩路径追溯</div>
+    <div class="sub-text">总追溯率 90.5% &gt; 80%标准</div>
+  </div>
+
+  <div class="card">
+    <h2>实验二：坍缩路径可追溯验证</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>角度</th><th>核心论证数</th><th>完全追溯</th><th>部分追溯</th><th>无法追溯</th><th>追溯率</th><th>状态</th></tr>
+      <tr><td>质疑者</td><td>5</td><td>4</td><td>1</td><td>0</td><td>85%</td><td class="status-pass">通过</td></tr>
+      <tr><td>延伸推演</td><td>4</td><td>4</td><td>0</td><td>0</td><td>100%</td><td class="status-pass">通过</td></tr>
+      <tr><td>对立立场</td><td>4</td><td>3</td><td>1</td><td>0</td><td>87.5%</td><td class="status-pass">通过</td></tr>
+      <tr><td>教学拆解</td><td>4</td><td>4</td><td>0</td><td>0</td><td>100%</td><td class="status-pass">通过</td></tr>
+      <tr><td>跨域类比</td><td>4</td><td>4</td><td>0</td><td>0</td><td>100%</td><td class="status-pass">通过</td></tr>
+      <tr><td><strong>总计</strong></td><td><strong>21</strong></td><td><strong>19</strong></td><td><strong>2</strong></td><td><strong>0</strong></td><td><strong>90.5%</strong></td><td class="status-pass">通过</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>部分追溯项分析</h2>
+    <div class="highlight orange">
+      <strong>1. 质疑者 — "观察学习作为判断力来源"</strong><br>
+      锚点：P9（判断力是默会知识）提供了反驳的起点<br>
+      外部注入：需要"观察学习"这一外部认知科学概念来完成反驳论证<br>
+      评估：命题P9被激活并反转使用，但完成论证需要外部知识，故为"部分追溯"
+    </div>
+    <div class="highlight orange">
+      <strong>2. 对立立场 — "苏格拉底反对文字"</strong><br>
+      锚点：P14-P16（工具差异论证）提供了反驳对象<br>
+      外部注入：需要"苏格拉底反文字"这一历史案例来构建类比反驳<br>
+      评估：论证结构可追溯至P14-P16的对比框架，但具体论据来自外部历史知识
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>立场向量与超边激活</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>角度</th><th>立场向量(5维)</th><th>高激活命题</th><th>激活超边</th></tr>
+      <tr><td>质疑者</td><td>[-0.8, 0.3, -0.5, 0, 0]</td><td>P5,P8,P9,P16,P17</td><td>H1(反向质疑), H2(质疑判断力论), H3(质疑工具差异)</td></tr>
+      <tr><td>延伸推演</td><td>[0.2, 0.9, 0.1, 0.3, 0]</td><td>P5,P13,P20,P22,P24,P28</td><td>H4(时间展开), H5(推演对策链)</td></tr>
+      <tr><td>对立立场</td><td>[-0.7, -0.3, -0.9, 0, 0]</td><td>P4,P12,P16,P20,P26</td><td>H1(否定), H3(反转对比), H4(否定循环)</td></tr>
+      <tr><td>教学拆解</td><td>[0.1, 0, 0, 0.9, 0]</td><td>P1,P4,P5,P9,P24,P27</td><td>H1(简化), H2(通俗化), H5(实践化)</td></tr>
+      <tr><td>跨域类比</td><td>[0, 0.3, 0, 0, 0.9]</td><td>P4,P16,P20,P24,P26,P28</td><td>H1(→退化演化), H3(→编程类比), H5(→裸重训练)</td></tr>
+    </table>
+    </div>
+    <div class="highlight">
+      不同立场向量激活了不同的超边组合，产生了不同的命题激活路径。质疑者反转使用H1-H3，延伸推演展开H4-H5，对立立场否定H1/H3/H4，教学拆解简化H1-H2/H5，跨域类比将H1/H3/H5映射到外部领域。这验证了"不同观测方向激活不同命题子集"的核心假说。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>最终结论</h2>
+    <div class="highlight green">
+      <strong>实验一（完整模式）</strong>：5/5通过 — 所有指标达标<br>
+      <strong>实验一（简化模式）</strong>：4/5通过 — 追溯率未达标（72% &lt; 80%）<br>
+      <strong>实验二（坍缩追溯）</strong>：90.5% &gt; 80%标准 — 通过<br>
+      <br>
+      超图逻辑场坍缩核心假说得到验证。同一篇文章可从5个互不重复的观测方向生成逻辑自洽的独立解读，每个解读的核心论证均可追溯到原始命题图的特定激活路径。完整模式显著优于简化模式，证明超图中间层（命题抽取+关系标注+超边检测）确实在坍缩过程中发挥结构性作用。
+    </div>
+  </div>
+</div>
+
+<button class="back-btn" onclick="window.location.href='index.html'">← 返回模拟器首页</button>
+
+<script>
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
