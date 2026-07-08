@@ -7,6 +7,7 @@ import { useSelfEvolution, type PersonalityTone } from '../stores/self-evolution
 import { useSuperAgent } from '../stores/super-agent'
 import { exportAllData, importAllData } from '../utils/data-integrity'
 import { generateId } from '../utils/markdown'
+import CognitiveEngine from './CognitiveEngine.vue'
 
 const emit = defineEmits<{
   close: []
@@ -19,7 +20,15 @@ const human = useHumanSimulator()
 const evolution = useSelfEvolution()
 const superAgent = useSuperAgent()
 
-const activeTab = ref<'tools' | 'planner' | 'human' | 'evolve'>('evolve')
+const activeTab = ref<'tools' | 'planner' | 'human' | 'evolve' | 'emerge'>('evolve')
+
+const panelTabs = [
+  { id: 'evolve' as const, label: '进化', icon: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z' },
+  { id: 'emerge' as const, label: '涌现', icon: 'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83' },
+  { id: 'tools' as const, label: '工具', icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6' },
+  { id: 'planner' as const, label: '规划', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
+  { id: 'human' as const, label: '人手', icon: 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z' },
+]
 
 const newToolName = ref('')
 const newToolDesc = ref('')
@@ -289,12 +298,7 @@ onMounted(() => {
     </div>
 
     <div class="tab-row">
-      <button v-for="t in [
-        { id: 'evolve', label: '进化', icon: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z' },
-        { id: 'tools', label: '工具', icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6' },
-        { id: 'planner', label: '规划', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
-        { id: 'human', label: '人手', icon: 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z' },
-      ]" :key="t.id"
+      <button v-for="t in panelTabs" :key="t.id"
         class="ptab" :class="{ active: activeTab === t.id }" @click="activeTab = t.id">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path :d="t.icon" /></svg>
         <span>{{ t.label }}</span>
@@ -604,6 +608,9 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
+      <!-- ===== 涌现面板 ===== -->
+      <CognitiveEngine v-if="activeTab === 'emerge'" />
 
       <!-- ===== 人手面板 ===== -->
       <div v-if="activeTab === 'human'" class="section">
