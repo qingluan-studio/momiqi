@@ -1135,6 +1135,92 @@ const problemSolving = [
       { name: '近似算法与启发式', detail: 'NPC问题不是终点——近似算法(保证解在最优解某个因子内)和启发式(没有理论保证但实践中好用)。AI帮你选：这个问题最知名的近似比是多少？有哪些启发式在实践中表现好？什么时候用模拟退火vs遗传算法vs蚁群优化？' },
     ]},
 ]
+
+const muskProjects = [
+  { name: 'xAI / Grok', invested: '$60亿+ (2024年B轮)', icon: 'brain', color: '#f59e0b',
+    desc: '马斯克2023年创立，目标"理解宇宙的真实本质"。Grok-2已开源(Grok-1的MoE架构314B参数)，Grok-3在Colossus超算集群(10万H100 GPU，90天建成)上训练。核心竞争力：实时访问X平台(推特)数据的独占优势——所有其他AI公司都没有这个级别的实时信息流。Grok以"反觉醒"定位——少政治正确、多幽默讽刺。',
+    techs: ['MoE架构(314B/8专家)','Colossus超算(10万H100)','X平台实时数据独占','多模态(Grok-1.5 Vision)','开源策略(Grok-1 Apache2.0)','长上下文(128K)','反觉醒/无过滤风格','计划中的Grok-3(更大规模)'] },
+  { name: 'Tesla Dojo超算', invested: '$10亿+ (累计)', icon: 'cpu', color: '#ef4444',
+    desc: '特斯拉自研AI训练芯片+超算系统，专为自动驾驶视频数据优化。不同于英伟达GPU的通用架构——Dojo的D1芯片是"为处理海量视频帧而生的专用处理器"。目标是替代英伟达成为特斯拉的算力基石。ExaPOD(一个完整Dojo集群)可达1.1 ExaFLOPS。关键意义：如果Dojo成功，特斯拉将成为唯一拥有"自研芯片+自研超算+自研算法+自有数据"闭环的AI公司。',
+    techs: ['D1训练芯片(7nm,500亿晶体管)','Dojo Tile(25个D1晶圆级集成)','ExaPOD(1.1 ExaFLOPS)','VPU(Video Processing Unit)','Dojo编译器(定制ML编译器)','专为视频+3D场景优化','特斯拉车队每天产生1600亿帧视频','Cortex推理集群(5万H100)'] },
+  { name: 'Neuralink·脑机接口', invested: '$6.8亿+ (融资总额)', icon: 'activity', color: '#8b5cf6',
+    desc: '"人脑与AI融合"——不是科幻，已获FDA人体试验批准。N1植入物(硬币大小)包含1024个电极，通过专用手术机器人(R1)将超细线(头发丝的1/10)植入大脑运动皮层。2024年1月首例人类植入成功——患者可用"意念"控制光标玩国际象棋。长期愿景：治疗瘫痪/失明/精神疾病→终极目标是"人类与AI共生"以应对AI风险的"控制问题"。',
+    techs: ['N1植入物(1024通道无线传输)','R1手术机器人(自动植入电极线)','1024根超细柔性电极(1/10发丝)','实时神经信号解码(2000+样本/秒)','FDA突破性设备认定','Blindsight(视觉修复)','心灵感应(Telepathy)产品','脑-机双向通信(未来方向)'] },
+  { name: 'Optimus·人形机器人', invested: '$数亿(研发中)', icon: 'user', color: '#22c55e',
+    desc: '代号擎天柱——特斯拉"下一个最大产品"的赌注。目标$2万以下，进入每个家庭和工厂。Gen 2已展示：端到端神经网络训练、手指拿鸡蛋不碎、自校准。与波士顿动力不同——Optimus不依赖预编程动作，AI实时处理视觉+触觉+姿态数据做全身控制。生产场景：先在特斯拉超级工厂自己替代人类工人→验证→大规模量产→外销。',
+    techs: ['端到端神经网络(视觉→动作)','Tesla Bot Gen 2(22自由度手)','FSD视觉系统复用','全身动态平衡控制','触觉传感器(精密抓取)','自研执行器(28个结构致动器)','模仿学习(人类远程操作示教)','目标成本<$2万/台'] },
+  { name: 'x.AI · Grok的未来方向', invested: '持续烧钱', icon: 'zap', color: '#a855f7',
+    desc: '马斯克公开路线图：Grok-3 → AGI探索。关键差异化路径——1)真理引擎：不完全服从人类偏好训练(RLHF)，追求"理解宇宙真实" 2)物理世界理解：利用特斯拉车队(500万+辆车)的传感器数据训练多模态世界模型 3)推理时扩展：探索推理时间计算(类似o1思路但更极致) 4)能源独立：已开始自建天然气发电厂为后续GPU集群供电。',
+    techs: ['Grok-3(更大规模预训练)','物理世界模型(Tesla数据融合)','推理时计算扩展(Inference-time scaling)','多模态深度整合','自建能源基础设施','通用物理推理能力','开源与商业化双轨','xAI+SpaceX+Tesla数据协同'] },
+]
+
+const burnMoneyFree = [
+  { paid: 'Grok API ($8/月起)', free: 'Grok-1 开源 + Ollama 本地运行', live: 'Grok-1权重已Apache 2.0开源！ollama pull grok(社区量化版)。314B参数需要显存充足(A100 80G×4或M2 Ultra 192GB统一内存)。完整能力=SOTA开源MoE模型，X实时数据不可复刻但可用SearXNG+实时RSS代理替代。' },
+  { paid: 'Dojo超算 ($10亿级)', free: '自建GPU集群 (Lambda Labs / RunPod)', live: 'Dojo是ASIC(专用芯片)，你不可能"DIY Dojo"。但等价的思路：Lambda Labs($1.1/时/H100)、RunPod($1.99/时/H100)、Vast.ai(最低$0.5/时/A6000)。需要训练大模型？租8×H100集群约$20/小时。比Dojo慢，但比"没有"强。关键是：你不需要自研芯片——开源分布式训练框架(DeepSpeed/FSDP)让商品GPU也能跑大模型。' },
+  { paid: 'Neuralink 脑机接口', free: 'OpenBCI + EEG + 开源BCI软件', live: 'Neuralink是做侵入式(开颅)，但非侵入式脑机接口已有成熟开源方案：OpenBCI($500-2000)的EEG头带、Muse脑电头带($250)、NeuroPype(信号处理)。加上OpenViBE/Python MNE做脑电信号解码。虽然精度远不如Neuralink，但可以做：专注度检测→自动调节屏幕亮度、脑电→控制简单游戏、睡眠脑电分析。' },
+  { paid: 'Optimus 机器人 ($2万+)', free: 'Unitree G1 / 开源人形方案 / LeRobot', live: '宇树G1人形机器人$1.6万起(已上市)。加上HuggingFace的LeRobot开源框架——用普通摄像头+机械臂做模仿学习。MIT的Cheetah四足机器人完全开源(硬件+软件)。DIY路线：买机械臂($2000-5000)+Intel RealSense深度相机+ROS2+模仿学习(IBC/ACT算法)→你也能做"端到端视觉→动作"的AI机器人。' },
+  { paid: 'Tesla FSD ($8000或$99/月)', free: 'Comma.ai OpenPilot ($1399硬件)', live: 'Comma.ai的OpenPilot是目前最好的开源辅助驾驶——兼容250+车型，一个摄像头+AI盒子+线束=支持自动跟车+车道保持+自动变道(Vision)。比FSD差在"无地图导航+无城市NOA+无无保护左转"——但$1399买断vs$8000，且代码全开源(GitHub)。创始人George Hotz是第一代iPhone越狱者。' },
+  { paid: '多模态世界模型', free: '开源World Model + Mujoco + Isaac Sim', live: '特斯拉在内部训练"端到端的世界模型"(视频→3D场景→决策)。开源路线：Runway的Gen模型(研究级)、Sora的研究论文思路+开源复现(MiniSora/OpenSora)、MuJoCo物理仿真引擎(DeepMind开源/免费)+NVIDIA Isaac Sim(免费开发者版)。用这些工具你也可以训练自己的"世界理解AI"——一个小规模的物理世界模拟器。' },
+]
+
+const profTheories = [
+  { prof: 'Geoffrey Hinton', title: '深度学习之父 · 图灵奖', school: '多伦多大学', color: '#ef4444',
+    theories: [
+      { name: '胶囊网络 (Capsule Networks)', desc: '替代CNN的池化层——用"胶囊"的向量输出保持空间层级关系。解决CNN的"把脸倒过来就不认识"的匹卡索问题。虽然实践中未打败CNN，但影响了ViT等架构的设计思路。核心洞见：神经网络需要显式建模"部分-整体"关系。' },
+      { name: '蒸馏 (Knowledge Distillation)', desc: '用大模型(Teacher)的输出作为"软标签"训练小模型(Student)——不是硬标签(one-hot)，而是概率分布(软目标)。核心发现：概率分布蕴含更多信息——Teacher对"这不是猫，但有可能像老虎"的软判断帮助Student学得更快。第40章已详述。' },
+      { name: 'Dropout·正则化经典', desc: '训练时随机"丢弃"50%神经元——等效于训练指数级子网络的集成。测试时全网络但权重缩放。这个简单的技巧成了深度学习正则化的标配。直觉：打破神经元之间的"共适应"——每个神经元必须独立学会有用特征，不能依赖特定同伴的存在。' },
+      { name: '前向-前向算法', desc: 'Hinton 2022年提出的反向传播替代方案——不使用反向传播来训练神经网络，而是使用两个前向pass：positive pass(真实数据)和negative pass(生成数据)，最大化正样本的激活+最小化负样本的激活。潜在优势：更适合模拟生物学习、适合边缘设备(不需要存储所有中间激活)。' },
+    ]},
+  { prof: 'Yann LeCun', title: 'CNN之父 · 图灵奖 · Meta首席AI科学家', school: 'NYU / Meta FAIR', color: '#3b82f6',
+    theories: [
+      { name: '卷积神经网络 (CNN/LeNet)', desc: '1989年提出的LeNet是CNN的开山之作——局部感受野+共享权重+池化。之后AlexNet/ResNet/EfficientNet都是LeNet的子孙。核心洞见：图像的平移不变性不需要网络去"学"——通过架构设计直接"内置"。CNN的效率来自于参数共享(一个滤波器滑过整张图)。' },
+      { name: '能量模型 (Energy-Based Models)', desc: '"概率可以不用Softmax表示"——用能量函数E(x)代替：低能量=高概率，高能量=低概率。训练目标：降低真实样本的能量+提高其他样本的能量。EBM避免了Softmax归一化(Z)的计算爆炸。JEPA(Joint Embedding Predictive Architecture)是EBM在自监督学习中的最新应用。' },
+      { name: '世界模型架构 (JEPA/World Model)', desc: '"自回归生成模型(LLM的next-token范式)不可能通向AGI"——LeCun的核心论战。他认为AGI需要JEPA架构：在表示空间中预测，而非在像素/token空间中生成。输入→编码器→表示空间→预测器→预测下一个表示→通过"抽象表示"的理解来规划行动。这是他目前(2024)全力推进的方向。' },
+      { name: '自监督学习·SSL核心推动者', desc: '"蛋糕比喻":自监督学习是蛋糕本体，监督学习是糖霜，强化学习是樱桃。核心方法：掩码自编码器(MAE)——遮住图片的大部分→让模型补全→迫使模型理解全局结构。Wav2Vec/I-JEPA/DINOv2都是这个哲学的产品。' },
+    ]},
+  { prof: 'Yoshua Bengio', title: '深度学习三巨头 · 图灵奖', school: '蒙特利尔大学 / MILA', color: '#8b5cf6',
+    theories: [
+      { name: '注意力机制早期工作', desc: '2014年Bahdanau注意力——神经机器翻译中"对齐+翻译"联合训练，让模型在输出每个词时"看"输入的不同部分。这是Transformer自注意力的直系祖先。核心突破：解决了seq2seq的信息瓶颈问题(固定长度上下文向量)。' },
+      { name: '生成对抗网络 (GAN)指导', desc: '虽然GAN由Goodfellow(Ian Goodfellow是Bengio的学生)提出，但Bengio对其理论分析做了大量奠基工作。包括：训练不稳定性的数学分析、模式坍塌的成因、WGAN对原始GAN的改进方向——用Wasserstein距离替代JS散度。' },
+      { name: '系统2深度学习', desc: 'Bengio近年核心研究方向——给深度学习加"慢思考"。GFlowNets(生成流网络)：不是直接优化奖励函数，而是学习"采样的策略"——把序列决策变成概率流。在分子设计/因果发现中已展示潜力。也是"AI推理"路线的理论支撑之一。' },
+      { name: 'AI安全的数学化', desc: '"我们可能在AI安全的最后一年"——Bengio的警示。他正在将AI安全形式化为数学问题：量化不确定性的贝叶斯方法、AI的对齐度量、安全探索的理论边界。他反对"停下来"——主张"加速安全研究"——用AI的能力来解决AI的安全问题。' },
+    ]},
+  { prof: 'Juergen Schmidhuber', title: 'LSTM之父 · 现代AI先驱', school: 'IDSIA / KAUST', color: '#22c55e',
+    theories: [
+      { name: 'LSTM (长短期记忆)', desc: '1997年提出——当时几乎无人问津，20年后成为语音识别/机器翻译/NLP的标配。LSTM的"遗忘门+输入门+输出门"三位一体解决了RNN的梯度消失问题。Google 2015年后几乎所有语音识别都是LSTM驱动的，2019年才被Transformer取代。这个设计等了18年才被大规模使用。' },
+      { name: '元学习 (Meta-Learning) 先驱', desc: '"学会学习"概念的早期推动者。1987年就提出了"Self-Referential Weight Matrix"——一个能修改自己权重的网络。现代的MAML(Model-Agnostic Meta-Learning)和RL^2都是这个思想的后代。核心：不是学"解决一个任务"，而是学"快速适应新任务"的通用策略。' },
+      { name: '好奇驱动探索', desc: '智能体的内在动机——不是外部奖励，而是"预测误差"驱动探索。1990年提出的"Formal Theory of Creativity"：智能体被激励去探索环境中的新奇/不可预测的状态。这影响了DeepMind的Agent57(首个在所有Atari游戏中超越人类)和OpenAI的Random Network Distillation。' },
+      { name: 'Goedel Machine·终极元学习器', desc: '2003年提出的理论构想——一个能"证明并执行自我改进"的AI。如果它能证明某个自修改"不会使系统变得更不高效/不安全"，它就执行这个修改。这可能是理论上最彻底的自改进架构——虽然从未被实现，但它的思想影响了AI安全领域对"可控自改进"的思考。' },
+    ]},
+  { prof: 'Richard Sutton', title: '强化学习之父', school: 'Alberta大学 / DeepMind / Keen', color: '#f59e0b',
+    theories: [
+      { name: 'TD学习 (Temporal Difference)', desc: '"快乐不在于结果，而在于预期的变化"——TD学习的哲学。不是等最终奖励→平均分配——而是在每步都"比较当前估计和下一步的估计+即时奖励"。这个想法简单到可以写在一张纸上，却支撑了AlphaGo/DQN/ChatGPT(RLHF也是基于TD思想)。' },
+      { name: '苦涩的教训 (The Bitter Lesson)', desc: '"AI研究中最大的教训是：利用计算的方法最终总会胜出。不是因为它们更聪明，而是因为摩尔定律站在它们这边。"人类知识/规则编码(如象棋走法)vs 搜索+学习——后者总是赢。GPT的成功是"苦涩的教训"的最新佐证：不是架构精巧，是算力+数据够大。' },
+      { name: '函数近似+TD=DQN', desc: '把DeepMind的DQN拆开看：Q-Learning(Watkins, 1989)+经验回放(Lin, 1992)+深度神经网络作为函数近似器=DQN(2013)。核心洞察：深度神经网络作为Q函数的近似器+经验回放打破数据相关性+固定目标网络稳定训练。三个"老技术"在GPU时代的化学反应。' },
+      { name: '策略梯度与Actor-Critic', desc: '从REINFORCE(1992)到PPO(2017)——Sutton奠定了整个策略梯度家族的理论基础。核心公式：策略梯度定理——∇J = E[Q(s,a) * ∇log π(a|s)]。Actor-Critic分家：Actor负责选动作、Critic负责评价动作——配合使用比单独两者都好。PPO是ChatGPT(RLHF)的基础。' },
+    ]},
+  { prof: 'Andrew Ng', title: 'AI教育家 · Google Brain联合创始人', school: '斯坦福 / DeepLearning.AI / Landing AI', color: '#ec4899',
+    theories: [
+      { name: 'Data-Centric AI', desc: '"不是做一个更好的模型——是做更好的数据"——Ng的核心哲学。实证发现：提高数据质量的ROI远大于微调模型架构。他的Landing AI在做"系统性提高数据质量"的工具链。具体实践：主动学习(选最有价值的样本给人类标注)+数据增强+错误分析驱动的数据迭代。' },
+      { name: 'AI Full Stack普及者', desc: '从Stanford ML课程(Coursera 500万人注册)到DeepLearning.AI专项课程——Ng几乎单枪匹马把AI教育从研究生院扩展到了"任何人只要有电脑就能学"。他的教学哲学：先给直觉和可视化→再给数学。这不是"简化AI"——是"降低AI的入门门槛但不降低深度"。' },
+      { name: 'Google Brain·规模假设验证', desc: '2011年Ng在Google的"猫实验"——用16000个CPU训练一个巨大的无监督神经网络在YouTube视频上"看猫"，网络自动学会识别"猫"的概念而没有被告知什么是猫。这是"大规模无监督学习能涌现概念"的第一个实证。之后OpenAI的GPT-2/GPT-3都是这个哲学的更极端版本。' },
+      { name: 'AI for Everyone 实践框架', desc: '"每个公司都应有一个AI团队，但不是每个公司都需要AI研究人员"。Ng提出的实用框架：识别自动化机会(任务×ROI矩阵)→做AI可行性评估(数据+技术)→构建MVP(1-2个高ROI用例)→建立数据中心(持续改进数据的流程)→扩展到更多用例。不是理论，是操作手册。' },
+    ]},
+  { prof: 'Ilya Sutskever', title: 'OpenAI联合创始人 · 前首席科学家', school: '多伦多大学(Hinton学生)', color: '#a855f7',
+    theories: [
+      { name: 'Seq2Seq·序列到序列', desc: '2014年与Oriol Vinyals和Quoc Le一起提出——"输入一个序列，输出另一个序列"——所有翻译/摘要/对话系统的基础。结构：Encoder(把输入编码为上下文向量)→Decoder(从上下文向量生成输出)。加上注意力(Bahdanau)=现代Transformer的直系祖先。Google Translate 2016年切换到NMT后翻译质量跃升了近一个人类语言等级。' },
+      { name: 'GPT系列·规模假设', desc: '"大就是好"的最坚定信仰者——从GPT-1(117M)到GPT-4(推测1.8T参数)。他的核心信念：算力+数据+模型规模的同步增长会持续解锁新的涌现能力——不是"设计更好的架构"而是"给更大的模型喂更多的数据"。GPT-4的编码/推理/多语言/创意能力让"规模假设"获得了最强实证。' },
+      { name: 'Superalignment·超级对齐', desc: '"未来4年内需要解决超级智能的对齐问题"——这是OpenAI"超级对齐"团队的使命。Ilya亲自领导：如何确保比人类聪明的AI仍然服从人类意图？核心思路：用一个弱AI来监督一个强AI的训练(Weak-to-Strong Generalization)——如果弱AI能可靠地引导强AI，那么人类(弱)也能引导超级AI(强)。' },
+        { name: 'Token化预测·世界的令牌', desc: '预测下一个token的能力，大到一定程度会变成理解世界的能力。GPT的成功验证了这个哲学——next-token prediction是在学习这个世界是怎么运作的——因为要预测人类写的下一个词，需要理解人类所描述的世界。' },
+    ]},
+  { prof: 'Fei-Fei Li', title: 'ImageNet创始人 · AI视觉之母', school: '斯坦福 / World Labs', color: '#14b8a6',
+    theories: [
+      { name: 'ImageNet·视觉AI的"曼哈顿计划"', desc: '2009年启动——1400万张手工标注图片，覆盖21841个类别。2012年AlexNet在ImageNet上的突破(错误率从25%降到15%)被广泛视为"深度学习革命"的起点。这不仅仅是"更大的数据集"——而是证明了"深度学习+大数据=计算机视觉的范式转变"——使CV从"手工特征工程"转向"端到端学习"。' },
+      { name: '空间智能 (Spatial Intelligence)', desc: 'Fei-Fei Li 2024年创办World Labs的核心方向——从"看图识物"升级到"理解三维世界"。空间智能要点：物体在3D空间中的位置/方向/交互、物理规律(重力/碰撞/遮挡)、视角变换的几何约束。这是从ImageNet的"What"(是什么)到World Labs的"Where & How"(在哪里、如何交互)的范式升级。' },
+      { name: '以人为本的AI', desc: '斯坦福HAI(Human-Centered AI Institute)联合创始人。核心理念：AI的终极目标不是"更聪明"而是"更好用"——增强人类能力而非取代人类。HAI的研究项目从AI伦理、AI经济影响、AI在医疗/教育/艺术中的增强性应用全面覆盖。' },
+      { name: '具身智能的重要性', desc: '"只看图片的理解永远是平面的"——她推动的BEHAVIOR基准(1000个人类日常活动)和RoboTurk遥操作平台让机器人学习的数据从"研究者采集的脚本"变成了"远程人类遥控的真实操作"。斯坦福的Mobile ALOHA(开源)就是在她的领导下做出来的——$32000的家庭机器人做饭/洗碗/购物。' },
+    ]},
+]
 </script>
 
 <template>
@@ -1142,7 +1228,7 @@ const problemSolving = [
     <div class="evo-hero">
       <div class="hero-glow" />
       <h1 class="hero-title">AI 进化之路</h1>
-      <p class="hero-subtitle">从对话到文明 — 理解人工智能的能力阶梯与前沿全景</p>
+      <p class="hero-subtitle">从对话到文明 — 理解人工智能的能力阶梯与前沿全景 <span class="hero-ver">v53</span></p>
     </div>
 
     <div class="evo-content">
@@ -2158,6 +2244,72 @@ const problemSolving = [
         </div>
       </section>
 
+      <!-- 54. 马斯克AI帝国 -->
+      <section data-section="musk" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">54</span> 马斯克AI帝国 · xAI/Dojo/Neuralink/Optimus/FSD</h2>
+        <p class="section-desc">5大烧钱项目、数千亿投资规模、从脑机接口到人形机器人的完整AI版图——以及背后的技术真相。</p>
+        <div v-for="(mp, mpi) in muskProjects" :key="mp.name" class="mp-block" :class="{ visible: visibleSections['musk'] }" :style="{ '--delay': `${mpi*0.08}s` }">
+          <div class="mp-head">
+            <span class="mp-icon" :style="{ background: mp.color+'18' }">
+              <svg v-if="mp.icon==='brain'" width="22" height="22" viewBox="0 0 24 24" fill="none" :stroke="mp.color" stroke-width="1.5"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.54-2.94 2.5 2.5 0 0 1-2.5-3.44A2.5 2.5 0 0 1 4.5 9a2.5 2.5 0 0 1 5-2.5V4.5A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.54-2.94 2.5 2.5 0 0 0 2.5-3.44A2.5 2.5 0 0 0 19.5 9a2.5 2.5 0 0 0-5-2.5V4.5A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+              <svg v-else-if="mp.icon==='cpu'" width="22" height="22" viewBox="0 0 24 24" fill="none" :stroke="mp.color" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+              <svg v-else-if="mp.icon==='activity'" width="22" height="22" viewBox="0 0 24 24" fill="none" :stroke="mp.color" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <svg v-else-if="mp.icon==='user'" width="22" height="22" viewBox="0 0 24 24" fill="none" :stroke="mp.color" stroke-width="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" :stroke="mp.color" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </span>
+            <div class="mp-title-wrap">
+              <span class="mp-name" :style="{ color: mp.color }">{{ mp.name }}</span>
+              <span class="mp-invest">{{ mp.invested }}</span>
+            </div>
+          </div>
+          <p class="mp-desc">{{ mp.desc }}</p>
+          <div class="mp-techs">
+            <span v-for="t in mp.techs" :key="t" class="mp-tag">{{ t }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 55. 烧钱项目免费复刻 -->
+      <section data-section="burnfree" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">55</span> 烧钱项目免费复刻 · 你有钱时才能用→没钱时也能用</h2>
+        <p class="section-desc">马斯克砸几千亿的AI项目，你花几千块再加开源社区的力量，能复刻到什么程度？</p>
+        <div v-for="(bf, bfi) in burnMoneyFree" :key="bf.paid" class="bf-row" :class="{ visible: visibleSections['burnfree'] }" :style="{ '--delay': `${bfi*0.06}s` }">
+          <div class="bf-paid">
+            <span class="bf-label">付费版</span>
+            <span class="bf-name">{{ bf.paid }}</span>
+          </div>
+          <div class="bf-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+          <div class="bf-free">
+            <span class="bf-label free-label">免费替代</span>
+            <span class="bf-name free-name">{{ bf.free }}</span>
+          </div>
+          <div class="bf-live">{{ bf.live }}</div>
+        </div>
+      </section>
+
+      <!-- 56. 教授理论武器库 -->
+      <section data-section="profs" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">56</span> 教授理论武器库 · 8位大师的核心洞察</h2>
+        <p class="section-desc">Hinton / LeCun / Bengio / Schmidhuber / Sutton / Ng / Sutskever / Fei-Fei Li —— 32个改变AI走向的理论。</p>
+        <div class="prof-grid">
+          <div v-for="(pt, pti) in profTheories" :key="pt.prof" class="prof-card" :class="{ visible: visibleSections['profs'] }" :style="{ '--delay': `${pti*0.06}s` }">
+            <div class="prof-head" :style="{ borderColor: pt.color }">
+              <span class="prof-name" :style="{ color: pt.color }">{{ pt.prof }}</span>
+              <span class="prof-title">{{ pt.title }}</span>
+              <span class="prof-school">{{ pt.school }}</span>
+            </div>
+            <div class="prof-theories">
+              <div v-for="th in pt.theories" :key="th.name" class="prof-th">
+                <div class="prof-th-name">{{ th.name }}</div>
+                <p class="prof-th-desc">{{ th.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- 结尾总结 -->
       <section data-section="summary" class="evo-section summary-section">
         <div class="summary-card" :class="{ visible: visibleSections['summary'] }">
@@ -2214,6 +2366,7 @@ const problemSolving = [
   color: var(--text-tertiary);
   position: relative;
 }
+.hero-ver { font-size: 9px; color: var(--accent); font-weight: 700; margin-left: 8px; background: rgba(245,158,11,0.12); padding: 1px 6px; border-radius: 3px; }
 
 .evo-content {
   padding: 0 16px 40px;
@@ -2974,6 +3127,60 @@ const problemSolving = [
 .ps-card { padding: 10px; border-radius: 8px; background: rgba(128,128,128,0.04); border-left: 2px solid var(--border-color); }
 .ps-card-name { font-size: 10px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
 .ps-card-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.5; }
+
+/* Musk Projects */
+.mp-block {
+  padding: 16px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 12px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.mp-block.visible { opacity: 1; transform: translateY(0); }
+.mp-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.mp-icon { display: flex; padding: 6px; border-radius: 8px; flex-shrink: 0; }
+.mp-title-wrap { display: flex; flex-direction: column; }
+.mp-name { font-size: 15px; font-weight: 800; }
+.mp-invest { font-size: 9px; color: var(--text-tertiary); }
+.mp-desc { font-size: 10px; color: var(--text-primary); line-height: 1.6; margin-bottom: 8px; }
+.mp-techs { display: flex; flex-wrap: wrap; gap: 4px; }
+.mp-tag { font-size: 7px; padding: 2px 7px; border-radius: 3px; background: rgba(245,158,11,0.08); color: var(--accent); font-weight: 600; }
+
+/* Burn Money Free */
+.bf-row {
+  padding: 12px 14px; border-radius: 10px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 8px;
+  display: grid; grid-template-columns: 1fr 24px 1fr; gap: 8px; align-items: center;
+  opacity: 0; transform: translateY(6px);
+  transition: all 0.35s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.bf-row.visible { opacity: 1; transform: translateY(0); }
+.bf-paid, .bf-free { display: flex; flex-direction: column; gap: 2px; }
+.bf-label { font-size: 7px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; }
+.bf-label.free-label { color: #22c55e; }
+.bf-name { font-size: 11px; font-weight: 700; color: var(--text-primary); }
+.bf-name.free-name { color: #22c55e; }
+.bf-arrow { display: flex; align-items: center; justify-content: center; }
+.bf-live { font-size: 9px; color: var(--text-secondary); line-height: 1.5; grid-column: 1 / -1; padding-top: 8px; border-top: 1px dashed var(--border-color); }
+
+/* Prof Theories */
+.prof-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.prof-card {
+  padding: 14px; border-radius: 12px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.prof-card.visible { opacity: 1; transform: translateY(0); }
+.prof-head {
+  padding-bottom: 8px; margin-bottom: 10px; border-bottom: 2px solid;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.prof-name { font-size: 12px; font-weight: 800; }
+.prof-title { font-size: 8px; color: var(--text-tertiary); }
+.prof-school { font-size: 7px; color: var(--text-tertiary); }
+.prof-theories { display: flex; flex-direction: column; gap: 8px; }
+.prof-th { padding-left: 8px; border-left: 2px solid var(--border-color); }
+.prof-th-name { font-size: 10px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+.prof-th-desc { font-size: 8px; color: var(--text-tertiary); line-height: 1.55; }
 
 /* Summary */
 .summary-section { margin-top: 6px; margin-bottom: 6px; }
