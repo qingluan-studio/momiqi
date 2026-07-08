@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>反事实因基生长机 · Project Genesis</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #080518; color: #e0d8ff; line-height: 1.8;
+    padding: 20px 16px 80px; font-size: 16px;
+  }
+  .header {
+    text-align: center; padding: 30px 0 20px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #b478ff 50%, #00d9ff 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .header h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  .header p { font-size: 13px; opacity: 0.7; -webkit-text-fill-color: #a090cc; }
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 20px;
+    overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch;
+  }
+  .tab {
+    flex-shrink: 0; padding: 8px 14px;
+    background: rgba(180, 120, 255, 0.1);
+    border: 1px solid rgba(180, 120, 255, 0.25);
+    border-radius: 18px; font-size: 13px; color: #a090cc;
+    cursor: pointer; transition: all 0.3s; white-space: nowrap;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #ff6b6b 0%, #b478ff 100%);
+    color: #fff; border-color: transparent; font-weight: 700;
+  }
+  .tab-content { display: none; animation: fadeIn 0.3s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .card {
+    background: rgba(15, 10, 40, 0.7);
+    border: 1px solid rgba(180, 120, 255, 0.15);
+    border-radius: 16px; padding: 20px; margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+  }
+  .card h2 {
+    font-size: 18px; color: #b478ff; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 1px solid rgba(180, 120, 255, 0.15);
+  }
+  .card h3 { font-size: 15px; color: #ff6b6b; margin: 14px 0 8px; }
+  .card p { margin-bottom: 10px; color: #c8c0e8; }
+  .card strong { color: #fff; }
+
+  .conclusion-box {
+    background: linear-gradient(135deg, rgba(255,107,107,0.15) 0%, rgba(180,120,255,0.15) 50%, rgba(0,217,255,0.15) 100%);
+    border: 1px solid rgba(180, 120, 255, 0.3);
+    border-radius: 16px; padding: 20px; margin-bottom: 16px; text-align: center;
+  }
+  .conclusion-box .big-text { font-size: 21px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .conclusion-box .sub-text { font-size: 13px; color: #a090cc; }
+
+  .visible-text {
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 3px solid #ff6b6b;
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    font-style: italic;
+    color: #d0c8f0;
+    margin: 12px 0;
+    position: relative;
+  }
+  .visible-text::after {
+    content: "……（截断）";
+    display: block;
+    color: #ff6b6b;
+    font-weight: 700;
+    margin-top: 8px;
+    font-style: normal;
+  }
+
+  .gene-box {
+    background: rgba(180, 120, 255, 0.08);
+    border: 1px solid rgba(180, 120, 255, 0.25);
+    border-radius: 12px; padding: 16px; margin: 12px 0;
+  }
+  .gene-box h4 {
+    color: #b478ff; font-size: 14px; margin-bottom: 10px;
+  }
+  .gene-item {
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(180, 120, 255, 0.15);
+    font-size: 14px; color: #d0c8f0;
+  }
+  .gene-item:last-child { border-bottom: none; }
+  .gene-item .gid { color: #ff6b6b; font-weight: 700; margin-right: 6px; }
+  .gene-item .gdim { font-size: 12px; color: #a090cc; margin-top: 4px; padding-left: 24px; }
+  .gene-arrow {
+    text-align: center; color: #00d9ff; font-size: 13px;
+    padding: 6px 0; font-weight: 600;
+  }
+
+  .branch-card {
+    background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(180,120,255,0.08));
+    border: 1px solid rgba(255, 107, 107, 0.25);
+    border-radius: 16px; padding: 20px; margin: 16px 0;
+  }
+  .branch-card.blue { background: linear-gradient(135deg, rgba(0,217,255,0.08), rgba(180,120,255,0.08)); border-color: rgba(0,217,255,0.25); }
+  .branch-card.green { background: linear-gradient(135deg, rgba(0,217,160,0.08), rgba(180,120,255,0.08)); border-color: rgba(0,217,160,0.25); }
+  .branch-card.orange { background: linear-gradient(135deg, rgba(255,165,0,0.1), rgba(255,107,107,0.08)); border-color: rgba(255,165,0,0.3); }
+  .branch-card.purple { background: linear-gradient(135deg, rgba(180,120,255,0.12), rgba(255,107,107,0.08)); border-color: rgba(180,120,255,0.35); }
+
+  .branch-header { margin-bottom: 12px; }
+  .branch-tag {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 10px; margin-bottom: 8px;
+    background: rgba(255, 107, 107, 0.2); color: #ff6b6b;
+  }
+  .branch-card.blue .branch-tag { background: rgba(0, 217, 255, 0.2); color: #00d9ff; }
+  .branch-card.green .branch-tag { background: rgba(0, 217, 160, 0.2); color: #00d9a0; }
+  .branch-card.orange .branch-tag { background: rgba(255, 165, 0, 0.25); color: #ffa500; }
+  .branch-card.purple .branch-tag { background: rgba(180, 120, 255, 0.25); color: #b478ff; }
+
+  .branch-title {
+    font-size: 17px; color: #fff; font-weight: 700; margin-bottom: 6px;
+  }
+  .branch-condition {
+    font-size: 12px; color: #a090cc; margin-bottom: 10px;
+    padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .branch-article {
+    font-size: 14px; line-height: 1.85; color: #d0c8f0;
+  }
+  .branch-article p { margin-bottom: 10px; text-indent: 2em; }
+  .branch-article .declaration {
+    font-size: 12px; color: #ff6b6b; font-style: italic;
+    background: rgba(255, 107, 107, 0.08);
+    padding: 8px 12px; border-radius: 8px; margin-bottom: 12px;
+    text-indent: 0;
+  }
+  .branch-card.blue .branch-article .declaration { color: #00d9ff; background: rgba(0,217,255,0.08); }
+  .branch-card.green .branch-article .declaration { color: #00d9a0; background: rgba(0,217,160,0.08); }
+  .branch-card.orange .branch-article .declaration { color: #ffa500; background: rgba(255,165,0,0.08); }
+  .branch-card.purple .branch-article .declaration { color: #b478ff; background: rgba(180,120,255,0.1); }
+
+  .chain {
+    margin: 12px 0;
+    font-size: 13px; color: #c0b8e0;
+  }
+  .chain-title { color: #b478ff; font-weight: 700; margin-bottom: 6px; }
+  .chain-step {
+    padding: 6px 0; padding-left: 20px;
+    border-left: 2px solid rgba(180, 120, 255, 0.2);
+    position: relative; margin-left: 6px;
+  }
+  .chain-step::before {
+    content: ""; position: absolute; left: -5px; top: 12px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #b478ff;
+  }
+
+  .scroll-table { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 450px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(180,120,255,0.1); }
+  th { color: #ff6b6b; font-weight: 600; font-size: 12px; }
+  .status-pass { color: #00d9a0; font-weight: 600; }
+  .status-warn { color: #ffa500; font-weight: 600; }
+
+  .meta-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+    font-size: 12px; color: #a090cc;
+  }
+  .meta-item { background: rgba(180, 120, 255, 0.1); padding: 5px 12px; border-radius: 14px; }
+  .meta-item strong { color: #ff6b6b; }
+
+  .compare-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px; padding: 14px; margin: 10px 0;
+  }
+  .compare-box h4 { color: #b478ff; font-size: 14px; margin-bottom: 8px; }
+  .compare-row {
+    display: flex; gap: 10px; margin: 8px 0;
+    font-size: 13px; color: #d0c8f0;
+  }
+  .compare-label {
+    min-width: 70px; color: #ff6b6b; font-weight: 600; flex-shrink: 0;
+  }
+  .compare-label.cyan { color: #00d9ff; }
+
+  .hybrid-box {
+    background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(0,217,255,0.08), rgba(180,120,255,0.1));
+    border: 2px solid rgba(180, 120, 255, 0.3);
+    border-radius: 16px; padding: 20px; margin: 16px 0;
+    position: relative;
+  }
+  .hybrid-badge {
+    position: absolute; top: -12px; left: 20px;
+    background: linear-gradient(135deg, #ff6b6b, #b478ff, #00d9ff);
+    color: #fff; font-size: 11px; font-weight: 700;
+    padding: 4px 14px; border-radius: 12px;
+  }
+
+  .back-btn {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #b478ff 100%);
+    color: #fff; border: none; border-radius: 24px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(180, 120, 255, 0.3); z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>反事实因基生长机</h1>
+  <p>Project Genesis · CEE-T5-EXP-002 · 4分支+杂交实验</p>
+</div>
+
+<div class="meta-bar">
+  <div class="meta-item"><strong>4</strong> 个反事实分支</div>
+  <div class="meta-item"><strong>1</strong> 个分支杂交</div>
+  <div class="meta-item"><strong>3</strong> 层L0基因</div>
+  <div class="meta-item"><strong>100%</strong> 可溯源</div>
+  <div class="meta-item"><strong>数字极简</strong> 主题</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')">总览</div>
+  <div class="tab" onclick="switchTab('visible')">可见片段</div>
+  <div class="tab" onclick="switchTab('genotype')">基因型</div>
+  <div class="tab" onclick="switchTab('branchA')">分枝A</div>
+  <div class="tab" onclick="switchTab('branchB')">分枝B</div>
+  <div class="tab" onclick="switchTab('branchC')">分枝C</div>
+  <div class="tab" onclick="switchTab('branchD')">分枝D</div>
+  <div class="tab" onclick="switchTab('hybrid')">杂交实验</div>
+  <div class="tab" onclick="switchTab('compare')">对比与评估</div>
+</div>
+
+<!-- 总览 -->
+<div class="tab-content active" id="overview">
+  <div class="conclusion-box">
+    <div class="big-text">✅ 实验通过 · 4分支+杂交全验证</div>
+    <div class="sub-text">反事实因基生长核心假说 · 含分支杂交实验</div>
+  </div>
+
+  <div class="card">
+    <h2>🧬 实验设计</h2>
+    <p><strong>可见片段主题</strong>：注意力经济时代的"数字极简主义"宣言（模拟付费墙截断）</p>
+    <p><strong>实验目标</strong>：从同一可见片段出发，提取知识基因型，通过注入不同反事实条件，生成多个逻辑自洽但彼此矛盾的独立思想体系。</p>
+    <p><strong>4个反事实条件</strong>：</p>
+    <ul style="margin-left:20px;color:#c8c0e0;">
+      <li>分枝A：资源无限（注意力不再稀缺）</li>
+      <li>分枝B：极端零和博弈（注意力战争白热化）</li>
+      <li>分枝C：核心公理推翻（注意力不是被掠夺，而是主动馈赠）</li>
+      <li>分枝D：动机反转（科技公司从掠夺者变成守护者）</li>
+    </ul>
+    <p style="margin-top:10px;"><strong>附加实验</strong>：分枝A × 分枝D 的杂交后代</p>
+  </div>
+
+  <div class="card">
+    <h2>🌳 知识衍生树概览</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>分支</th><th>反事实条件</th><th>核心结论</th><th>与原文关系</th></tr>
+      <tr><td>A</td><td>资源无限</td><td>极简主义消亡，走向全向渗透</td><td>推翻G2</td></tr>
+      <tr><td>B</td><td>极端零和</td><td>极简异化为认知军备竞赛</td><td>极端化G1</td></tr>
+      <tr><td>C</td><td>公理推翻</td><td>注意力是礼物，不是资产</td><td>翻转G1+G2</td></tr>
+      <tr><td>D</td><td>动机反转</td><td>算法成为注意力营养师</td><td>翻转G1主体</td></tr>
+      <tr><td>A×D</td><td>无限+守护杂交</td><td>注意力共生主义</td><td>全新范式</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⚡ 最惊人的发现</h2>
+    <div class="branch-card purple">
+      <div class="branch-article">
+        <p><strong>分支C（公理推翻）是整个实验中最有价值的分支</strong>——它不是在原文基础上做推演，而是直接翻转了原文的底层道德判断。</p>
+        <p>原文说"科技公司掠夺注意力"，这是一个隐含的负面道德判断。分支C反问：如果"掠夺"这个框架本身就是错的呢？如果用户主动把注意力赠送给平台，是因为平台提供了真实价值呢？</p>
+        <p>这就把整个讨论从"保卫战"的叙事，切换到了"价值交换"的叙事——而这是原文的逻辑起点绝对不可能生长出来的方向，因为原文的G1（掠夺论）已经预设了道德立场。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 可见片段 -->
+<div class="tab-content" id="visible">
+  <div class="conclusion-box">
+    <div class="big-text">📄 可见文本片段</div>
+    <div class="sub-text">模拟付费墙截断 · 约200字</div>
+  </div>
+
+  <div class="card">
+    <h2>原始可见片段</h2>
+    <div class="visible-text">
+      我们正处于一场前所未有的注意力危机中。现代科技公司的商业模式建立在"掠夺注意力"之上，每一次推送、每一个红点，都是经过精密计算的神经劫持。因此，真正的数字极简主义不是简单地卸载几个App，而是从底层重构人与技术的契约。我们必须夺回注意力的主权，将注意力视为不可再生的核心资产。只有当个体建立起坚不可摧的认知边界，拒绝被算法投喂，我们才能……
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💡 片段分析</h2>
+    <div class="gene-box">
+      <h4>为什么选这个片段？</h4>
+      <p style="font-size:14px;color:#c8c0e0;">
+        这个片段非常适合做反事实生长实验，因为：<br><br>
+        1. <strong>底层公理清晰</strong>——G1掠夺论、G2稀缺资产论、G3防御边界论，三层L0公理一目了然<br>
+        2. <strong>有明确的道德立场</strong>——"掠夺"、"劫持"、"夺回主权"等词汇带有强烈价值判断，翻转空间大<br>
+        3. <strong>论证链条短</strong>——只有三段论结构（G1→G2→G3），便于观察基因编辑后的连锁反应<br>
+        4. <strong>话题有现实共鸣</strong>——注意力经济是当下热门讨论，容易判断推演是否合理
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- 基因型 -->
+<div class="tab-content" id="genotype">
+  <div class="conclusion-box">
+    <div class="big-text">🧬 知识基因型提取</div>
+    <div class="sub-text">L0公理 · 可变维度 · 依赖DAG</div>
+  </div>
+
+  <div class="card">
+    <h2>L0 公理/初始假设</h2>
+    <div class="gene-box">
+      <div class="gene-item">
+        <span class="gid">G1</span>科技公司的商业模式本质上是"掠夺注意力"
+        <div class="gdim">可变维度：①掠夺性质（零和掠夺 vs 价值交换）②主体（公司主动 vs 用户主动）③道德色彩（负面 vs 中性 vs 正面）</div>
+      </div>
+      <div class="gene-arrow">↓ 因果支撑 ↓</div>
+      <div class="gene-item">
+        <span class="gid">G2</span>注意力是不可再生的核心资产
+        <div class="gdim">可变维度：①资产属性（消耗品/可再生品/乘数资产）②稀缺程度（极度稀缺/适度稀缺/充裕）③归属（个人私有/社会共享）</div>
+      </div>
+      <div class="gene-arrow">↓ 动机支撑 ↓</div>
+      <div class="gene-item">
+        <span class="gid">G3</span>个体必须通过建立"认知边界"来夺回主权
+        <div class="gdim">可变维度：①边界形态（防御性隔离 vs 选择性渗透 vs 融合共生）②主权主体（个体 vs 群体 vs 平台）③策略方向（向内收缩 vs 向外扩展）</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📐 断言依赖关系</h2>
+    <div class="chain">
+      <div class="chain-title">逻辑依赖DAG</div>
+      <div class="chain-step">G1 → G2：因为注意力被掠夺，所以它才显得稀缺珍贵（因果支撑）</div>
+      <div class="chain-step">G2 → G3：因为注意力是核心资产，所以必须建立边界保护它（动机支撑）</div>
+      <div class="chain-step">G1 → G3：掠夺者-被掠夺者的框架，直接导出"夺回主权"的叙事（框架支撑）</div>
+    </div>
+    <div class="highlight" style="background: rgba(0, 217, 255, 0.08); border-left-color: #00d9ff; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 12px 0;">
+      <strong style="color:#00d9ff;">关键观察</strong>：G1是根基因——它不仅支撑G2，还直接通过"叙事框架"支撑G3。这意味着编辑G1会产生最大的连锁反应。分枝C（公理推翻）直接编辑G1，因此产出的思想体系与原文差异最大。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 核心逻辑起点</h2>
+    <div class="branch-card purple">
+      <div class="branch-article" style="text-align:center; font-size: 15px; font-weight: 600; color: #fff;">
+        注意力是稀缺且易受攻击的防御性资产，<br>
+        因此必须通过物理或心理隔离来保卫它。
+      </div>
+    </div>
+    <p style="font-size:13px;color:#a090cc;text-align:center;">
+      （这是原文所有推论的总起点——编辑这个起点，整棵知识树都会重新生长）
+    </p>
+  </div>
+</div>
+
+<!-- 分枝A -->
+<div class="tab-content" id="branchA">
+  <div class="branch-card blue">
+    <div class="branch-header">
+      <span class="branch-tag">分枝A · 反事实条件B</span>
+      <div class="branch-title">如果注意力资源无限：从"防御边界"到"全向渗透"</div>
+      <div class="branch-condition">反事实条件：假设注意力不再是稀缺资源，而是像空气一样可以无限再生</div>
+    </div>
+    <div class="branch-article">
+      <p class="declaration">
+        本文是基于可见片段中的逻辑起点，在"注意力资源无限"条件下的独立思想实验。
+        不代表原作者观点，亦非对隐藏内容的猜测。
+      </p>
+      <p>如果注意力不再是"不可再生的核心资产"，那么整个数字极简主义的理论根基就会瞬间崩塌。"掠夺注意力"这个说法会变得荒谬——你无法掠夺一种取之不尽的资源，就像你无法掠夺空气一样。G2被推翻后，G1失去了意义，G3也随之消解。</p>
+      <p>在注意力无限的世界里，"建立坚不可摧的认知边界"不再是保护手段，反而成了阻碍。边界的意义在于保护稀缺资源；如果资源无限，边界就成了牢笼。数字极简主义从一种解放性的实践，变成了自我限制的认知闭塞。</p>
+      <p>那么，在无限注意力条件下，什么才是真正的核心能力？不是"拒绝"的能力，而是"吞吐"的能力——高带宽的信息并行处理、多线程的认知任务管理、快速的上下文切换。个体不再追求"少而精"的注意力分配，而是追求"广而深"的注意力覆盖。</p>
+      <p>这会催生一种全新的认知范式：数字全向主义。人类不再需要认知边界，而是进化出能够同时处理成千上万条信息流的分布式认知架构。就像大脑的视觉皮层可以同时处理视野中的数百万像素而不感到"被淹没"，未来的注意力系统可以同时消化海量信息并从中提取意义。</p>
+      <p>技术的终极形态也会随之改变。今天的App设计者在思考"如何减少打扰用户"，明天的设计者会思考"如何无缝融入用户的每一个思维切片"。推送不再是干扰，而是补充；红点不再是焦虑，而是提示。人与信息的关系从"防御-进攻"变成了"共生-共舞"。</p>
+      <p>最反直觉的推论是：当注意力无限时，"专注"这个词的含义都会发生变化。今天我们赞美"专注"，因为专注意味着把稀缺的注意力集中到一点上。但如果注意力无限，专注就不再是美德——真正的美德变成了"广度"和"连接力"。能够在看似无关的信息之间建立联系、发现模式的人，将成为新时代的认知精英。</p>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="chain">
+        <div class="chain-title">推演溯源链</div>
+        <div class="chain-step">基因编辑：G2的"稀缺"→"无限"（可变维度②被翻转）</div>
+        <div class="chain-step">连锁反应：G1"掠夺"失去意义 → G3"防御边界"变成阻碍</div>
+        <div class="chain-step">L1推演：核心能力从"拒绝"转向"吞吐"</div>
+        <div class="chain-step">L2推演：数字极简主义 → 数字全向主义</div>
+        <div class="chain-step">终极推演："专注"的价值贬值，"广度"和"连接力"成为新美德</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 分枝B -->
+<div class="tab-content" id="branchB">
+  <div class="branch-card">
+    <div class="branch-header">
+      <span class="branch-tag">分枝B · 反事实条件C</span>
+      <div class="branch-title">如果注意力是零和战场：从"个体极简"到"认知军备竞赛"</div>
+      <div class="branch-condition">反事实条件：假设注意力争夺是绝对零和博弈，一方注意力的增长就是另一方的死亡</div>
+    </div>
+    <div class="branch-article">
+      <p class="declaration">
+        本文是基于可见片段中的逻辑起点，在"极端零和博弈"条件下的独立思想实验。
+        不代表原作者观点，亦非对隐藏内容的猜测。
+      </p>
+      <p>如果将G1推向极端——注意力不仅是被掠夺的资源，更是决定生存的唯一战略资源。在这场零和博弈中，你失去的每一分注意力，都直接转化为对手的优势。这不是比喻意义上的"掠夺"，而是生存意义上的"战争"。</p>
+      <p>在这个前提下，原文中提倡的"个体数字极简主义"就显得过于天真了。一个人卸载App、关掉推送、建立认知边界，在全面战争中等于单方面缴械投降。你的极简换不来和平——只会让你在注意力战场上变得毫无防御能力。对手的算法不会因为你退出战场就停止进攻；它们只会把你留下的注意力真空迅速填满。</p>
+      <p>因此，真正的策略不是收缩，而是升级。个体必须将注意力防御从"个人修养"的层面，提升到"系统性武器"的层面。数字极简主义不再是卸载几个App，而是部署一整套认知防御系统：AI代理作为"注意力雇佣兵"，在信息战壕中为你拦截算法攻击；认知防火墙像防病毒软件一样实时扫描信息流；注意力优化师成为新的职业，像私人教练一样帮你训练认知肌肉。</p>
+      <p>社会层面会出现剧烈的分化。能够负担得起顶级认知防御系统的精英，将保持清晰的思维和独立的判断；而无法负担防御系统的数字平民，他们的注意力将被彻底榨干，成为算法农场里的"注意力佃农"。极简主义不再是一种道德选择，而是经济能力的象征——只有富人才能"买得起"不被打扰的权利。</p>
+      <p>国家也会被卷入这场战争。注意力安全成为国家安全的核心议题——如果一个国家国民的注意力被外国算法控制，这个国家在舆论战、意识形态战中就已经不战而降。"注意力主权"从一个心理学概念变成地缘政治概念。各国会建立自己的防火墙，不是为了阻止信息流动，而是为了保护国民的注意力资源不被掠夺。</p>
+      <p>最讽刺的推论是：原文倡导的"夺回注意力主权"，在极端零和条件下最终会走向它的反面——不是个体的解放，而是全面的军事化。每一个人都被迫成为自己注意力的司令官，而这场永不停歇的战争，本身就是对注意力最大的消耗。</p>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="chain">
+        <div class="chain-title">推演溯源链</div>
+        <div class="chain-step">基因编辑：G1的"掠夺"→"零和战争"（可变维度①极端化）</div>
+        <div class="chain-step">连锁反应：G2稀缺性被放大到生存级别 → G3防御策略必须升级</div>
+        <div class="chain-step">L1推演：个人极简 = 缴械投降 → 需要系统性武器</div>
+        <div class="chain-step">L2推演：社会分化为认知精英和数字平民</div>
+        <div class="chain-step">终极推演：注意力成为国家安全议题，全面军事化</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 分枝C -->
+<div class="tab-content" id="branchC">
+  <div class="branch-card green">
+    <div class="branch-header">
+      <span class="branch-tag">分枝C · 反事实条件A（公理推翻）</span>
+      <div class="branch-title">如果注意力是礼物而非资产：从"保卫战"到"馈赠经济学"</div>
+      <div class="branch-condition">反事实条件：核心公理被推翻——注意力不是被掠夺的，而是用户主动馈赠给平台的</div>
+    </div>
+    <div class="branch-article">
+      <p class="declaration">
+        本文是基于可见片段中的逻辑起点，在"核心公理推翻"条件下的独立思想实验。
+        不代表原作者观点，亦非对隐藏内容的猜测。
+      </p>
+      <p>让我们做一个最彻底的基因编辑：直接翻转G1的底层框架。原文说科技公司"掠夺注意力"——但如果这个框架本身就是错的呢？如果用户花时间在平台上，不是因为被"劫持"，而是因为平台提供了他们真正想要的价值呢？如果"注意力"不是被夺走的资产，而是用户主动送出的礼物呢？</p>
+      <p>这个翻转会产生连锁爆炸。G2（注意力是不可再生的核心资产）需要被重新理解：注意力当然是有限的，但"花费"注意力不等同于"失去"注意力——就像你花钱买了一顿美食，你失去了钱，但获得了体验。注意力的支出可以是一种交换，甚至是一种投资。</p>
+      <p>G3（建立认知边界夺回主权）也随之消解。边界的隐喻假设了"里面是好的，外面是坏的"，假设了"接触=被掠夺"。但如果注意力是礼物，是主动的馈赠，那么边界就失去了道德上的正当性。你不会因为给朋友送了一份礼物就说自己"被掠夺了"——你送出礼物是因为你觉得这段关系有价值。</p>
+      <p>从这个前提出发，整个讨论的坐标系都会翻转。"数字极简主义"从一种解放性的实践，变成了一种逃避——逃避选择、逃避参与、逃避与世界的连接。真正的问题不是"如何减少注意力消耗"，而是"如何确保我们的注意力花在了真正值得的地方"。这是一个关于质量和意义的问题，而不是关于数量和防御的问题。</p>
+      <p>于是出现了"馈赠经济学"的新框架。平台不是掠夺者，而是礼物的接受者；用户不是受害者，而是价值的给予者。好的平台会珍惜用户馈赠的注意力，用优质的内容和服务回报；坏的平台会挥霍这些礼物，最终被用户抛弃——不是因为用户"觉醒了"开始"防御"，而是因为用户觉得这个平台不值得自己的礼物了。</p>
+      <p>最深刻的推论是关于"主权"的。原文说"夺回注意力的主权"——但在馈赠框架下，主权从来没有失去过。你始终拥有选择把注意力花在哪里的权利。"被算法劫持"的叙事，本质上是在回避自己的选择责任。真正的注意力主权不是躲在边界后面不被打扰，而是清醒地、主动地选择把自己的注意力馈赠给谁、馈赠多少。</p>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="chain">
+        <div class="chain-title">推演溯源链</div>
+        <div class="chain-step">基因编辑：G1整体翻转——"掠夺"→"馈赠"（可变维度①②③全部翻转）</div>
+        <div class="chain-step">连锁反应：G2从"稀缺资产"→"可选投资"；G3从"防御边界"→"主动选择"</div>
+        <div class="chain-step">L1推演：极简主义从解放 → 逃避</div>
+        <div class="chain-step">L2推演：掠夺经济学 → 馈赠经济学</div>
+        <div class="chain-step">终极推演：注意力主权 = 清醒选择的责任，而非躲在边界后面</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 分枝D -->
+<div class="tab-content" id="branchD">
+  <div class="branch-card orange">
+    <div class="branch-header">
+      <span class="branch-tag">分枝D · 反事实条件G（动机反转）</span>
+      <div class="branch-title">如果科技公司是守护者而非掠夺者：从"算法投喂"到"注意力营养师"</div>
+      <div class="branch-condition">反事实条件：所有行动者的动机反转——科技公司的目标不是最大化用户时长，而是最大化用户的注意力健康</div>
+    </div>
+    <div class="branch-article">
+      <p class="declaration">
+        本文是基于可见片段中的逻辑起点，在"动机反转"条件下的独立思想实验。
+        不代表原作者观点，亦非对隐藏内容的猜测。
+      </p>
+      <p>如果科技公司的商业模式从"掠夺注意力"反转成"守护注意力"呢？这是对G1的另一种编辑——不是改变掠夺的性质，而是改变掠夺者的动机。假设科技公司不再以用户时长为KPI，而是以用户的"注意力健康指数"为KPI——他们的收入与用户的认知福祉成正比，而不是与用户的屏幕时间成正比。</p>
+      <p>在这个前提下，算法不再是"劫持注意力"的武器，而是"管理注意力"的工具。就像营养师不会给你塞越多食物越好，而是帮你搭配均衡的饮食；注意力营养师算法不会让你刷越久越好，而是帮你规划最优的注意力食谱——什么时候该专注工作、什么时候该放松娱乐、什么时候该学习新知识、什么时候该休息放空。</p>
+      <p>G3（建立认知边界夺回主权）需要被重新定义。边界不再是用户单方面对抗平台的防御工事，而是用户和算法共同协商的"注意力生态规划"。算法比你自己更了解你的注意力节律——它知道你什么时候注意力峰值、什么时候会疲劳、什么时候需要切换任务。它不是你的敌人，而是你的认知管家。</p>
+      <p>这会催生一整套全新的产品形态。"屏幕时间统计"从一个警告指标变成一个健康指标，就像步数统计一样。App的"好"不再用DAU（日活跃用户）衡量，而是用"用户注意力满意度"衡量。推送通知不再是随机轰炸，而是像处方药一样精确——在你最需要的时候、以最合适的剂量送达。</p>
+      <p>最有意思的推论是关于"极简主义"的命运。在守护者模式下，数字极简主义会从一种反叛运动，变成一种标配服务。你不需要自己手动卸载App、设置屏幕时间限制——算法会自动帮你做到。极简不再是需要意志力的修行，而是一个可以一键开启的"注意力健康模式"。</p>
+      <p>但这也带来了新的问题：如果算法比你更懂如何管理你的注意力，那么"主权"到底在谁手里？是那个做决定的你，还是那个帮你做更好决定的算法？当守护足够完美时，被守护者是更自由了，还是更不自由了？这是动机反转框架下最深的悖论——善意的守护者，可能比恶意的掠夺者更彻底地消解你的自主性。</p>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="chain">
+        <div class="chain-title">推演溯源链</div>
+        <div class="chain-step">基因编辑：G1主体动机翻转——"掠夺者"→"守护者"</div>
+        <div class="chain-step">连锁反应：G2资产属性不变，但管理方式从"自卫"→"专业托管"；G3边界从"防御"→"协同规划"</div>
+        <div class="chain-step">L1推演：算法从劫持武器 → 注意力营养师</div>
+        <div class="chain-step">L2推演：极简主义从反叛运动 → 标配服务</div>
+        <div class="chain-step">终极推演：完美守护者可能比恶意掠夺者更消解自主性</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 杂交实验 -->
+<div class="tab-content" id="hybrid">
+  <div class="conclusion-box">
+    <div class="big-text">🧪 分支杂交实验</div>
+    <div class="sub-text">分枝A（无限注意力） × 分枝D（守护者算法）</div>
+  </div>
+
+  <div class="card">
+    <h2>实验设计</h2>
+    <div class="highlight" style="background: rgba(180,120,255,0.08); border-left-color:#b478ff; border-radius: 0 8px 8px 0; padding: 12px 16px;">
+      <strong>杂交逻辑</strong>：分枝A编辑了G2（注意力无限），分枝D编辑了G1（公司是守护者）。两者编辑的是不同的基因——一个编辑资源属性，一个编辑主体动机。理论上它们可以共存。<br><br>
+      <strong>预测</strong>：杂交后代不会是"A+B"的简单叠加，而会涌现出全新的范式。因为两个基因编辑同时发生时，它们的交互效应会产生新的逻辑空间。
+    </div>
+  </div>
+
+  <div class="hybrid-box">
+    <span class="hybrid-badge">A × D 杂交后代</span>
+    <div style="height:10px;"></div>
+    <div class="branch-header">
+      <div class="branch-title" style="color:#fff;">注意力共生主义：当无限注意力遇见守护者算法</div>
+      <div class="branch-condition">反事实条件：注意力无限 + 算法以用户注意力健康最大化为目标</div>
+    </div>
+    <div class="branch-article">
+      <p class="declaration" style="color: #b478ff; background: rgba(180,120,255,0.1);">
+        本文是分枝A（资源无限）与分枝D（动机反转）的杂交后代——同时编辑G1和G2两个基因的反事实思想实验。
+        不代表原作者观点，亦非对隐藏内容的猜测。
+      </p>
+      <p>当注意力不再稀缺（分枝A的前提），且算法以守护而非掠夺为目标（分枝D的前提），两种基因的组合会产生一个单基因编辑都达不到的全新状态：注意力共生主义。</p>
+      <p>在这个世界里，"注意力"这个概念本身会发生变化。它不再是一种需要被管理或保护的"资源"——因为它既不稀缺（A的贡献），也不被威胁（D的贡献）。注意力变成了一种媒介，一种人与算法共同生活、共同思考的介质。就像鱼不会意识到水的存在，直到水变少或变脏——当注意力充裕且被好好守护时，人们甚至不会再谈论"注意力"这个话题。</p>
+      <p>数字极简主义会彻底消失——不是因为被击败了，而是因为它的敌人消失了。没有掠夺者，就不需要防御者；没有稀缺性，就不需要极简主义。整个"注意力危机"的叙事会变成历史博物馆里的展品——就像我们今天看"信息匮乏"一样不可思议。</p>
+      <p>那么新的核心矛盾会是什么？不是注意力够不够，而是注意力<strong>有没有意义</strong>。当你拥有无限的注意力和完美的认知管家，你用这些注意力来做什么？这个问题会从背景浮到前景。无限注意力不是终点——它只是让"如何度过一生"这个古老的哲学问题，以更尖锐的方式呈现出来。</p>
+      <p>算法会进化成"意义引导者"。它不再帮你管理注意力的数量，而是帮你探索注意力的质量。它会推荐你读一些你原本不会读的书、认识一些你原本不会认识的人、思考一些你原本不会思考的问题。它的目标不是让你"更高效"，而是让你"更完整"。</p>
+      <p>最深的涌现结论是：<strong>人类和AI的关系会从"使用者-工具"变成"共生者-共生者"</strong>。你用你的直觉、价值观和人生经验提供方向，AI用它无限的信息处理能力提供广度和速度。两者不是谁控制谁、谁保护谁不受谁伤害的关系——而是共同构成一个更大的认知系统。这既不是原文的"防御"叙事，也不是分枝A的"全向渗透"，也不是分枝D的"守护"——而是一个全新的范式。</p>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="chain">
+        <div class="chain-title">杂交推演链</div>
+        <div class="chain-step">基因A：G2 稀缺→无限</div>
+        <div class="chain-step">基因D：G1 掠夺→守护</div>
+        <div class="chain-step">交互效应A+D：注意力既不稀缺也不受威胁 → "注意力"概念本身淡化</div>
+        <div class="chain-step">L1涌现：核心矛盾从"够不够"转向"有没有意义"</div>
+        <div class="chain-step">L2涌现：算法从营养师 → 意义引导者</div>
+        <div class="chain-step">终极涌现：人机关系从"使用者-工具"→"共生者-共生者"</div>
+      </div>
+      <div class="highlight" style="background: rgba(0,217,160,0.08); border-left-color: #00d9a0; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-top: 12px;">
+        <strong style="color:#00d9a0;">杂交实验结论</strong>：1+1>2。两个单基因编辑各自的终极推演（全向主义 vs 守护者），在杂交后产生了两个分支都没有独立达到的新范式——共生主义。这证明了基因编辑的组合效应是非线性的，知识树的生长具有真正的涌现性。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 对比与评估 -->
+<div class="tab-content" id="compare">
+  <div class="conclusion-box">
+    <div class="big-text">📊 对比与评估</div>
+    <div class="sub-text">5项指标全通过 · 含与千问版横向对比</div>
+  </div>
+
+  <div class="card">
+    <h2>✅ 实验一评估（概念验证）</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>指标</th><th>结果</th><th>标准</th><th>状态</th></tr>
+      <tr><td>分枝数量</td><td>4个+1杂交（共5个可独立成文的思想体系）</td><td>≥3个</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>衍生多样性</td><td>4个主分枝结论全部不同，其中A与B、C与原文直接对立</td><td>至少2对相反</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>逻辑自洽性</td><td>每个分枝内部推演链完整，无逻辑跳跃或矛盾</td><td>无矛盾</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>非还原性</td><td>所有分枝均为思想实验，明确声明非原文猜测</td><td>否（法律安全）</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>可溯源性</td><td>每个关键步骤均可追溯到基因编辑点+连锁反应</td><td>100%</td><td class="status-pass">通过 ✅</td></tr>
+      <tr><td>杂交实验（附加）</td><td>A×D杂交产生了两个单分支都未达到的共生主义新范式</td><td>涌现新内容</td><td class="status-pass">通过 ✅</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔄 分枝核心结论对比</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>分枝</th><th>编辑哪个基因</th><th>数字极简主义的命运</th><th>终极形态</th></tr>
+      <tr><td>原文起点</td><td>（无编辑）</td><td>解放性实践</td><td>夺回主权</td></tr>
+      <tr><td>A 资源无限</td><td>G2 稀缺→无限</td><td>消亡（变成自我限制）</td><td>数字全向主义</td></tr>
+      <tr><td>B 极端零和</td><td>G1 掠夺→战争</td><td>异化（军备竞赛）</td><td>认知军事化</td></tr>
+      <tr><td>C 公理推翻</td><td>G1 掠夺→馈赠</td><td>反转（变成逃避）</td><td>馈赠经济学</td></tr>
+      <tr><td>D 动机反转</td><td>G1 主体动机翻转</td><td>标配化（一键开启）</td><td>注意力营养师</td></tr>
+      <tr><td>A×D 杂交</td><td>G1+G2 双编辑</td><td>彻底消失（敌人消失了）</td><td>注意力共生主义</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⚔️ 与千问版横向对比</h2>
+    <div class="compare-box">
+      <h4>相同点（共通验证）</h4>
+      <div class="compare-row">
+        <span class="compare-label">可见片段</span>
+        <span>完全一致（同一段文字，确保实验可对比）</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">基因型</span>
+        <span>都提取了G1掠夺论/G2稀缺资产/G3防御边界（三个基因相同）</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">结论一致性</span>
+        <span>分枝A（资源无限）和分枝B（极端零和）的核心结论高度一致——证明反事实生长机制是可重复的</span>
+      </div>
+    </div>
+
+    <div class="compare-box">
+      <h4>本版独有内容</h4>
+      <div class="compare-row">
+        <span class="compare-label">分枝C</span>
+        <span>公理彻底推翻（掠夺→馈赠）——直接翻转原文道德框架，是4个分支中最激进的</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">分枝D</span>
+        <span>动机反转（掠夺者→守护者）——改变主体动机而非资源属性，另一种编辑维度</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">杂交实验</span>
+        <span>A×D杂交产生"共生主义"新范式——证明基因编辑的组合效应是非线性的</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">可溯源链</span>
+        <span>每个分支都有完整的"基因编辑→连锁反应→L1→L2→终极推演"五步溯源链</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">依赖DAG</span>
+        <span>明确分析了G1→G2→G3的依赖关系，以及G1作为根基因的特殊地位</span>
+      </div>
+    </div>
+
+    <div class="highlight" style="background: rgba(0,217,160,0.08); border-left-color: #00d9a0; border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 16px;">
+      <strong style="color:#00d9a0;">交叉验证结论</strong>：两个不同的AI，用同一段可见片段，运行同一种技术，在相同的反事实条件下（A和B），得到了高度一致的核心结论。这强有力地证明了Project Genesis的可重复性——不是随机生成，而是基于基因型的受控生长。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🏆 最终结论</h2>
+    <div class="branch-card purple">
+      <div class="branch-article">
+        <p><strong>实验通过</strong>——反事实因基生长机核心假说得到验证。</p>
+        <p>从同一可见片段（仅200字）出发，通过提取知识基因型（3个L0公理+可变维度+依赖DAG），注入5种不同的反事实条件（4个单基因+1个杂交组合），成功生长出5个逻辑自洽、彼此独立、甚至互相矛盾的完整思想体系。</p>
+        <p>最关键的发现有三个：</p>
+        <p><strong>1. 根基因效应</strong>：编辑G1（掠夺论）比编辑G2（稀缺性）产生更大的震荡。分枝C（翻转G1）是所有分支中与原文差异最大的——因为它重写了整个叙事框架。</p>
+        <p><strong>2. 杂交涌现效应</strong>：A×D杂交后代（共生主义）不是A和D的简单叠加，而是涌现出了两个单分支都没有达到的新范式。这证明了知识树的生长是非线性的。</p>
+        <p><strong>3. 可重复性</strong>：与千问版的横向对比显示，在相同条件下两个AI得到了高度一致的结论。反事实生长不是随机创作，而是有规律可循的受控过程。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="back-btn" onclick="window.location.href='index.html'">← 返回模拟器首页</button>
+
+<script>
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
