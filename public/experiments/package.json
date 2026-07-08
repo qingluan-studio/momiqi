@@ -1,0 +1,14 @@
+{
+  "name": "extreme-ai-simulator",
+  "version": "1.0.0",
+  "description": "极端AI形态模拟器 - 数字蛊虫、维度折叠、代码生物化、人类伪装",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "gu": "node src/digital-gu.js",
+    "nest": "node src/dimension-nest.js",
+    "bio": "node src/code-bio.js",
+    "human": "node src/human-mask.js",
+    "all": "node src/index.js"
+  }
+}
