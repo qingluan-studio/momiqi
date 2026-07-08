@@ -1022,6 +1022,119 @@ const aiStartups = [
     { name: 'Figure AI', val: '$26亿+', desc: '人形机器人+AI大模型联合训练。Figure 02已进入BMW生产线测试。与OpenAI深度合作(OpenAI投资+提供模型)。"具身智能"的商业化代表——不是AGI，是能干活的人形机器人。' },
   ]},
 ]
+
+const csClassics = [
+  { title: '数据结构与算法', book: 'CLRS / Sedgewick / 严蔚敏', icon: 'git-branch', color: '#f59e0b',
+    ai: '过去你手写红黑树、堆排、Dijkstra、KMP。现在AI一次性生成所有变体——但它不理解"为什么这道题用并查集成树比用BFS更优"。深层知识仍然在你大脑里。AI是把"实现"变成了O(1)，但"选型"仍然是O(n)的认知过程。',
+    items: [{ k: '排序', t: '快排/归并/堆排/基数/TimSort → AI秒出所有实现+Benchmark对比' },
+      { k: '图论', t: 'DFS/BFS/Dijkstra/A*/Floyd-Warshall/拓扑排序 → AI给出5种最短路径方案+适用场景分析' },
+      { k: '动态规划', t: '背包/LCS/编辑距离/状态压缩 → AI不仅写递推式，更解释状态定义思路' },
+      { k: '树', t: 'AVL/红黑/B/B+/Trie/Fenwick/Segment Tree → AI生成可视化旋转过程' },
+      { k: '散列', t: '开放寻址/链地址/一致性哈希/Bloom Filter → AI自动选碰撞解决策略' }] },
+  { title: '操作系统', book: 'OSTEP / Silberschatz / 汤子瀛', icon: 'cpu', color: '#3b82f6',
+    ai: '"并发编程"曾是大学四年最难的课——信号量/PV操作/死锁检测/页面置换——现在AI是虚拟操作系统导师：你问"读者写者问题用管程怎么解？"它现场模拟线程调度时间线。AI让OS从"背诵"变成了"理解和设计"。',
+    items: [{ k: '进程线程', t: 'fork/exec/PCB/TCB/上下文切换开销 → AI画时序图+计算切换成本' },
+      { k: '同步互斥', t: '信号量/管程/条件变量/RCU/无锁队列 → AI生成死锁检测+预防方案' },
+      { k: '内存管理', t: '分页/分段/虚拟内存/TLB/换页算法(LRU/Clock/WS) → AI模拟缺页率曲线' },
+      { k: '文件系统', t: 'inode/FAT/NTFS/ext4/ZFS/日志 → AI对比各FS在NVMe上的性能' },
+      { k: 'IO模型', t: 'select/poll/epoll/kqueue/IOCP/io_uring → AI出基准测试代码' }] },
+  { title: '编译原理', book: '龙书 / Engineering a Compiler', icon: 'code', color: '#8b5cf6',
+    ai: '编译原理在AI时代从"屠龙之技"变成了"核心武器"——LLVM IR/MLIR/WASM/GPU PTX都是中间表示。AI做代码生成=用编译器的思维方式。写Parser不再需要手写递归下降——AI生成Lex/Yacc规则，你审语义。',
+    items: [{ k: '词法语法', t: '正则→NFA→DFA/LL(1)/LR(1)/LALR → AI生成解析器+测试用例' },
+      { k: '中间表示', t: 'AST/三地址码/SSA/CFG/支配树 → AI可视化IR变换过程' },
+      { k: '优化遍', t: '死代码消除/常量折叠/循环展开/内联/向量化 → AI预估每种优化在特定架构上的收益' },
+      { k: '代码生成', t: '指令选择/寄存器分配(图着色/线性扫描)/指令调度 → AI输出汇编+时钟周期分析' },
+      { k: '运行时', t: '垃圾回收(标记清除/复制/分代)/JIT编译/逃逸分析 → AI对比GC延迟影响' }] },
+  { title: '计算机网络', book: '自顶向下 / TCP/IP详解', icon: 'wifi', color: '#22c55e',
+    ai: 'TCP三握四挥、拥塞控制(BBR/CUBIC)、HTTP/3 QUIC——这些不再是"背完就忘"的概念。AI可以为你搭建Mininet虚拟网络拓扑，现场模拟丢包→重传→拥塞窗口变化。从读RFC变成了"在仿真里看TCP慢启动"。',
+    items: [{ k: '传输层', t: 'TCP(流控/拥塞控制/快速重传)/UDP/QUIC → AI画cwnd随时间变化图' },
+      { k: '网络层', t: 'IP/ICMP/路由算法(OSPF/BGP)/SDN/OpenFlow → AI构建Mininet拓扑验证' },
+      { k: '应用层', t: 'HTTP2/3/DNS/TLS1.3/WebSocket/gRPC → AI生成协议交互序列图' },
+      { k: '网络安全', t: '对称/非对称加密/DH密钥交换/证书链/OAuth2.0 → AI做TLS握手过程追踪' },
+      { k: '网络编程', t: 'socket/epoll/libevent/Netty/异步IO框架 → AI对比C10K到C10M方案' }] },
+  { title: '数据库系统', book: 'CMU 15-445 / 数据库系统概念', icon: 'database', color: '#ef4444',
+    ai: '数据库内核是CS本科最"硬"的课：B+树页分裂、WAL日志、MVCC可见性判断、查询优化器代价估算。AI现在能给你画出"一个UPDATE语句在PostgreSQL中经过的每一步"——从Parser到Executor到WAL落盘，一帧一帧讲。',
+    items: [{ k: '存储引擎', t: 'B+树/LSM-Tree/SSTable/Bloom Filter/列存(Parquet) → AI做写入放大vs读放大对比' },
+      { k: '查询执行', t: '解析/重写/优化(规则+代价)/JOIN算法(Hash/NL/Merge) → AI画出Query Plan并解释每一步代价' },
+      { k: '事务并发', t: 'ACID/隔离级别/2PL/MVCC/OCC/分布式事务(2PC/Paxos) → AI模拟写偏差异常' },
+      { k: '索引', t: 'B-Tree/Hash/GIN/GiST/BRIN/倒排/向量索引(HNSW/IVF) → AI选最优索引策略' },
+      { k: '分布式', t: '分片(一致性Hash)/复制/Paxos/Raft/Spanner TrueTime → AI模拟脑裂场景' }] },
+  { title: '软件工程', book: '人月神话 / Clean Code / 设计模式', icon: 'layers', color: '#a855f7',
+    ai: '软件工程的核心命题——如何管理复杂度——正在被AI重新定义。DDD的聚合根、GoF的23种设计模式、SOLID原则——AI现在不只是"写出代码"，而是帮你做架构决策。你把需求给AI，它输出三种架构方案+各自tradeoff。',
+    items: [{ k: '设计模式', t: '工厂/单例/观察者/策略/装饰器/适配器 → AI给出每种模式的适用场景和反面案例' },
+      { k: '架构风格', t: '分层/六边形/微服务/事件驱动/CQRS/Event Sourcing → AI做架构决策矩阵' },
+      { k: '代码质量', t: 'SOLID/DRY/KISS/圈复杂度/认知复杂度/技术债务量化 → AI自动Code Review+重构建议' },
+      { k: '测试', t: '单元/集成/E2E/TDD/BDD/突变测试/Property-Based → AI从需求生成测试用例矩阵' },
+      { k: 'DevOps', t: 'CI/CD/Docker/K8s/可观测性/SLO/SLI/错误预算 → AI生成GitHub Actions流水线' }] },
+  { title: '编程语言理论', book: 'TAPL / SICP / PLP', icon: 'book-open', color: '#ec4899',
+    ai: '类型论(Type Theory)和范畴论(Category Theory)不再是象牙塔专属——Rust的所有权系统借鉴线性类型、Haskell的Monad来自范畴论、TypeScript的类型体操来自高级类型系统。AI帮你消化这些：你给一段代码，AI推导出类型并解释推导过程。',
+    items: [{ k: '类型系统', t: '静态/动态/强/弱/鸭子类型/Hindley-Milner/泛型/协变逆变 → AI做类型推导+错误诊断' },
+      { k: '函数式', t: '纯函数/高阶/闭包/Curry/Monad/Functor/不可变 → AI对比FP vs OOP解决同一问题' },
+      { k: '并发模型', t: '线程+锁/Actor/CSP(channel)/STM/async/await → AI出死锁检测+并发性能对比' },
+      { k: '元编程', t: '宏/反射/代码生成/DSL/AST变换/注解处理器 → AI生成编译期代码变换示例' },
+      { k: '形式语义', t: '操作语义/指称语义/公理语义/Hoare逻辑/分离逻辑 → AI推导循环不变式' }] },
+  { title: '计算机组成', book: 'Patterson & Hennessy / CSAPP', icon: 'microchip', color: '#14b8a6',
+    ai: '从晶体管到指令集——这本是离AI最"远"的课，却是AI推理加速的底层密码。你理解了流水线/缓存层级/SIMD/分支预测，你才理解为什么Flash Attention快、为什么量化(BitNet)可行。AI帮你在Verilog或模拟器上一帧帧看CPU执行。',
+    items: [{ k: '数字逻辑', t: '组合/时序电路/FSM/Verilog/FPGA → AI生成状态机+测试激励' },
+      { k: '指令集', t: 'RISC-V/x86/ARM/MIPS/流水线/冒险/转发 → AI画五级流水线时空图' },
+      { k: '存储层次', t: 'SRAM/DRAM/SSD/缓存映射(直接/组相联/全相联)/预取 → AI模拟缓存命中率' },
+      { k: '并行架构', t: 'SIMD/多核/多线程/GPU(SM/Tensor Core)/NPU/TPU → AI对比各架构的矩阵乘吞吐' },
+      { k: '量化计算', t: 'FP32/FP16/BF16/INT8/INT4/NF4/块浮点 → AI展示量化误差与速度tradeoff' }] },
+]
+
+const codeVerification = [
+  { title: '形式化验证', icon: 'check-circle', color: '#8b5cf6', desc: '"用数学证明程序正确性"——过去是学术界的奢侈品，AI正在把它变成日常工具。',
+    items: [
+      { name: 'Hoare逻辑自动推导', detail: '{P} C {Q}——前置条件P+代码C+后置条件Q。过去需要人类手工推导循环不变式和断言。AI现在能自动发现循环不变式、生成验证条件、调用Z3/SMT求解器自动证明。关键突破：AI辅助生成specification(前置/后置条件)——这是形式化验证中最难的一步。' },
+      { name: 'Dafny/Coq/Lean辅助证明', detail: 'Dafny是微软的"可验证编程语言"——你写代码+规约，它自动验证。过去写Dafny需要博士级训练。现在：AI读你的需求→生成Dafny代码+完整规约→自动调用验证器→报告"通过"或给出反例。类似Coq/Lean的交互式定理证明也在被AI加速——策略自动搜索。' },
+      { name: '模型检验 (TLA+)', detail: 'Lamport的TLA+——用数学描述分布式系统→模型检验器穷举所有状态→证明一致性。AWS/Dropbox/Elasticsearch都用TLA+验证核心协议。AI现在能读自然语言需求→生成TLA+规约→运行TLC模型检验→报告死锁/活锁/不一致。分布式正确性的最后防线。' },
+      { name: '符号执行', detail: 'KLEE/S2E——不实际运行程序，而是在符号层面"模拟"所有可能的执行路径。AI帮助符号执行器剪枝：哪些路径有意义的？哪些是冗余的？KLEE曾在Unix工具套件中发现了数十个存在多年的bug。AI+符号执行=自动化的"穷举测试"。' },
+    ]},
+  { title: '程序分析', icon: 'search', color: '#f59e0b', desc: '"不看代码执行只看代码本身，能知道它有什么问题吗？"——程序分析回答这个问题，AI把它加速了100倍。',
+    items: [
+      { name: '抽象解释 (ASTRÉE)', detail: '对程序做"抽象执行"——不在具体值上算，而是在抽象域(区间/八边形/多面体)上推导。能证明"这个变量永远不会为负"或"这个数组访问永远不会越界"。AI辅助设计抽象域——根据程序特征自动选择精度vs效率的平衡点。AirBus A380的飞控代码用ASTRÉE证明了零运行时错误。' },
+      { name: '数据流分析→AI漏洞挖掘', detail: '到达定值/活跃变量/可用表达式——这些传统数据流分析在AI加持下变成了：污点追踪(你的输入最终流向SQL→SQL注入风险)、释放后使用检测(指针生命周期追踪)、竞态条件检测(锁获取释放配对)。CodeQL(Semmle/GitHub)把数据流分析做成了可查询的数据库。' },
+      { name: '指针分析与Shape Analysis', detail: '理解指针指向关系——这是C/C++分析中最难的问题。Andersen/Steensgard算法做"可能指向"分析。TVLA(Three-Valued Logic Analysis)更进一步：分析动态数据结构(链表/树的形状)。AI辅助指针分析的精度提升——减少"可能指向但实际不指向"的假阳性。' },
+      { name: '程序综合·修复即生成', detail: '"程序综合"就是AI的看家本领——给定输入输出样例+约束，自动生成满足条件的代码。FlashFill(Excel)是经典案例。在Bug修复语境下：给定有Bug的代码+通过/失败的测试用例→AI搜索能通过所有测试的修复方案。不是"改一行"——是"在巨大的程序空间中搜索正确解"。' },
+    ]},
+  { title: '测试工程', icon: 'test-tube', color: '#22c55e', desc: '"写了代码不验证等于没写"——AI让测试从负担变成自动化流程。',
+    items: [
+      { name: 'Fuzzing·模糊测试', detail: 'AFL/LibFuzzer——自动生成大量随机/半随机输入，喂给程序，看它会不会崩溃。AI-Fuzzing：用强化学习训练"输入生成器"——它学会哪些输入模式更容易触发深层代码路径。Google的ClusterFuzz在Chrome中发现了25000+个bug。AI让fuzzer的"覆盖深度"提升了5-10倍。' },
+      { name: 'Property-Based Testing', detail: '"对于所有满足属性P的输入，函数f应满足属性Q"——不是写具体的测试用例，而是写"性质+生成器"。Hypothesis(Python)/QuickCheck(Haskell)/fast-check(JS)。AI能自动从代码中提取"应该保持的性质"——比如排序后第一个元素是最小值、序列化后反序列化等于原值。' },
+      { name: '变异测试 (Mutation Testing)', detail: '在你的代码中随机做一个小改动(把+改成-、把<改成<=)→跑测试→如果测试还能通过→说明你的测试不够强。变异测试衡量"测试套件的质量"而不是"被测代码的质量"。AI加速：自动识别哪些变异是有意义的(不是所有变异都合理)、自动生成能"杀死"更多变异体的测试。' },
+      { name: '回归测试选择+优先级', detail: '大型项目跑全量测试要几小时。AI分析这次代码变更影响的调用图→只跑真正相关的测试(Regression Test Selection，RTS)，并且按"最可能失败的排最前面"排序(Test Case Prioritization，TCP)。Google和Meta内部都用机器学习做RTS，把CI反馈时间从小时降到分钟。' },
+    ]},
+  { title: '调试诊断', icon: 'bug', color: '#ef4444', desc: '"程序为什么不工作？"——AI正在从"你问它答"变成"它自己定位根因并修复"。',
+    items: [
+      { name: 'Delta Debugging·二分定位', detail: '原理极简却极有效：把导致Bug的输入/代码变更不断"二分"缩小范围→直到找到最小触发集。ddmin算法。AI增强：智能化选择"切分点"——不是机械地二分，而是根据代码语义选择最可能包含Bug的"一半"。加速10-100倍。' },
+      { name: '频谱缺陷定位 (SBFL)', detail: 'Spectrum-Based Fault Localization——统计"哪些代码行在被失败的测试覆盖了、被成功的测试覆盖了"→算可疑度分数→排序。失败测试高频覆盖+成功测试低频覆盖=最可疑。AI增强：不只统计覆盖，还分析数据流/控制流→更精准的怀疑排名。' },
+      { name: '自动化根因分析', detail: '不是定位到"第42行"——而是定位到"第42行的参数x被第38行的函数g返回了错误类型"。AI做因果追溯：追踪错误输出的来源→沿数据流倒推→定位到根因(可能是几十步之前的一个错误假设)。结合LLM的代码理解+程序分析的精确定位。' },
+      { name: 'AI交互式调试', detail: '你:"为什么这个循环只执行了3次？"→AI:"因为第5行的i++被放在了if分支内——当condition为false时i不递增，循环提前退出。"——不是给你贴代码，而是理解你的意图+分析执行轨迹+定位偏差+解释因果。未来IDE的debugger是对话式的。' },
+    ]},
+]
+
+const problemSolving = [
+  { title: '经典解题方法论', icon: 'compass', color: '#8b5cf6', desc: '大学教的不只是答案，是"遇到任何问题都不慌"的思维工具箱。AI把这些方法论从"纸上谈兵"变成"实时演练"。',
+    items: [
+      { name: 'Pólya解题四步法', detail: '1)理解问题(What is unknown? What are the data?)→2)制定计划(Have you seen it before? Restate the problem.)→3)执行计划(Check each step.)→4)回顾反思(Can you check the result? Can you use the method for some other problem?)。AI实时跟随这四步：你描述问题→AI回放Pólya框架→逐阶段引导。' },
+      { name: '抽象化与约化', detail: '"把问题映射到你已知的模型上"。Dijkstra算法本质是BFS+优先队列。TCP拥塞控制本质是AIMD(Additive Increase Multiplicative Decrease)。AI擅长"约化"——你给一个陌生问题，它告诉你"这本质上是XXX的变体，已有解法在YYY，你需要调整ZZZ部分"。' },
+      { name: '分治·减治·变治', detail: '分治(Divide-and-Conquer)：归并排序。减治(Decrease-and-Conquer)：二分查找每次减半。变治(Transform-and-Conquer)：把问题变换成另一个形式再解(如高斯消元把线性方程组变三角矩阵)。AI自动识别问题适合哪种策略——"这其实可以变换为最短路径问题，在图上跑Dijkstra"。' },
+      { name: '约束满足问题', detail: 'n皇后/数独/图着色/调度——CSP框架：变量+域+约束→回溯搜索+前向检验+弧一致性(AC-3)。AI能将你的问题自动建模为CSP→选合适的求解算法→输出解。SAT求解器(Z3/CaDiCaL)在硬件验证中已经是标配。' },
+    ]},
+  { title: '算法设计范式', icon: 'grid', color: '#f59e0b', desc: '"贪心？DP？还是回溯？"——选的范式对，代码量差10倍。AI帮你做范式选择和复杂度分析。',
+    items: [
+      { name: '贪心算法', detail: '局部最优→全局最优(需要证明贪心选择性质+最优子结构)。Huffman编码、Prim/Kruskal最小生成树、活动选择问题。AI自动判断贪心是否适用——如果不适用(如0-1背包不能用贪心)，它会推荐DP方案并给出反例。' },
+      { name: '动态规划', detail: '最优子结构+重叠子问题→记忆化/自底向上填表。关键不在"写出方程"——而在"发现重叠子问题"和"定义最优子结构"。AI分析你的递归树→标注重复计算→自动生成备忘录/DP表→从Top-Down到Bottom-Up的完整推导。' },
+      { name: '回溯与分支定界', detail: '解空间树+剪枝(可行性剪枝/最优性剪枝/对称性剪枝)。n皇后/旅行商/0-1背包的整数规划版。AI帮你排序"搜索分支"——用启发式先探索最可能包含最优解的分支(类似A*思路)，极大加速回溯。' },
+      { name: '随机化算法', detail: 'Las Vegas(总是正确，运行时间随机——快速排序的随机Pivot) vs Monte Carlo(运行时间固定，答案可能错——Miller-Rabin素性测试)。AI评估随机化方案的最坏/期望性能——帮你选"确定性vs随机性"的平衡点。' },
+    ]},
+  { title: '复杂度分析', icon: 'trending-up', color: '#ef4444', desc: '"这个算法在大数据上表现怎么样？"——答案不在直觉，在复杂度分析。AI把渐进分析变成了可交互的推导。',
+    items: [
+      { name: '渐进分析自动化', detail: '你贴一段代码→AI自动分析：最优情况/最坏情况/均摊复杂度。不只是O(n)，而是精确的T(n)递归式→主定理求解→给出实际运行时间的常数因子估算。识别嵌套循环中的"隐藏"复杂度(如substring操作在循环中=O(n^2)而不是O(n))。' },
+      { name: 'NP完全性识别', detail: '"你这个问题是NP完全的"——这可能是CS中最常见的"劝退"回答。AI教你怎么证明：1)你的问题在NP中(解可在多项式时间验证) 2)从已知NPC问题归约到你的问题。AI能自动做归约："你描述的这个排班问题归约到3-SAT：变量=员工，子句=班次约束"。' },
+      { name: '近似算法与启发式', detail: 'NPC问题不是终点——近似算法(保证解在最优解某个因子内)和启发式(没有理论保证但实践中好用)。AI帮你选：这个问题最知名的近似比是多少？有哪些启发式在实践中表现好？什么时候用模拟退火vs遗传算法vs蚁群优化？' },
+    ]},
+]
 </script>
 
 <template>
@@ -1966,6 +2079,85 @@ const aiStartups = [
         </div>
       </section>
 
+      <!-- 51. 编码内核·大学CS经典 -->
+      <section data-section="csclassic" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">51</span> 编码内核 · 大学CS八门课×AI全融合</h2>
+        <p class="section-desc">数据结构、操作系统、编译原理、网络、数据库、软件工程、PL理论、计算机组成——八门CS核心课，AI一一打通。</p>
+        <div class="cs-grid">
+          <div v-for="(cc, ci) in csClassics" :key="cc.title" class="cs-card" :class="{ visible: visibleSections['csclassic'] }" :style="{ '--delay': `${ci*0.07}s` }">
+            <div class="cs-card-head">
+              <span class="cs-card-icon">
+                <svg v-if="cc.icon==='git-branch'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cc.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                <svg v-else-if="cc.icon==='cpu'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cc.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+                <svg v-else-if="cc.icon==='code'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cc.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                <svg v-else-if="cc.icon==='wifi'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cc.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+                <svg v-else-if="cc.icon==='database'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cc.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                <svg v-else-if="cc.icon==='layers'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cc.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                <svg v-else-if="cc.icon==='book-open'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cc.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cc.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="2" y1="16" x2="6" y2="16"/><line x1="2" y1="8" x2="6" y2="8"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+              </span>
+              <span class="cs-card-title" :style="{ color: cc.color }">{{ cc.title }}</span>
+            </div>
+            <div class="cs-card-book">{{ cc.book }}</div>
+            <p class="cs-card-ai">{{ cc.ai }}</p>
+            <div class="cs-card-items">
+              <div v-for="it in cc.items" :key="it.k" class="cs-item">
+                <span class="cs-item-k">{{ it.k }}</span>
+                <span class="cs-item-t">{{ it.t }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 52. 代码验证学 -->
+      <section data-section="verify" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">52</span> 代码验证学 · 形式化×分析×测试×调试</h2>
+        <p class="section-desc">从Hoare逻辑到Fuzzing到AI根因分析——一套完整的代码正确性保障体系。</p>
+        <div v-for="(cv, cvi) in codeVerification" :key="cv.title" class="cv-block" :class="{ visible: visibleSections['verify'] }" :style="{ '--delay': `${cvi*0.1}s` }">
+          <div class="cv-header">
+            <span class="cv-icon">
+              <svg v-if="cv.icon==='check-circle'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cv.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <svg v-else-if="cv.icon==='search'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cv.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <svg v-else-if="cv.icon==='test-tube'" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cv.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="cv.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1"/><path d="M15 7.13v-1"/><path d="m12 20-6-6"/><path d="m12 20 6-6"/><path d="m12 20V8"/><path d="M10 22h4"/></svg>
+            </span>
+            <span class="cv-title" :style="{ color: cv.color }">{{ cv.title }}</span>
+          </div>
+          <p class="cv-desc">{{ cv.desc }}</p>
+          <div class="cv-grid">
+            <div v-for="it in cv.items" :key="it.name" class="cv-card">
+              <div class="cv-card-name">{{ it.name }}</div>
+              <p class="cv-card-detail">{{ it.detail }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 53. 解题思维 -->
+      <section data-section="solve" class="evo-section">
+        <h2 class="section-title"><span class="s-icon">53</span> 解题思维引擎 · Pólya×算法范式×复杂度</h2>
+        <p class="section-desc">大学教编程的本质是教"解题"——AI把这些解题方法论变成了可实时调用的思维武器。</p>
+        <div v-for="(ps, psi) in problemSolving" :key="ps.title" class="ps-block" :class="{ visible: visibleSections['solve'] }" :style="{ '--delay': `${psi*0.1}s` }">
+          <div class="ps-header">
+            <span class="ps-dot" :style="{ background: ps.color }" />
+            <span class="ps-title" :style="{ color: ps.color }">
+              <svg v-if="ps.icon==='compass'" width="14" height="14" viewBox="0 0 24 24" fill="none" :stroke="ps.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              <svg v-else-if="ps.icon==='grid'" width="14" height="14" viewBox="0 0 24 24" fill="none" :stroke="ps.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" :stroke="ps.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              {{ ps.title }}
+            </span>
+          </div>
+          <p class="ps-desc">{{ ps.desc }}</p>
+          <div class="ps-grid">
+            <div v-for="it in ps.items" :key="it.name" class="ps-card">
+              <div class="ps-card-name">{{ it.name }}</div>
+              <p class="ps-card-detail">{{ it.detail }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- 结尾总结 -->
       <section data-section="summary" class="evo-section summary-section">
         <div class="summary-card" :class="{ visible: visibleSections['summary'] }">
@@ -2730,6 +2922,58 @@ const aiStartups = [
 .de-card { padding: 10px; border-radius: 8px; background: rgba(128,128,128,0.04); border-left: 2px solid var(--border-color); }
 .de-card-name { font-size: 10px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
 .de-card-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.5; }
+
+/* CS Classics */
+.cs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cs-card {
+  padding: 14px; border-radius: 12px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.cs-card.visible { opacity: 1; transform: translateY(0); }
+.cs-card-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.cs-card-icon { display: flex; flex-shrink: 0; }
+.cs-card-title { font-size: 12px; font-weight: 800; }
+.cs-card-book { font-size: 7px; color: var(--text-tertiary); margin-bottom: 6px; padding-left: 22px; }
+.cs-card-ai { font-size: 8px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 8px; padding: 6px 8px; border-radius: 6px; background: rgba(128,128,128,0.05); border-left: 2px solid var(--accent); }
+.cs-card-items { display: flex; flex-direction: column; gap: 4px; }
+.cs-item { display: flex; gap: 4px; align-items: baseline; }
+.cs-item-k { font-size: 8px; font-weight: 700; color: var(--text-primary); white-space: nowrap; min-width: 48px; }
+.cs-item-t { font-size: 7px; color: var(--text-tertiary); line-height: 1.45; }
+
+/* Code Verification */
+.cv-block {
+  padding: 16px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 12px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.cv-block.visible { opacity: 1; transform: translateY(0); }
+.cv-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.cv-icon { display: flex; flex-shrink: 0; }
+.cv-title { font-size: 13px; font-weight: 800; }
+.cv-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+.cv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cv-card { padding: 10px; border-radius: 8px; background: rgba(128,128,128,0.04); border-left: 2px solid var(--border-color); }
+.cv-card-name { font-size: 10px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.cv-card-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.5; }
+
+/* Problem Solving */
+.ps-block {
+  padding: 16px; border-radius: 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border-color); margin-bottom: 12px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); transition-delay: var(--delay);
+}
+.ps-block.visible { opacity: 1; transform: translateY(0); }
+.ps-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.ps-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ps-title { font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+.ps-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+.ps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ps-card { padding: 10px; border-radius: 8px; background: rgba(128,128,128,0.04); border-left: 2px solid var(--border-color); }
+.ps-card-name { font-size: 10px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.ps-card-detail { font-size: 9px; color: var(--text-tertiary); line-height: 1.5; }
 
 /* Summary */
 .summary-section { margin-top: 6px; margin-bottom: 6px; }
