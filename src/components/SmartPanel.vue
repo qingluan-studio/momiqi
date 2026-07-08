@@ -140,11 +140,67 @@ function handleAddStep(planId: string) {
 }
 
 function handleStartPlan(id: string) { planner.startPlan(id) }
-function handleCompleteStep(planId: string, stepId: string) {
-  planner.updateStepStatus(planId, stepId, 'completed', '完成了！')
+async function handleCompleteStep(planId: string, stepId: string) {
+  await planner.executeStep(planId, stepId)
   planner.autoAdvance(planId)
 }
+async function handleExecuteAllSteps(planId: string) {
+  if (planner.isExecutingStep.value) return
+  await planner.executeAllSteps(planId)
+}
 function handleRetryStep(planId: string, stepId: string) { planner.retryStep(planId, stepId) }
+
+
+// --- inline tool execution ---
+const activeToolId = ref('')
+const toolParamsInput = ref<Record<string, string>>({})
+const toolExecuting = ref(false)
+const toolResult = ref<any>(null)
+const toolError = ref('')
+
+function openToolRunner(tool: ReturnType<typeof tools.getTool>) {
+  if (!tool) return
+  activeToolId.value = tool.id
+  toolParamsInput.value = {}
+  for (const p of tool.params) {
+    toolParamsInput.value[p.name] = p.default ?? ''
+  }
+  toolResult.value = null
+  toolError.value = ''
+}
+
+async function runTool() {
+  if (toolExecuting.value) return
+  const tool = tools.getTool(activeToolId.value)
+  if (!tool) return
+  toolExecuting.value = true
+  toolResult.value = null
+  toolError.value = ''
+  try {
+    const params: Record<string, any> = {}
+    for (const p of tool.params) {
+      const val = toolParamsInput.value[p.name]
+      if (val !== '' && val !== undefined) {
+        if (p.type === 'number') params[p.name] = Number(val)
+        else if (p.type === 'boolean') params[p.name] = val === 'true'
+        else params[p.name] = val
+      }
+    }
+    const result = await tools.executeTool(activeToolId.value, params)
+    if (result.success) {
+      toolResult.value = result.data
+      evolution.recordAttempt(true)
+    } else {
+      toolError.value = result.error || '执行失败'
+      evolution.recordAttempt(false)
+    }
+  } catch (e: any) {
+    toolError.value = e.message
+    evolution.recordAttempt(false)
+  } finally {
+    toolExecuting.value = false
+  }
+}
 
 function handleCreateScript() {
   if (!scriptName.value.trim()) return
@@ -391,7 +447,7 @@ onMounted(() => {
         </div>
 
         <div class="tool-grid">
-          <div v-for="t in toolList" :key="t.id" class="tool-card">
+          <div v-for="t in toolList" :key="t.id" class="tool-card" :class="{ active: activeToolId === t.id }" @click="openToolRunner(t)">
             <div class="tool-icon-wrap">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path :d="t.icon" /></svg>
             </div>
@@ -404,9 +460,49 @@ onMounted(() => {
                 <span>成功率 {{ t.successRate }}%</span>
               </div>
             </div>
-            <button class="del-btn" v-if="t.category === 'evolved' || t.category === 'user'" @click="tools.removeTool(t.id)">
+            <button class="del-btn" v-if="t.category === 'evolved' || t.category === 'user'" @click.stop="tools.removeTool(t.id)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
+          </div>
+        </div>
+
+        <div v-if="activeToolId" class="tool-runner">
+          <h4>{{ tools.getTool(activeToolId)?.name }} - 执行工具</h4>
+          <div v-for="p in tools.getTool(activeToolId)?.params || []" :key="p.name" class="param-row">
+            <label>{{ p.description }} ({{ p.type }}) <span v-if="p.required" class="required">*</span></label>
+            <select v-if="p.enum" v-model="toolParamsInput[p.name]" class="input">
+              <option v-for="e in p.enum" :key="e" :value="e">{{ e }}</option>
+            </select>
+            <textarea v-else-if="p.type === 'object' || p.type === 'array'" v-model="toolParamsInput[p.name]"
+              class="input textarea" rows="2" :placeholder="`输入${p.type === 'object' ? 'JSON对象' : 'JSON数组'}...`" />
+            <input v-else v-model="toolParamsInput[p.name]" class="input" :type="p.type === 'number' ? 'number' : 'text'"
+              :placeholder="p.description" />
+          </div>
+          <div class="runner-actions">
+            <button class="btn accent" @click="runTool" :disabled="toolExecuting">
+              <svg v-if="toolExecuting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+                <circle cx="12" cy="12" r="10" opacity="0.3" /><path d="M12 2a10 10 0 0 1 10 10" />
+              </svg>
+              {{ toolExecuting ? '执行中...' : '执行工具' }}
+            </button>
+            <button class="btn" @click="activeToolId = ''; toolResult = null; toolError = ''">关闭</button>
+          </div>
+          <div v-if="toolError" class="evolve-msg fail">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+            <span>{{ toolError }}</span>
+          </div>
+          <div v-if="toolResult" class="tool-output">
+            <div v-if="toolResult.code" class="code-block"><pre>{{ toolResult.code }}</pre></div>
+            <div v-if="toolResult.translation" class="output-text">{{ toolResult.translation }}</div>
+            <div v-if="toolResult.summary" class="output-text" v-html="toolResult.summary"></div>
+            <div v-if="toolResult.sql" class="code-block"><pre>{{ toolResult.sql }}</pre></div>
+            <div v-if="toolResult.analysis" class="output-text">{{ toolResult.analysis }}</div>
+            <div v-if="toolResult.qrImageUrl" class="output-img"><img :src="toolResult.qrImageUrl" alt="QR Code" /></div>
+            <div v-if="toolResult.result" class="code-block"><pre>{{ typeof toolResult.result === 'string' ? toolResult.result : JSON.stringify(toolResult.result, null, 2) }}</pre></div>
+            <div v-if="toolResult.query" class="output-text search-results">{{ toolResult.results }}</div>
+            <div v-if="toolResult.formatted" class="output-text">{{ toolResult.formatted }}</div>
+            <div v-if="!toolResult.code && !toolResult.translation && !toolResult.summary && !toolResult.sql && !toolResult.analysis && !toolResult.qrImageUrl && !toolResult.result && !toolResult.query && !toolResult.formatted"
+              class="output-text">{{ JSON.stringify(toolResult, null, 2) }}</div>
           </div>
         </div>
       </div>
@@ -450,6 +546,9 @@ onMounted(() => {
               <div class="plan-actions">
                 <button v-if="p.status === 'draft'" class="btn-xs accent" @click="handleStartPlan(p.id)">开干</button>
                 <button v-if="p.status === 'active'" class="btn-xs" @click="planner.pausePlan(p.id)">暂停</button>
+                <button v-if="p.status === 'active'" class="btn-xs accent" @click="handleExecuteAllSteps(p.id)" :disabled="planner.isExecutingStep.value">
+                  {{ planner.isExecutingStep.value ? '执行中...' : '一键执行到底' }}
+                </button>
                 <button v-if="p.status === 'paused'" class="btn-xs accent" @click="handleStartPlan(p.id)">继续</button>
                 <button class="btn-xs danger" @click="planner.cancelPlan(p.id)">取消</button>
               </div>
@@ -476,10 +575,16 @@ onMounted(() => {
                   </span>
                 </div>
                 <div class="step-rt" v-if="p.status === 'active'">
-                  <button v-if="s.status === 'in_progress'" class="btn-xs accent" @click="handleCompleteStep(p.id, s.id)">搞定</button>
-                  <button v-if="s.status === 'failed' && s.retryCount < s.maxRetries" class="btn-xs" @click="handleRetryStep(p.id, s.id)">再来</button>
+                  <button v-if="s.status === 'pending'" class="btn-xs accent" @click="handleCompleteStep(p.id, s.id)">AI执行</button>
+                  <button v-if="s.status === 'in_progress'" class="btn-xs" disabled>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10" opacity="0.3" /><path d="M12 2a10 10 0 0 1 10 10" /></svg>
+                    执行中
+                  </button>
+                  <button v-if="s.status === 'failed' && s.retryCount < s.maxRetries" class="btn-xs" @click="handleRetryStep(p.id, s.id)">重试</button>
                 </div>
               </div>
+              <div v-if="s.result" class="step-result" v-html="s.result"></div>
+              <div v-if="s.errorLog" class="step-error">{{ s.errorLog }}</div>
             </div>
 
             <div v-if="p.status === 'active'" class="add-step-row">
@@ -1069,4 +1174,85 @@ onMounted(() => {
 
 .s-ok { color: #22c55e; font-size: 10px; font-weight: 600; min-width: 24px; }
 .s-fail { color: #ef4444; font-size: 10px; font-weight: 600; min-width: 24px; }
+
+/* ===== 工具执行面板 ===== */
+.tool-card.active { border: 1px solid var(--accent); }
+
+.tool-runner {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.tool-runner h4 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+
+.param-row { margin-bottom: 8px; }
+.param-row label { display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
+.param-row .input { margin-bottom: 0; }
+.required { color: #ef4444; }
+
+.runner-actions { display: flex; gap: 6px; margin-top: 10px; }
+.runner-actions .btn { flex: 1; width: auto; }
+.runner-actions .btn:last-child { background: var(--bg-tertiary); color: var(--text-primary); }
+
+.tool-output {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.code-block {
+  background: #1a1a2e;
+  color: #e2e8f0;
+  padding: 10px;
+  border-radius: 6px;
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.output-text { font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+
+.output-img { text-align: center; padding: 8px; }
+.output-img img { max-width: 100%; border-radius: 6px; }
+
+.search-results { color: var(--text-primary); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; }
+
+/* ===== 步骤结果 ===== */
+.step-result {
+  margin-top: 6px;
+  margin-left: 24px;
+  padding: 8px 10px;
+  background: rgba(34, 197, 94, 0.06);
+  border-left: 2px solid #22c55e;
+  border-radius: 0 6px 6px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.step-error {
+  margin-top: 4px;
+  margin-left: 24px;
+  padding: 6px 10px;
+  background: rgba(239, 68, 68, 0.06);
+  border-left: 2px solid #ef4444;
+  border-radius: 0 4px 4px 0;
+  font-size: 11px;
+  color: #ef4444;
+}
 </style>

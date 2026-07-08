@@ -6,6 +6,25 @@ import { renderMarkdown, generateId } from '../utils/markdown'
 import type { SubAgent } from '../stores/agents'
 import { useEvolution } from '../stores/evolution'
 import { useSelfLearning } from '../stores/self-learning'
+import { useCorpusEngine } from '../stores/corpus-engine'
+import { useKnowledgePlugins } from '../stores/knowledge-plugins'
+import {
+  shouldTriggerKnowledgeSearch,
+  buildSystemContext,
+  extractSources,
+  formatKnowledgeContext,
+} from '../utils/knowledge-router'
+
+const corpus = useCorpusEngine()
+const knowledgePlugins = useKnowledgePlugins()
+
+const speedMetrics = ref({ tokensPerSec: 0, totalTokens: 0, elapsedMs: 0, provider: '' as string })
+const lastSpeed = computed(() => {
+  if (!speedMetrics.value.tokensPerSec) return ''
+  const tps = speedMetrics.value.tokensPerSec
+  if (tps >= 1000) return `${(tps / 1000).toFixed(1)}k t/s`
+  return `${tps} t/s`
+})
 
 const props = defineProps<{
   chat: ReturnType<typeof import('../stores/chat').useChat>
@@ -30,6 +49,8 @@ const editingMessageId = ref<string | null>(null)
 const editContent = ref('')
 const evolution = useEvolution()
 const selfLearning = useSelfLearning()
+const knowledgeSources = ref<string[]>([])
+const externalKnowledgeUsed = ref(false)
 
 onMounted(() => {
   if (props.pendingPrompt) {
@@ -77,7 +98,26 @@ async function sendMessage() {
   }
   props.chat.addMessage(props.session.id, assistantMsg)
 
+  const startTime = performance.now()
   isLoading.value = true
+  externalKnowledgeUsed.value = false
+  knowledgeSources.value = []
+
+  let knowledgeContext: string | null = null
+
+  // Auto-route to external knowledge plugins if question needs it
+  if (shouldTriggerKnowledgeSearch(text) && knowledgePlugins.enabledCount.value > 0) {
+    try {
+      const results = await knowledgePlugins.smartSearch(text)
+      knowledgeContext = buildSystemContext(results)
+      if (results.some((r) => r.results.length > 0)) {
+        externalKnowledgeUsed.value = true
+        knowledgeSources.value = extractSources(results)
+      }
+    } catch {
+      // Knowledge search failed silently, continue with normal chat
+    }
+  }
 
   try {
     const allMessages = props.session.messages
@@ -85,20 +125,48 @@ async function sendMessage() {
       .slice(0, -1)
       .map((m) => ({ role: m.role, content: m.content }))
 
+    const contextPhrase = corpus.matchPhrase(text)
+
     const messages = props.activeAgent
       ? [{ role: 'system' as const, content: props.activeAgent.systemPrompt }, ...allMessages]
       : deepThink.value
         ? [{ role: 'system' as const, content: '请对每个问题给出详细的推理过程、分析步骤和最终结论。中文回答。' }, ...allMessages]
         : allMessages
 
+    // Inject external knowledge context as system message
+    if (knowledgeContext) {
+      messages.unshift({
+        role: 'system' as const,
+        content: `以下是从外部知识库检索到的参考资料。请在回答时参考这些信息并注明来源：\n\n${knowledgeContext}`,
+      })
+    }
+
+    let totalTokens = 0
+
     const result = await chatWithFallback(messages, (provider, text, tokens) => {
       props.chat.updateLastAssistant(props.session.id, text, provider, tokens)
+      if (tokens) totalTokens += tokens
       if (tokens) evolution.addTokens(tokens)
     })
 
+    const elapsed = performance.now() - startTime
     props.chat.updateLastAssistant(props.session.id, result.content, result.provider, result.tokens)
+
+    const finalTokens = result.tokens || totalTokens
+    speedMetrics.value = {
+      tokensPerSec: elapsed > 0 ? Math.round((finalTokens / elapsed) * 1000) : 0,
+      totalTokens: finalTokens,
+      elapsedMs: Math.round(elapsed),
+      provider: result.provider,
+    }
+
     if (result.tokens) evolution.addTokens(result.tokens)
     selfLearning.track(props.activeAgent?.name || 'default', text, result.content, true, result.tokens || 0)
+
+    // Inject human-like conversational phrase (20% chance)
+    if (contextPhrase && Math.random() < 0.2) {
+      props.chat.appendToLastAssistant(props.session.id, `\n\n> *${contextPhrase.variant}*`)
+    }
   } catch (err: any) {
     props.chat.updateLastAssistant(
       props.session.id,
@@ -204,6 +272,14 @@ function exportChat() {
     <div class="provider-badge">
       <span class="dot"></span>
       {{ activeProviderName }}
+      <span v-if="lastSpeed && !isLoading" class="speed-badge">{{ lastSpeed }}</span>
+      <span v-if="externalKnowledgeUsed && knowledgeSources.length > 0" class="knowledge-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" />
+          <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+        </svg>
+        {{ knowledgeSources.slice(0, 3).join(', ') }}{{ knowledgeSources.length > 3 ? ' +' + (knowledgeSources.length - 3) : '' }}
+      </span>
       <span v-if="props.activeAgent" class="agent-pill" @click="$emit('openAgents')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path :d="props.activeAgent.icon" />
@@ -406,6 +482,31 @@ function exportChat() {
   height: 6px;
   border-radius: 50%;
   background: var(--accent);
+}
+
+.speed-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(16,185,129,0.15);
+  color: #10b981;
+  font-weight: 500;
+}
+
+.knowledge-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(168,85,247,0.12);
+  color: #a855f7;
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .messages-container {

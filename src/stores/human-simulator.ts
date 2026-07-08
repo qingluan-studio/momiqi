@@ -79,6 +79,8 @@ interface HumanSimulatorState {
   recordedActions: HumanAction[]
   allowDangerousEval: boolean
   runHistory: number
+  stealthMode: boolean
+  antiDetection: boolean
 }
 
 const BUILTIN_SCRIPTS: Omit<HumanScript, 'id' | 'createdAt' | 'lastRunAt' | 'runCount' | 'averageDuration'>[] = [
@@ -167,6 +169,8 @@ const DEFAULT_STATE: HumanSimulatorState = {
   recordedActions: [],
   allowDangerousEval: false,
   runHistory: 0,
+  stealthMode: false,
+  antiDetection: false,
 }
 
 export function useHumanSimulator() {
@@ -356,6 +360,214 @@ export function useHumanSimulator() {
     }
   }
 
+  function runScript(scriptId: string, context: { iframe?: HTMLIFrameElement; doc?: Document } = {}): HumanScriptResult {
+    const script = state.scripts.find((s) => s.id === scriptId)
+    if (!script) {
+      return {
+        scriptId,
+        scriptName: '',
+        success: false,
+        actionsExecuted: 0,
+        actionsTotal: 0,
+        failedAt: 0,
+        error: '脚本不存在',
+        duration: 0,
+        screenshot: '',
+      }
+    }
+
+    const start = performance.now()
+    let actionsExecuted = 0
+
+    try {
+      const targetDoc = context.doc || context.iframe?.contentDocument || document
+      if (state.antiDetection && typeof targetDoc !== 'undefined') {
+        applyStealth(targetDoc)
+      }
+
+      for (let i = 0; i < script.actions.length; i++) {
+        const action = script.actions[i]
+
+        // Human-like delay between actions
+        if (state.stealthMode && i > 0) {
+          const delay = 200 + Math.random() * 600
+          const now = Date.now()
+          while (Date.now() - now < delay) { /* spin */ }
+        }
+
+        try {
+          executeAction(action, targetDoc)
+          actionsExecuted++
+        } catch (e: any) {
+          return {
+            scriptId: script.id,
+            scriptName: script.name,
+            success: false,
+            actionsExecuted,
+            actionsTotal: script.actions.length,
+            failedAt: i,
+            error: e?.message || '执行失败',
+            duration: performance.now() - start,
+            screenshot: '',
+          }
+        }
+      }
+
+      const duration = performance.now() - start
+      script.lastRunAt = Date.now()
+      script.runCount++
+      script.averageDuration = Math.round(
+        (script.averageDuration * (script.runCount - 1) + duration) / script.runCount
+      )
+
+      state.runHistory++
+      if (state.runHistory > 1000) state.runHistory = 0
+
+      const result: HumanScriptResult = {
+        scriptId: script.id,
+        scriptName: script.name,
+        success: true,
+        actionsExecuted,
+        actionsTotal: script.actions.length,
+        failedAt: -1,
+        error: '',
+        duration,
+        screenshot: '',
+      }
+      state.results.push(result)
+
+      const MAX_RESULTS = 100
+      if (state.results.length > MAX_RESULTS) {
+        state.results = state.results.slice(-MAX_RESULTS)
+      }
+
+      save()
+      return result
+    } catch (e: any) {
+      return {
+        scriptId: script.id,
+        scriptName: script.name,
+        success: false,
+        actionsExecuted,
+        actionsTotal: script.actions.length,
+        failedAt: actionsExecuted,
+        error: e?.message || '脚本执行异常',
+        duration: performance.now() - start,
+        screenshot: '',
+      }
+    }
+  }
+
+  function applyStealth(doc: Document) {
+    try {
+      // Override navigator.webdriver
+      const navProto = Object.getPrototypeOf(navigator)
+      Object.defineProperty(navProto, 'webdriver', {
+        get: () => false,
+        configurable: true,
+      })
+
+      // Suppress PhantomJS detection
+      const win = doc.defaultView as any
+      if (win) {
+        delete win.callPhantom
+        delete win._phantom
+        delete win.__phantomas
+        delete win.Buffer
+        delete win.emit
+        delete win.spawn
+      }
+
+      // Override Chrome automation flag
+      Object.defineProperty(navProto, 'plugins', {
+        get: () => [1, 2, 3, 4, 5],
+        configurable: true,
+      })
+
+      // Randomize screen dimensions slightly
+      Object.defineProperty(navProto, 'languages', {
+        get: () => ['zh-CN', 'zh', 'en-US', 'en'],
+        configurable: true,
+      })
+
+      // Override permissions query for notifications
+      const origQuery = (navigator as any).permissions?.query
+      if (origQuery && (navigator as any).permissions) {
+        (navigator as any).permissions.query = (params: any) => {
+          if (params.name === 'notifications') {
+            return Promise.resolve({ state: 'prompt', onchange: null } as PermissionStatus)
+          }
+          return origQuery.call(navigator.permissions, params)
+        }
+      }
+
+      // Hide automation extension detection
+      if (win) {
+        win.chrome = { runtime: {} }
+      }
+    } catch {
+      // Stealth injection failed silently
+    }
+  }
+
+  function simulateHumanInput(el: HTMLInputElement | HTMLTextAreaElement, value: string) {
+    const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+
+    if (state.stealthMode) {
+      // Type character by character with random delays
+      let pos = 0
+      const typeNext = () => {
+        if (pos >= value.length) {
+          el.dispatchEvent(new Event('input', { bubbles: true }))
+          el.dispatchEvent(new Event('change', { bubbles: true }))
+          return
+        }
+        const snippet = value.slice(0, pos + 1)
+        nativeSetter?.call(el, snippet)
+        el.dispatchEvent(new Event('input', { bubbles: true }))
+        el.dispatchEvent(new KeyboardEvent('keydown', { key: value[pos], bubbles: true }))
+        el.dispatchEvent(new KeyboardEvent('keypress', { key: value[pos], bubbles: true }))
+        el.dispatchEvent(new KeyboardEvent('keyup', { key: value[pos], bubbles: true }))
+        pos++
+        const delay = 30 + Math.random() * 80
+        setTimeout(typeNext, delay)
+      }
+      typeNext()
+    } else {
+      nativeSetter?.call(el, value)
+      el.dispatchEvent(new Event('input', { bubbles: true }))
+      el.dispatchEvent(new Event('change', { bubbles: true }))
+    }
+  }
+
+  function simulateHumanClick(el: HTMLElement) {
+    const rect = el.getBoundingClientRect()
+    const x = rect.left + rect.width * (0.3 + Math.random() * 0.4)
+    const y = rect.top + rect.height * (0.3 + Math.random() * 0.4)
+
+    if (state.stealthMode) {
+      // Simulate mouse movement to target
+      const moveEvent = new MouseEvent('mousemove', {
+        clientX: x, clientY: y, bubbles: true,
+      })
+      document.elementFromPoint(x, y)?.dispatchEvent(moveEvent)
+
+      // Small random hover delay
+      const delay = 50 + Math.random() * 150
+      const then = Date.now()
+      while (Date.now() - then < delay) { /* spin */ }
+    }
+
+    el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+    el.dispatchEvent(new MouseEvent('mousedown', { clientX: x, clientY: y, bubbles: true }))
+    el.dispatchEvent(new MouseEvent('mouseup', { clientX: x, clientY: y, bubbles: true }))
+    el.dispatchEvent(new MouseEvent('click', { clientX: x, clientY: y, bubbles: true, cancelable: true }))
+
+    if (!state.stealthMode) {
+      el.click()
+    }
+  }
+
   function executeAction(action: HumanAction, doc: Document) {
     switch (action.type) {
       case 'wait':
@@ -371,8 +583,7 @@ export function useHumanSimulator() {
       case 'click': {
         const el = action.selector.startsWith('window') ? null : doc.querySelector(action.selector)
         if (el instanceof HTMLElement) {
-          el.click()
-          el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+          simulateHumanClick(el)
         } else if (action.x !== undefined && action.y !== undefined) {
           const clickEvent = new MouseEvent('click', { clientX: action.x, clientY: action.y, bubbles: true })
           doc.elementFromPoint(action.x, action.y)?.dispatchEvent(clickEvent)
@@ -383,12 +594,7 @@ export function useHumanSimulator() {
       case 'input': {
         const el = doc.querySelector(action.selector)
         if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-          const nativeSetter = Object.getOwnPropertyDescriptor(
-            HTMLInputElement.prototype, 'value'
-          )?.set
-          nativeSetter?.call(el, action.value)
-          el.dispatchEvent(new Event('input', { bubbles: true }))
-          el.dispatchEvent(new Event('change', { bubbles: true }))
+          simulateHumanInput(el, action.value)
         }
         break
       }
@@ -406,12 +612,22 @@ export function useHumanSimulator() {
       }
 
       case 'eval':
-        if (!state.allowDangerousEval) {
-          const safeFn = new Function('document', 'window', action.code)
-          safeFn(doc, doc.defaultView)
-        }
+        if (!state.allowDangerousEval) return
+        const safeFn = new Function('document', 'window', action.code)
+        safeFn(doc, doc.defaultView)
         break
     }
+  }
+
+  function toggleStealthMode() {
+    state.stealthMode = !state.stealthMode
+    if (state.stealthMode) state.antiDetection = true
+    save()
+  }
+
+  function toggleAntiDetection() {
+    state.antiDetection = !state.antiDetection
+    save()
   }
 
   function createQuickAction(type: HumanAction['type'], desc: string, detail: Partial<HumanAction> = {}): HumanAction {
@@ -470,5 +686,7 @@ export function useHumanSimulator() {
     runScript,
     createQuickAction,
     suggestScripts,
+    toggleStealthMode,
+    toggleAntiDetection,
   }
 }

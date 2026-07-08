@@ -56,6 +56,17 @@ export function useChat() {
     save()
   }
 
+  function appendToLastAssistant(sessionId: string, content: string) {
+    const s = findSession(sessionId)
+    if (!s) return
+    const last = s.messages[s.messages.length - 1]
+    if (last && last.role === 'assistant') {
+      last.content += content
+    }
+    s.updatedAt = Date.now()
+    save()
+  }
+
   function deleteSession(id: string) {
     const idx = sessions.findIndex((s) => s.id === id)
     if (idx < 0) return
@@ -89,6 +100,7 @@ export function useChat() {
     createSession,
     addMessage,
     updateLastAssistant,
+    appendToLastAssistant,
     deleteSession,
     getCurrentSession,
     switchSession,

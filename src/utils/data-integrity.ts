@@ -13,6 +13,10 @@ const DATA_VERSIONS: Record<string, number> = {
   knowledge: 1,
   chat: 1,
   agents: 1,
+  knowledgePlugins: 1,
+  aiIdentity: 1,
+  workspaceManager: 1,
+  corpusEngine: 1,
 }
 
 interface IntegrityMeta {

@@ -1,6 +1,7 @@
 import { reactive, computed } from 'vue'
 import { guardedLoad, guardedSave } from '../utils/data-integrity'
-import { generateId } from '../utils/markdown'
+import { generateId, renderMarkdown } from '../utils/markdown'
+import { chatWithFallback } from '../api/router'
 
 export interface ToolParam {
   name: string
@@ -302,7 +303,7 @@ export function useToolRegistry() {
     return [...state.executionHistory].reverse().slice(0, limit)
   }
 
-  function executeTool(toolId: string, params: Record<string, any>): ToolExecutionResult {
+  async function executeTool(toolId: string, params: Record<string, any>): Promise<ToolExecutionResult> {
     const start = performance.now()
     const tool = getTool(toolId)
 
@@ -321,16 +322,325 @@ export function useToolRegistry() {
       }
     }
 
-    const result: ToolExecutionResult = {
-      success: true,
-      data: { tool: tool.name, params, message: `已调度工具 [${tool.name}]，参数: ${JSON.stringify(params)}` },
-      duration: performance.now() - start,
-      toolId,
-      toolName: tool.name,
+    try {
+      const data = await executeByToolName(tool.name, params)
+      const result: ToolExecutionResult = {
+        success: true,
+        data,
+        duration: performance.now() - start,
+        toolId,
+        toolName: tool.name,
+      }
+      recordExecution(result)
+      return result
+    } catch (e: any) {
+      const result: ToolExecutionResult = {
+        success: false,
+        error: e.message || `${tool.name} 执行失败`,
+        duration: performance.now() - start,
+        toolId,
+        toolName: tool.name,
+      }
+      recordExecution(result)
+      return result
     }
+  }
 
-    recordExecution(result)
-    return result
+  async function executeByToolName(name: string, params: Record<string, any>): Promise<any> {
+    switch (name) {
+      case '文本处理': return executeTextProcessing(params)
+      case '代码生成': return executeCodeGeneration(params)
+      case '图片理解': return executeVision(params)
+      case '联网搜索': return executeWebSearch(params)
+      case '文档总结': return executeSummarize(params)
+      case '网页分析': return executeWebPageAnalysis(params)
+      case '翻译': return executeTranslation(params)
+      case 'SQL生成': return executeSqlGeneration(params)
+      case '音频转录': return executeAudioTranscription(params)
+      case '时间管理': return executeTimeManagement(params)
+      case '二维码': return executeQrcode(params)
+      case '颜色工具': return executeColorTool(params)
+      default:
+        throw new Error(`未知工具: ${name}`)
+    }
+  }
+
+  async function executeCodeGeneration(params: Record<string, any>) {
+    const { prompt, language } = params
+    const langHint = language && language !== 'auto' ? `使用 ${language} 语言编写。` : '自动选择合适的编程语言。'
+    const result = await chatWithFallback([
+      { role: 'system', content: `你是一位资深程序员。${langHint}严格只输出代码，不要加任何解释、注释前缀或markdown代码块标记。直接输出纯代码。` },
+      { role: 'user', content: prompt },
+    ])
+    return {
+      code: result.content,
+      language: language || result.provider,
+      provider: result.provider,
+      tokens: result.tokens,
+    }
+  }
+
+  async function executeTranslation(params: Record<string, any>) {
+    const { text, from, to } = params
+    const targetLang = to || '中文'
+    const sourceHint = from ? `从${from}` : ''
+    const result = await chatWithFallback([
+      { role: 'system', content: `你是一个专业翻译引擎。将文本${sourceHint}翻译成${targetLang}。严格只输出译文，不要加任何解释、原文、引号或markdown标记。` },
+      { role: 'user', content: text },
+    ])
+    return {
+      translation: result.content,
+      from: from || '自动检测',
+      to: targetLang,
+      provider: result.provider,
+      tokens: result.tokens,
+    }
+  }
+
+  async function executeSqlGeneration(params: Record<string, any>) {
+    const { description, dialect } = params
+    const db = dialect || 'mysql'
+    const result = await chatWithFallback([
+      { role: 'system', content: `你是数据库专家。根据自然语言描述生成${db.toUpperCase()} SQL查询语句。严格只输出SQL，不要加解释或markdown代码块标记。` },
+      { role: 'user', content: description },
+    ])
+    return {
+      sql: result.content,
+      dialect: db,
+      provider: result.provider,
+      tokens: result.tokens,
+    }
+  }
+
+  async function executeSummarize(params: Record<string, any>) {
+    const { content, style } = params
+    const styleMap: Record<string, string> = {
+      brief: '用一句话（不超过50字）概括核心内容',
+      detailed: '给出详细摘要（200字以内），保留关键数据、人物和事实',
+      bullets: '以要点列表形式总结（每点一行，用 - 开头），最多5个要点',
+      mindmap: '以层级缩进结构组织要点，用缩进表示层级关系',
+    }
+    const instruction = styleMap[style] || styleMap.bullets
+    const result = await chatWithFallback([
+      { role: 'system', content: `你是文档分析专家。${instruction}。中文回复。` },
+      { role: 'user', content },
+    ])
+    return {
+      summary: result.content,
+      style: style || 'bullets',
+      provider: result.provider,
+      tokens: result.tokens,
+    }
+  }
+
+  async function executeVision(params: Record<string, any>) {
+    const { imageUrl, prompt } = params
+    const visionPrompt = prompt || '请详细描述这张图片的内容，包括场景、物体、人物、文字、色彩和构图。'
+    const result = await chatWithFallback([
+      { role: 'user', content: `${visionPrompt}\n\n图片URL: ${imageUrl}` },
+    ])
+    return {
+      analysis: result.content,
+      imageUrl,
+      provider: result.provider,
+      tokens: result.tokens,
+    }
+  }
+
+  async function executeWebSearch(params: Record<string, any>) {
+    const { query, count } = params
+    const n = count || 5
+    const result = await chatWithFallback([
+      { role: 'system', content: `你是搜索引擎助手。根据用户查询提供${n}条最新的相关信息。每条信息一行，格式: - [标题] 简要描述` },
+      { role: 'user', content: `搜索关键词: ${query}` },
+    ])
+    const lines = result.content.split('\n').filter((l: string) => l.trim().startsWith('-'))
+    return {
+      query,
+      results: lines.length > 0 ? lines.join('\n') : result.content,
+      count: lines.length,
+      provider: result.provider,
+      tokens: result.tokens,
+    }
+  }
+
+  async function executeWebPageAnalysis(params: Record<string, any>) {
+    const { url } = params
+    let pageContent = ''
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) })
+      const html = await res.text()
+      const textContent = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 8000)
+      pageContent = textContent
+    } catch {
+      // fall through to AI analysis without page content
+    }
+    const prompt = pageContent
+      ? `分析以下网页的文本内容，提取：1)页面主题 2)关键信息要点 3)核心结论\n\n${pageContent}`
+      : `请根据URL "${url}" 所指向的网站，分析其可能的主题、内容和用途。`
+    const result = await chatWithFallback([
+      { role: 'system', content: '你是网页分析专家。对网页内容进行结构化分析。中文回复。' },
+      { role: 'user', content: prompt },
+    ])
+    return {
+      url,
+      analysis: result.content,
+      fetched: !!pageContent,
+      provider: result.provider,
+      tokens: result.tokens,
+    }
+  }
+
+  function executeTextProcessing(params: Record<string, any>) {
+    const { input, operation, options = {} } = params
+    switch (operation) {
+      case 'encode': {
+        const encoded = btoa(String(input))
+        return { result: encoded, operation: 'encode' }
+      }
+      case 'decode': {
+        try {
+          const decoded = atob(String(input))
+          return { result: decoded, operation: 'decode' }
+        } catch {
+          throw new Error('输入不是有效的Base64编码文本')
+        }
+      }
+      case 'format': {
+        try {
+          const parsed = JSON.parse(String(input))
+          return { result: JSON.stringify(parsed, null, 2), operation: 'format' }
+        } catch {
+          throw new Error('不是有效的JSON格式，无法格式化')
+        }
+      }
+      case 'regex': {
+        const { pattern, flags } = options
+        if (!pattern) throw new Error('正则表达式模式不能为空')
+        try {
+          const regex = new RegExp(pattern, flags || 'g')
+          const matches = [...String(input).matchAll(regex)]
+          if (matches.length === 0) return { result: '未找到匹配', operation: 'regex', pattern, count: 0 }
+          const lines = matches.map((m, i) => {
+            if (m.groups) {
+              const groups = Object.entries(m.groups).map(([k, v]) => `  ${k}: ${v}`).join('\n')
+              return `匹配${i + 1}: ${m[0]}\n${groups}`
+            }
+            return `匹配${i + 1}: ${m[0]}`
+          })
+          return { result: lines.join('\n'), operation: 'regex', pattern, count: matches.length }
+        } catch (e: any) {
+          throw new Error(`正则表达式错误: ${e.message}`)
+        }
+      }
+      case 'markdown': {
+        const html = renderMarkdown(String(input))
+        return { result: html, operation: 'markdown', raw: input }
+      }
+      default:
+        throw new Error(`未知操作: ${operation}`)
+    }
+  }
+
+  function executeTimeManagement(params: Record<string, any>) {
+    const { operation, value } = params
+    switch (operation) {
+      case 'timezone': {
+        const now = new Date()
+        const utc = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC'
+        const local = now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+        const ts = Date.now()
+        return { utc, local: `${local} (系统本地)`, timestamp: ts }
+      }
+      case 'countdown': {
+        const target = new Date(value)
+        if (isNaN(target.getTime())) throw new Error('无效的目标日期')
+        const diff = target.getTime() - Date.now()
+        if (diff <= 0) return { message: '目标时间已到', target: value, remaining: 0 }
+        const days = Math.floor(diff / 86400000)
+        const hours = Math.floor((diff % 86400000) / 3600000)
+        const minutes = Math.floor((diff % 3600000) / 60000)
+        return { target: value, remaining: diff, formatted: `${days}天 ${hours}小时 ${minutes}分钟` }
+      }
+      case 'calc': {
+        const parts = value.split(',').map((p: string) => p.trim())
+        const d1 = new Date(parts[0])
+        const d2 = new Date(parts[1] || Date.now())
+        if (isNaN(d1.getTime()) || isNaN(d2.getTime())) throw new Error('无效的日期')
+        const diff = Math.abs(d2.getTime() - d1.getTime())
+        const days = Math.floor(diff / 86400000)
+        return { date1: parts[0], date2: parts[1] || '现在', daysBetween: days }
+      }
+      case 'format': {
+        const d = new Date(value)
+        if (isNaN(d.getTime())) return { result: new Date().toLocaleString('zh-CN') }
+        return {
+          iso: d.toISOString(),
+          local: d.toLocaleString('zh-CN'),
+          date: d.toLocaleDateString('zh-CN'),
+          time: d.toLocaleTimeString('zh-CN'),
+          weekday: ['日', '一', '二', '三', '四', '五', '六'][d.getDay()],
+        }
+      }
+      default:
+        throw new Error(`未知时间操作: ${operation}`)
+    }
+  }
+
+  function executeQrcode(params: Record<string, any>) {
+    const { data, action } = params
+    if (action === 'decode') throw new Error('二维码解析需要图片输入，请上传二维码图片使用图片理解工具')
+    const encoded = encodeURIComponent(String(data))
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}`
+    return { qrImageUrl: qrUrl, data: String(data).slice(0, 200) }
+  }
+
+  function executeColorTool(params: Record<string, any>) {
+    const { value, format } = params
+    const target = format || 'hex'
+    try {
+      const canvas = typeof document !== 'undefined' ? document.createElement('canvas') : null
+      if (canvas) {
+        canvas.width = 1; canvas.height = 1
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.fillStyle = value
+          ctx.fillRect(0, 0, 1, 1)
+          const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
+          const hex = '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('')
+          const rgb = `rgb(${r}, ${g}, ${b})`
+          const hslArr = rgbToHsl(r, g, b)
+          const hsl = `hsl(${hslArr[0]}, ${hslArr[1]}%, ${hslArr[2]}%)`
+          const result: Record<string, string> = { hex, rgb, hsl, preview: hex }
+          return { ...result, formatted: result[target] || hex }
+        }
+      }
+      return { formatted: value }
+    } catch (e: any) {
+      return { formatted: value, error: e.message }
+    }
+  }
+
+  function rgbToHsl(r: number, g: number, b: number): number[] {
+    const rn = r / 255; const gn = g / 255; const bn = b / 255
+    const max = Math.max(rn, gn, bn); const min = Math.min(rn, gn, bn)
+    const l = (max + min) / 2
+    if (max === min) return [0, 0, Math.round(l * 100)]
+    const d = max - min
+    const s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+    let h = 0
+    switch (max) {
+      case rn: h = ((gn - bn) / d + (gn < bn ? 6 : 0)) / 6; break
+      case gn: h = ((bn - rn) / d + 2) / 6; break
+      case bn: h = ((rn - gn) / d + 4) / 6; break
+    }
+    return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)]
+  }
+
+  async function executeAudioTranscription(params: Record<string, any>) {
+    const { audioData, language } = params
+    const lang = language || 'zh'
+    throw new Error(`音频转录需要支持语音识别的API（如Whisper），当前请使用支持多模态的Gemini模型。音频数据长度: ${audioData.length} 字符`)
   }
 
   function evolveTool(evolvedToolDef: Omit<ToolDefinition, 'id' | 'usageCount' | 'successRate' | 'category'>): ToolDefinition {

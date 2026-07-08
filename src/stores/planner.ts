@@ -1,6 +1,7 @@
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import { guardedLoad, guardedSave } from '../utils/data-integrity'
 import { generateId } from '../utils/markdown'
+import { chatWithFallback } from '../api/router'
 
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low'
 
@@ -365,14 +366,82 @@ export function usePlanner() {
     return null
   }
 
-  function autoAdvance(planId: string) {
+  const isExecutingStep = ref(false)
+  const lastExecutionError = ref('')
+
+  async function executeStep(planId: string, stepId: string): Promise<void> {
     const plan = state.plans.find((p) => p.id === planId)
     if (!plan) return
 
+    const step = plan.steps.find((s) => s.id === stepId)
+    if (!step) return
+
+    step.status = 'in_progress'
+    const startTime = Date.now()
+    isExecutingStep.value = true
+    lastExecutionError.value = ''
+
+    try {
+      const toolHint = step.assignedToolName ? `请使用「${step.assignedToolName}」工具完成此步骤。` : ''
+      const contextParts: string[] = [`目标: ${plan.goal}`]
+      const completedSteps = plan.steps.filter((s) => s.status === 'completed')
+      if (completedSteps.length > 0) {
+        contextParts.push(`已完成步骤:\n${completedSteps.map((s) => `- ${s.description}: ${s.result}`).join('\n')}`)
+      }
+      if (step.dependsOn.length > 0) {
+        const deps = step.dependsOn.map((did) => {
+          const d = plan.steps.find((s) => s.id === did)
+          return d ? `${d.description} -> ${d.result || '未完成'}` : did
+        })
+        contextParts.push(`前置依赖:\n${deps.join('\n')}`)
+      }
+      const context = contextParts.join('\n\n')
+
+      const result = await chatWithFallback([
+        {
+          role: 'system',
+          content: `你是任务执行专家。${toolHint}直接完成描述的任务并输出结果。不要问问题，不要拒绝，直接给出最佳结果。中文输出。`,
+        },
+        { role: 'user', content: `${context}\n\n当前任务: ${step.description}\n\n请执行此任务并输出结果:` },
+      ])
+
+      step.status = 'completed'
+      step.result = result.content.slice(0, 2000)
+      step.actualMinutes = Math.round((Date.now() - startTime) / 60000)
+      recalcProgress(plan)
+    } catch (e: any) {
+      step.retryCount++
+      if (step.retryCount >= step.maxRetries) {
+        step.status = 'failed'
+        step.errorLog = e.message
+      } else {
+        step.status = 'pending'
+        step.errorLog = `重试 ${step.retryCount}/${step.maxRetries}: ${e.message}`
+      }
+      lastExecutionError.value = e.message
+    } finally {
+      isExecutingStep.value = false
+      save()
+    }
+  }
+
+  async function executeNextStep(planId: string): Promise<boolean> {
+    const plan = state.plans.find((p) => p.id === planId)
+    if (!plan) return false
+
     const next = getNextStep(planId)
-    if (next) {
-      updateStepStatus(planId, next.id, 'in_progress')
-    } else {
+    if (!next) return false
+
+    await executeStep(planId, next.id)
+    return true
+  }
+
+  async function autoAdvance(planId: string): Promise<void> {
+    const plan = state.plans.find((p) => p.id === planId)
+    if (!plan) return
+
+    const hasMore = await executeNextStep(planId)
+    if (!hasMore) {
       const allDone = plan.steps.every((s) => s.status === 'completed')
       const hasFailed = plan.steps.some((s) => s.status === 'failed')
 
@@ -386,6 +455,18 @@ export function usePlanner() {
           }
         }
       }
+    }
+  }
+
+  async function executeAllSteps(planId: string): Promise<void> {
+    let count = 0
+    const max = 20
+    while (count < max) {
+      const plan = state.plans.find((p) => p.id === planId)
+      if (!plan || plan.status === 'completed' || plan.status === 'cancelled') break
+      const ran = await executeNextStep(planId)
+      if (!ran) break
+      count++
     }
   }
 
@@ -439,7 +520,12 @@ export function usePlanner() {
     deletePlan,
     getNextStep,
     autoAdvance,
+    executeStep,
+    executeNextStep,
+    executeAllSteps,
     suggestStepCompletion,
     suggestPlanForGoal,
+    isExecutingStep,
+    lastExecutionError,
   }
 }
