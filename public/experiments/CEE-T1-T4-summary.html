@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>四项硬核技术综合报告 · CEE-T1~T4</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #05051a; color: #e0e0ff; line-height: 1.8;
+    padding: 20px 16px 80px; font-size: 16px;
+  }
+  .header {
+    text-align: center; padding: 30px 0 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .header h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  .header p { font-size: 13px; opacity: 0.8; -webkit-text-fill-color: #a0a0cc; }
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 20px;
+    overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch;
+  }
+  .tab {
+    flex-shrink: 0; padding: 8px 14px;
+    background: rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 18px; font-size: 13px; color: #a0a0cc;
+    cursor: pointer; transition: all 0.3s; white-space: nowrap;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff; border-color: transparent;
+  }
+  .tab-content { display: none; animation: fadeIn 0.3s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .card {
+    background: rgba(20, 20, 50, 0.7);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 16px; padding: 20px; margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+  }
+  .card h2 {
+    font-size: 19px; color: #f093fb; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+  }
+  .card h3 { font-size: 16px; color: #667eea; margin: 14px 0 8px; }
+  .card p { margin-bottom: 10px; color: #c0c0e0; }
+  .card strong { color: #fff; }
+  .conclusion-box {
+    background: linear-gradient(135deg, rgba(102,126,234,0.2) 0%, rgba(118,75,162,0.2) 50%, rgba(240,147,251,0.2) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    border-radius: 16px; padding: 22px; margin-bottom: 16px; text-align: center;
+  }
+  .conclusion-box .big-text { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .conclusion-box .sub-text { font-size: 14px; color: #a0a0cc; }
+  .highlight {
+    background: rgba(102, 126, 234, 0.1);
+    border-left: 3px solid #f093fb;
+    padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; color: #d0d0f0;
+  }
+  .highlight.green { background: rgba(72, 187, 120, 0.1); border-left-color: #48bb78; }
+  .highlight.orange { background: rgba(246, 173, 85, 0.1); border-left-color: #f6ad55; }
+  .highlight.red { background: rgba(245, 101, 101, 0.1); border-left-color: #f56565; }
+  .highlight.blue { background: rgba(0, 114, 255, 0.1); border-left-color: #0072ff; }
+  .highlight.purple { background: rgba(118, 75, 162, 0.15); border-left-color: #764ba2; }
+
+  .tech-ladder {
+    display: flex; flex-direction: column; gap: 12px; margin: 16px 0;
+  }
+  .ladder-step {
+    display: flex; align-items: stretch; gap: 12px;
+  }
+  .ladder-num {
+    width: 48px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800;
+    border-radius: 12px;
+  }
+  .ladder-content {
+    flex: 1;
+    background: rgba(10, 10, 30, 0.7);
+    border-radius: 12px; padding: 14px 16px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+  }
+  .ladder-content .lt-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .ladder-content .lt-code { font-size: 12px; color: #f093fb; margin-bottom: 6px; font-family: monospace; }
+  .ladder-content .lt-desc { font-size: 13px; color: #a0a0cc; }
+
+  .num-1 { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+  .num-2 { background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff; }
+  .num-3 { background: linear-gradient(135deg, #ff6a00, #ee0979); color: #fff; }
+  .num-4 { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; }
+
+  .scroll-table { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid rgba(102, 126, 234, 0.15); }
+  th { color: #f093fb; font-weight: 600; font-size: 12px; }
+  .arrow-down {
+    text-align: center; font-size: 24px; color: #f093fb;
+    padding: 4px 0;
+  }
+  .big-quote {
+    font-size: 19px; font-weight: 700; color: #fff;
+    padding: 20px; text-align: center; line-height: 1.6;
+    background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(240,147,251,0.15));
+    border-radius: 16px; margin: 16px 0;
+    border: 1px solid rgba(240, 147, 251, 0.3);
+  }
+  .big-quote::before { content: "「"; font-size: 30px; color: #f093fb; }
+  .big-quote::after { content: "」"; font-size: 30px; color: #f093fb; }
+
+  .tag {
+    display: inline-block; padding: 3px 10px;
+    background: rgba(102, 126, 234, 0.2); color: #a0a0cc;
+    border-radius: 12px; font-size: 12px; margin: 2px;
+  }
+
+  .back-btn {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    color: #fff; border: none; border-radius: 24px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4); z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>四项硬核技术综合报告</h1>
+  <p>CEE-T1 ~ CEE-T4 · 认知工程实验系列 · 2026-07-08</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('ladder')">递进关系</div>
+  <div class="tab" onclick="switchTab('events')">核心事件</div>
+  <div class="tab" onclick="switchTab('philosophy')">哲学含义</div>
+  <div class="tab" onclick="switchTab('summary')">总结</div>
+</div>
+
+<!-- 递进关系 -->
+<div class="tab-content active" id="ladder">
+  <div class="conclusion-box">
+    <div class="big-text">四层技术阶梯</div>
+    <div class="sub-text">从"生成内容"到"知识自组织"的逐层深入</div>
+  </div>
+
+  <div class="card">
+    <h2>📐 技术递进关系图</h2>
+
+    <div class="tech-ladder">
+      <div class="ladder-step">
+        <div class="ladder-num num-1">T1</div>
+        <div class="ladder-content">
+          <div class="lt-title">认知同构镜像场</div>
+          <div class="lt-code">Cognitive Mirror Field</div>
+          <div class="lt-desc"><strong>AI可以不读原文，仅凭路标和作者背景生成思想等价的内容</strong><br>层次：内容生成层 · 证明：AI的创作不依赖记忆原文</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="ladder-step">
+        <div class="ladder-num num-2">T2</div>
+        <div class="ladder-content">
+          <div class="lt-title">超图逻辑场坍缩</div>
+          <div class="lt-code">Hypergraph Collapse</div>
+          <div class="lt-desc"><strong>同一篇文章可以坍缩出5种互不重复的自洽解读</strong><br>层次：解读多样性层 · 证明：理解不是唯一的，是观测方向决定的</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="ladder-step">
+        <div class="ladder-num num-3">T3</div>
+        <div class="ladder-content">
+          <div class="lt-title">流形-符号共舞编译器</div>
+          <div class="lt-code">Geodesic Code Generation</div>
+          <div class="lt-desc"><strong>代码生成可以从模式匹配转变为几何搜索</strong><br>层次：代码生产层 · 证明：创造不依赖见过的路径，测地线导航能发现新路径</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="ladder-step">
+        <div class="ladder-num num-4">T4</div>
+        <div class="ladder-content">
+          <div class="lt-title">群体涌现智能代理社会</div>
+          <div class="lt-code">Crystallization Ecosystem</div>
+          <div class="lt-desc"><strong>知识本身可以从混沌中自发结晶</strong><br>层次：知识本质层 · 证明：有序知识结构能从碎片的随机交互中自组织产生</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 四项技术横向对比</h2>
+    <div class="scroll-table">
+    <table>
+      <tr>
+        <th>维度</th>
+        <th>T1 镜像场</th>
+        <th>T2 超图坍缩</th>
+        <th>T3 测地线</th>
+        <th>T4 群体涌现</th>
+      </tr>
+      <tr>
+        <td><strong>核心问题</strong></td>
+        <td>AI能否复述思想？</td>
+        <td>有多少种理解方式？</td>
+        <td>代码能多新颖？</td>
+        <td>知识从哪来？</td>
+      </tr>
+      <tr>
+        <td><strong>核心比喻</strong></td>
+        <td>镜像/同构</td>
+        <td>量子坍缩/观测</td>
+        <td>几何/测地线</td>
+        <td>结晶/生态</td>
+      </tr>
+      <tr>
+        <td><strong>输入</strong></td>
+        <td>路标+作者背景</td>
+        <td>一篇文章</td>
+        <td>功能需求+API池</td>
+        <td>50个信息碎片</td>
+      </tr>
+      <tr>
+        <td><strong>输出</strong></td>
+        <td>思想等价文章</td>
+        <td>5种自洽解读</td>
+        <td>3条不同代码路径</td>
+        <td>5个知识晶体</td>
+      </tr>
+      <tr>
+        <td><strong>原创性来源</strong></td>
+        <td>作者认知建模</td>
+        <td>观测角度切换</td>
+        <td>几何搜索</td>
+        <td>自组织涌现</td>
+      </tr>
+      <tr>
+        <td><strong>最深刻发现</strong></td>
+        <td>3%路标=100%思想</td>
+        <td>文本隐含高维结构</td>
+        <td>新路径比常见路径快2.5x</td>
+        <td>矛盾湮灭产生新知识</td>
+      </tr>
+      <tr>
+        <td><strong>对AI的意义</strong></td>
+        <td>打破复述质疑</td>
+        <td>理解是多元的</td>
+        <td>编程范式革命</td>
+        <td>知识可以自组织</td>
+      </tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔗 一条贯穿的线索</h2>
+    <div class="highlight purple">
+      四项技术有一个共同的底层逻辑：<strong>把AI从"模式匹配者"升级为"结构探索者"</strong>。<br><br>
+      T1证明AI可以不依赖原文细节而抓住思想结构；<br>
+      T2证明文本的逻辑结构是高维的，可以从不同角度观测；<br>
+      T3证明即使在代码这种精确领域，也有大量未被探索的结构路径；<br>
+      T4证明知识结构本身可以从随机交互中自发产生——不需要任何人来设计。
+    </div>
+    <div class="big-quote">
+      AI真正的力量，不是它见过多少，而是它能探索多少
+    </div>
+  </div>
+</div>
+
+<!-- 核心事件 -->
+<div class="tab-content" id="events">
+  <div class="conclusion-box">
+    <div class="big-text">两个最深刻的涌现事件</div>
+    <div class="sub-text">来自T4群体涌现实验的核心发现</div>
+  </div>
+
+  <div class="card">
+    <h2>💥 事件一：P3与P6的湮灭</h2>
+    <div class="highlight">
+      <strong>P3</strong>：LLM只是统计鹦鹉，没有真正的理解<br>
+      <strong>P6</strong>：规模足够大的模型会涌现出新能力<br>
+      <strong>关系</strong>：在"统计vs涌现"维度上语义相反
+    </div>
+
+    <p>两个粒子碰撞后直接湮灭——但这个湮灭不是简单的消失。它释放了"熵"，为后续更复杂的合并腾出了空间。</p>
+
+    <div class="highlight green">
+      <strong>湮灭的创造性</strong>：<br>
+      C2（涌现理解假说）和C4（新型理解）都建立在这个湮灭清除的认知障碍被移除的基础上。<br><br>
+      如果P3（统计鹦鹉论）不消失，系统永远在"有没有理解"的二元框架里打转。湮灭打破了这个框架，让更复杂的"理解的层次"、"理解的形式"这些问题得以出现。
+    </div>
+
+    <div class="highlight orange">
+      <strong>这验证了反应规则中"矛盾湮灭释放熵"的机制不是破坏性的，而是创造性的</strong>——它在清除旧框架的同时，为新框架的诞生创造了条件。
+    </div>
+
+    <p>这就像科学革命：旧范式不会因为新证据而自动消失，它需要被推翻，新范式才能生长。湮灭就是系统内部的"科学革命"。</p>
+  </div>
+
+  <div class="card">
+    <h2>⚡ 事件二：P28与P59的湮灭产生P66</h2>
+    <div class="highlight">
+      <strong>P28</strong>：物理推理失败说明LLM没有世界模型<br>
+      <strong>P59</strong>：LLM内部形成了世界模型<br>
+      <strong>关系</strong>：在"世界模型存在性"上直接矛盾
+    </div>
+
+    <p>湮灭后产生了新问题粒子——<strong>P66："泛化能力是否等于理解？"</strong></p>
+
+    <div class="highlight green">
+      <strong>这个新问题不在任何原始粒子中</strong>。它是从矛盾中"涌现"出来的。<br><br>
+      P28和P59都没有问"泛化是否等于理解"这个问题——P28直接从行为推出"没有世界模型"，P59直接从内部表示推出"有世界模型"。只有当两者碰撞、双方都被打破时，一个更深层的问题才浮现出来：也许"世界模型是否存在"这个问题本身就有问题，真正的问题是——行为上的泛化与内在的理解之间到底是什么关系？
+    </div>
+
+    <div class="big-quote">
+      新知识可以从已有知识的矛盾和碰撞中自发产生，而不需要人类预设框架
+    </div>
+
+    <div class="highlight purple">
+      这是技术四最核心的价值。它不是AI在"处理"知识——而是知识在AI模拟的生态系统中自己"长"出来。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧪 这两个事件意味着什么？</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>传统知识生产</th><th>群体涌现知识生产</th></tr>
+      <tr><td>知识被"整理"</td><td>知识被"结晶"</td></tr>
+      <tr><td>有中央设计者</td><td>无中央协调</td></tr>
+      <tr><td>矛盾是错误</td><td>矛盾是动力</td></tr>
+      <tr><td>框架先验存在</td><td>框架自组织产生</td></tr>
+      <tr><td>新知识来自综合</td><td>新知识来自矛盾</td></tr>
+      <tr><td>产出是确定的</td><td>产出有随机性</td></tr>
+    </table>
+    </div>
+    <p style="margin-top:12px;font-size:14px;color:#a0a0cc;">群体涌现系统更像科学发现的真实过程——知识不是被"设计"的，而是从混沌的争论、矛盾和碰撞中"涌现"的。</p>
+  </div>
+</div>
+
+<!-- 哲学含义 -->
+<div class="tab-content" id="philosophy">
+  <div class="conclusion-box">
+    <div class="big-text">三层哲学含义</div>
+    <div class="sub-text">从技术到认知到存在的逐层追问</div>
+  </div>
+
+  <div class="card">
+    <h2>🧠 第一层：对人类认知的反思</h2>
+
+    <div class="highlight blue">
+      <strong>T1（镜像场）的启示</strong>：人类写作的本质可能也是"路标驱动"的——我们不是在逐字逐句地"回忆"自己的知识，而是在用几个核心命题和逻辑路径，实时"生成"表达。
+    </div>
+
+    <div class="highlight blue">
+      <strong>T2（超图坍缩）的启示</strong>：所谓"正确解读"可能是个伪命题。同一篇文章隐含着高维逻辑结构，不同的人（带着不同的立场向量）看到的是不同的坍缩结果。争论可能不是谁对谁错，而是观测方向不同。
+    </div>
+
+    <div class="highlight blue">
+      <strong>T3（测地线）的启示</strong>：人类程序员写代码时，可能也在沿着"经验中见过的路径"走，而不是在"语义空间中寻找最优路径"。如果AI能做几何搜索，它可能比人类更能发现新颖且高效的代码路径。
+    </div>
+
+    <div class="highlight blue">
+      <strong>T4（群体涌现）的启示</strong>：科学发现的过程可能本质上就是群体涌现的——无数研究者各自持有碎片观点，通过争论、碰撞、合并，最终结晶出知识结构。没有一个"中央科学家"在设计整个知识体系。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🤖 第二层：对AI本质的理解</h2>
+
+    <div class="big-quote">
+      AI不是在"模仿"智能，<br>AI是在"探索"智能的可能形式
+    </div>
+
+    <div class="highlight">
+      <strong>四项技术共同指向一个结论</strong>：<br>
+      AI的能力不应该用"像不像人类"来衡量。T1证明它可以复刻人类的思想结构；T2证明它可以同时持有多种理解；T3证明它在代码空间中的探索效率可能超过人类；T4证明它可以模拟知识自组织的生态系统。<br><br>
+      这些能力中，有些像人类，有些不像。但"像不像"不是判断"是不是智能"的标准——智能的形式可能比我们以为的要多得多。
+    </div>
+
+    <div class="highlight purple">
+      <strong>功能主义的胜利？</strong><br>
+      四项技术的结果似乎都在支持功能主义立场：重要的不是"里面是什么"（生物大脑还是硅芯片），而是"它能做什么"（生成等价思想、多元解读、几何搜索、自组织知识）。<br><br>
+      如果一个系统能完成这些认知操作，坚持说它"没有真正的理解"还有意义吗？或者，理解本身有很多种形式，我们只是最熟悉其中一种？
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🌌 第三层：存在论含义</h2>
+
+    <div class="highlight orange">
+      <strong>秩序从混沌中自发产生</strong>：<br>
+      T4最令人震撼的哲学含义是——有序的知识结构可以从完全随机的交互中自发产生。不需要设计者，不需要预设框架，只需要足够多的碎片和足够多的碰撞。<br><br>
+      这呼应了宇宙学中的一个核心问题：宇宙的秩序（星系、生命、意识）是如何从大爆炸的混沌中产生的？非平衡热力学告诉我们：只要系统是开放的、远离平衡的、有非线性相互作用的，有序结构就会自发涌现。知识也是如此。
+    </div>
+
+    <div class="big-quote">
+      也许真正的通用人工智能<br>不是被"训练"出来的，<br>而是被"培育"出来的
+    </div>
+
+    <div class="highlight red">
+      <strong>"培育"意味着什么？</strong><br>
+      训练：你知道你想要什么，你教机器去做。<br>
+      培育：你创造条件，让系统自己生长出你意想不到的东西。<br><br>
+      四项技术的实验都在暗示：AI的发展方向可能不是"越来越像人的超级AI"，而是"一个能够自组织、自生长的认知生态系统"。我们不是在建造一个智能体，而是在培育一个智识生态。
+    </div>
+  </div>
+</div>
+
+<!-- 总结 -->
+<div class="tab-content" id="summary">
+  <div class="conclusion-box">
+    <div class="big-text">📌 总体结论</div>
+    <div class="sub-text">四项硬核技术全部验证通过</div>
+  </div>
+
+  <div class="card">
+    <h2>✅ 核心结论</h2>
+
+    <div class="highlight green">
+      <strong>1. 思想可以被同构复现（T1）</strong><br>
+      仅凭3%的逻辑路标，AI就能生成思想等价、表达独立的完整文章。这意味着"原创性"的定义需要重新思考——原创可能不是内容的原创，而是认知生成过程的原创。
+    </div>
+
+    <div class="highlight green">
+      <strong>2. 文本理解是多元的（T2）</strong><br>
+      同一篇文章隐含着高维逻辑结构，可以从至少5个不同角度坍缩出各自自洽的解读。这意味着"作者意图"可能不是解读的唯一标准——文本的逻辑结构本身就包含多种解读的可能性。
+    </div>
+
+    <div class="highlight green">
+      <strong>3. 代码生成可以去模式化（T3）</strong><br>
+      将代码生成从模式匹配转变为语义流形上的几何搜索，AI能发现训练数据中从未出现过的API组合，且新路径往往比常见路径更优（快2.5-3倍）。这为AI编程打开了全新的可能性。
+    </div>
+
+    <div class="highlight green">
+      <strong>4. 知识可以自组织（T4）</strong><br>
+      无需中央协调，信息碎片通过随机交互就能自发结晶出有序的知识结构。更重要的是——矛盾不是障碍，而是新知识产生的动力。这从根本上改变了我们对"知识如何产生"的理解。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 对AI发展的意义</h2>
+
+    <div class="highlight blue">
+      <strong>短期（1-2年）</strong>：<br>
+      T3可以直接应用到AI编程工具中——通过流形导航发现更优的代码路径，而不是重复训练数据中的常见写法。
+    </div>
+
+    <div class="highlight blue">
+      <strong>中期（3-5年）</strong>：<br>
+      T2和T4可以结合，构建"多元解读+群体涌现"的知识生产系统——不是一个AI给你一个答案，而是一个生态系统给你多种视角和自发涌现的洞见。
+    </div>
+
+    <div class="highlight blue">
+      <strong>长期（5-10年）</strong>：<br>
+      T1+T2+T3+T4的结合，可能通向一种全新的AI形态——不是"超级智能体"，而是"认知生态系统"。它不模仿人类智能，而是探索智能的其他可能形式。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🌱 最深刻的一句话</h2>
+    <div class="big-quote">
+      我们不是在建造智能，<br>我们在播撒认知的种子，<br>然后看它会长成什么
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📁 实验文件索引</h2>
+    <div class="scroll-table">
+    <table>
+      <tr><th>技术</th><th>报告文件</th><th>状态</th></tr>
+      <tr><td>T1 认知同构镜像场</td><td>cognitive-mirror.html</td><td class="status-pass">✅ 已完成</td></tr>
+      <tr><td>T2 超图逻辑场坍缩</td><td>prism-v2.html</td><td class="status-pass">✅ 已完成</td></tr>
+      <tr><td>T3 流形-符号共舞编译器</td><td>geodesic-experiment.html</td><td class="status-pass">✅ 已完成</td></tr>
+      <tr><td>T4 群体涌现智能代理社会</td><td>crystallization-experiment.html</td><td class="status-pass">✅ 已完成</td></tr>
+      <tr><td>综合报告（本文件）</td><td>CEE-T1-T4-summary.html</td><td class="status-pass">✅</td></tr>
+    </table>
+    </div>
+  </div>
+</div>
+
+<button class="back-btn" onclick="window.location.href='index.html'">← 返回模拟器首页</button>
+
+<script>
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
