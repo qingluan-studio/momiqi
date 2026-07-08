@@ -5,6 +5,7 @@ import { chatWithFallback } from '../api/router'
 import { renderMarkdown, generateId } from '../utils/markdown'
 import type { SubAgent } from '../stores/agents'
 import { useEvolution } from '../stores/evolution'
+import { useSelfLearning } from '../stores/self-learning'
 
 const props = defineProps<{
   chat: ReturnType<typeof import('../stores/chat').useChat>
@@ -28,6 +29,7 @@ const deepThink = ref(false)
 const editingMessageId = ref<string | null>(null)
 const editContent = ref('')
 const evolution = useEvolution()
+const selfLearning = useSelfLearning()
 
 onMounted(() => {
   if (props.pendingPrompt) {
@@ -96,6 +98,7 @@ async function sendMessage() {
 
     props.chat.updateLastAssistant(props.session.id, result.content, result.provider, result.tokens)
     if (result.tokens) evolution.addTokens(result.tokens)
+    selfLearning.track(props.activeAgent?.name || 'default', text, result.content, true, result.tokens || 0)
   } catch (err: any) {
     props.chat.updateLastAssistant(
       props.session.id,

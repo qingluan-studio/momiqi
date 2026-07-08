@@ -19,13 +19,20 @@ import KnowledgeBase from './components/KnowledgeBase.vue'
 import AIEvolution from './components/AIEvolution.vue'
 import AgentSelector from './components/AgentSelector.vue'
 import ACIPanel from './components/ACIPanel.vue'
+import DashboardPanel from './components/DashboardPanel.vue'
+import SelfLearningPanel from './components/SelfLearningPanel.vue'
+import SuperAgentPanel from './components/SuperAgentPanel.vue'
+import SmartPanel from './components/SmartPanel.vue'
 import { type SubAgent } from './stores/agents'
 import { useEvolution } from './stores/evolution'
+import { useSelfLearning } from './stores/self-learning'
+import { initDataIntegrity, exportAllData, importAllData } from './utils/data-integrity'
 
 const chatStore = useChat()
 const settingsStore = useSettings()
 const promptsStore = usePrompts()
 const evolution = useEvolution()
+const selfLearning = useSelfLearning()
 
 const activeTab = ref('chat')
 const showSidebar = ref(false)
@@ -33,6 +40,8 @@ const showSettings = ref(false)
 const showTest = ref(false)
 const showAgents = ref(false)
 const showACI = ref(false)
+const showSuperAgent = ref(false)
+const showSmartPanel = ref(false)
 const activeAgent = ref<SubAgent | null>(null)
 const showPromptLib = ref(false)
 const pendingPrompt = ref('')
@@ -101,7 +110,13 @@ function applyTheme(theme: string) {
   root.style.setProperty('color-scheme', isLight ? 'light' : 'dark')
 }
 
-onMounted(() => applyTheme(settingsStore.settings.theme))
+onMounted(() => {
+  const result = initDataIntegrity()
+  if (result.repaired.length > 0) {
+    console.log(`[数据完整性] 已修复 ${result.repaired.length} 项:`, result.repaired)
+  }
+  applyTheme(settingsStore.settings.theme)
+})
 watch(() => settingsStore.settings.theme, applyTheme)
 
 const themeMediaQuery = window.matchMedia('(prefers-color-scheme: light)')
@@ -110,8 +125,37 @@ themeMediaQuery.addEventListener('change', () => {
 })
 
 function switchTab(tab: string) {
+  if (tab === 'super') {
+    showSuperAgent.value = true
+    return
+  }
+  if (tab === 'smart') {
+    showSmartPanel.value = true
+    return
+  }
   activeTab.value = tab
   if (tab === 'chat' && !currentSession.value) {
+    startNewChat()
+  }
+}
+
+function handleDashboardNavigate(tab: string) {
+  switchTab(tab)
+}
+
+function handleSwitchToSuper(prompt: string) {
+  activeAgent.value = {
+    id: 'super-agent',
+    name: 'HOPE 超级助手',
+    icon: 'M12 2l2.4 7.2 7.6.6-5.8 4.6 1.8 7.2-6-4.6-6 4.6 1.8-7.2-5.8-4.6 7.6-.6z',
+    role: '融合全部 Agent 能力的超级 AI',
+    description: '融合全部 Agent 能力的超级 AI',
+    systemPrompt: prompt,
+    isBuiltin: true,
+  }
+  showSuperAgent.value = false
+  switchTab('chat')
+  if (!currentSession.value) {
     startNewChat()
   }
 }
@@ -153,6 +197,18 @@ function switchTab(tab: string) {
       @close="showACI = false"
     />
 
+    <SuperAgentPanel
+      v-if="showSuperAgent"
+      @close="showSuperAgent = false"
+      @switch-to-super="handleSwitchToSuper"
+    />
+
+    <SmartPanel
+      v-if="showSmartPanel"
+      @close="showSmartPanel = false"
+      @switch-to-super="handleSwitchToSuper"
+    />
+
     <Transition name="slide">
       <AgentSelector
         v-if="showAgents"
@@ -177,7 +233,7 @@ function switchTab(tab: string) {
           </svg>
         </button>
         <span class="app-title">
-          {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', tools: '工具箱', knowledge: '知识库', evolution: 'AI 进化之路' }[activeTab] }}
+          {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', tools: '工具箱', smart: '智能工坊', dashboard: '系统面板', knowledge: '知识库', evolution: 'AI 进化之路', selflearning: '自学习', super: '超级助手' }[activeTab] }}
         </span>
         <button class="icon-btn" @click="showACI = true" aria-label="ACI面板">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -226,7 +282,12 @@ function switchTab(tab: string) {
         <VisionTool v-if="activeTab === 'vision'" :settings="settingsStore" />
         <CodeGenTool v-if="activeTab === 'code'" :settings="settingsStore" />
         <ToolBox v-if="activeTab === 'tools'" :settings="settingsStore" />
+        <DashboardPanel
+          v-if="activeTab === 'dashboard'"
+          @navigate="handleDashboardNavigate"
+        />
         <KnowledgeBase v-if="activeTab === 'knowledge'" :settings="settingsStore" />
+        <SelfLearningPanel v-if="activeTab === 'selflearning'" />
         <AIEvolution v-if="activeTab === 'evolution'" />
       </main>
 
