@@ -23,6 +23,7 @@ import DashboardPanel from './components/DashboardPanel.vue'
 import SelfLearningPanel from './components/SelfLearningPanel.vue'
 import SuperAgentPanel from './components/SuperAgentPanel.vue'
 import SmartPanel from './components/SmartPanel.vue'
+import ArtGenerator from './components/ArtGenerator.vue'
 import { type SubAgent } from './stores/agents'
 import { useEvolution } from './stores/evolution'
 import { useSelfLearning } from './stores/self-learning'
@@ -233,7 +234,7 @@ function handleSwitchToSuper(prompt: string) {
           </svg>
         </button>
         <span class="app-title">
-          {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', tools: '工具箱', smart: '智能工坊', dashboard: '系统面板', knowledge: '知识库', evolution: 'AI 进化之路', selflearning: '自学习', super: '超级助手' }[activeTab] }}
+          {{ { chat: currentSession?.title || 'AI 对话', vision: '图片理解', code: '代码生成', art: '修仙画境', tools: '工具箱', smart: '智能工坊', dashboard: '系统面板', knowledge: '知识库', evolution: 'AI 进化之路', selflearning: '自学习', super: '超级助手' }[activeTab] }}
         </span>
         <button class="icon-btn" @click="showACI = true" aria-label="ACI面板">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -281,6 +282,7 @@ function handleSwitchToSuper(prompt: string) {
 
         <VisionTool v-if="activeTab === 'vision'" :settings="settingsStore" />
         <CodeGenTool v-if="activeTab === 'code'" :settings="settingsStore" />
+        <ArtGenerator v-if="activeTab === 'art'" />
         <ToolBox v-if="activeTab === 'tools'" :settings="settingsStore" />
         <DashboardPanel
           v-if="activeTab === 'dashboard'"
