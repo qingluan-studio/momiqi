@@ -126,6 +126,19 @@ const STYLE_KEYWORDS: Record<string, ArtStyle> = {
   幻想: 'fantasy',
   绚丽: 'fantasy',
   华丽: 'fantasy',
+  素描: 'sketch',
+  手绘: 'sketch',
+  炭笔: 'sketch',
+  速写: 'sketch',
+  油画: 'oil',
+  厚涂: 'oil',
+  像素: 'pixel',
+  像素风: 'pixel',
+  像素画: 'pixel',
+  赛博: 'cyberpunk',
+  赛博朋克: 'cyberpunk',
+  霓虹: 'cyberpunk',
+  机械: 'cyberpunk',
 }
 
 /**

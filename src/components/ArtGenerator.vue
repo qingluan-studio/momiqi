@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import { renderSceneWithParams, parsePrompt, getSceneList, getStyleList } from '../utils/procedural-art'
-import type { SceneParams, SceneType, ArtStyle } from '../utils/procedural-art'
+import { renderSceneWithParams, parsePrompt, getSceneList, getStyleList, printExpertReport } from '../utils/procedural-art'
+import type { SceneParams, SceneType, ArtStyle, RenderResult } from '../utils/procedural-art'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const prompt = ref('')
@@ -14,6 +14,9 @@ const atmosphere = ref(0.3)
 const variationFactor = ref(0.4)
 const seed = ref(Math.floor(Math.random() * 999999))
 const showAdvanced = ref(false)
+const report = ref('')
+const quality = ref(0)
+const showReport = ref(false)
 
 const scenes = getSceneList()
 const styles = getStyleList()
@@ -79,7 +82,9 @@ function generate() {
     const ctx = canvas.getContext('2d')
     if (!ctx) { generating.value = false; return }
 
-    renderSceneWithParams(ctx, params)
+    const result = renderSceneWithParams(ctx, params)
+    report.value = printExpertReport(result.fusion)
+    quality.value = result.assessment.overall
     generating.value = false
   })
 }
@@ -257,7 +262,7 @@ function handleKeydown(e: KeyboardEvent) {
     </div>
 
     <div class="info-banner">
-      纯前端程序化生成，零 API 调用，零 token 消耗。5 种风格可选，基于数学噪声算法实时渲染修仙场景。
+      纯前端程序化生成，零 API 调用，零 token 消耗。9 种风格可选，6 专家系统实时融合渲染修仙场景。
     </div>
   </div>
 </template>
@@ -423,6 +428,10 @@ function handleKeydown(e: KeyboardEvent) {
 .style-indicator.realistic { background: linear-gradient(135deg, #4a90d9, #2d5f8e); }
 .style-indicator.fantasy { background: linear-gradient(135deg, #e040fb, #ffc107); }
 .style-indicator.watercolor { background: linear-gradient(135deg, #ff9a9e, #fad0c4); }
+.style-indicator.sketch { background: linear-gradient(135deg, #333, #999); }
+.style-indicator.oil { background: linear-gradient(135deg, #8b4513, #d2691e); }
+.style-indicator.pixel { background: linear-gradient(135deg, #00ff41, #008f11); }
+.style-indicator.cyberpunk { background: linear-gradient(135deg, #ff00ff, #00ffff); }
 
 .canvas-wrapper {
   position: relative;

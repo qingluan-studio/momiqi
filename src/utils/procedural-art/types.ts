@@ -45,6 +45,10 @@ export type ArtStyle =
   | 'realistic'   // 写实 — enhanced details + natural colors
   | 'fantasy'     // 幻想 — vibrant + glow (默认)
   | 'watercolor'  // 水彩 — soft bleed + texture overlay
+  | 'sketch'      // 手绘素描 — high contrast + hatch lines
+  | 'oil'         // 油画 — thick brush strokes + impasto
+  | 'pixel'       // 像素风 — posterized + blocky
+  | 'cyberpunk'   // 赛博仙侠 — neon glow + high contrast
 
 /** 风格着色模式 */
 export type ShadingMode = 'cel' | 'gradient' | 'soft' | 'high-contrast'
